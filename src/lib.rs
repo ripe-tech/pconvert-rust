@@ -1,19 +1,32 @@
-pub fn pcompose() {
-    println!("Executing pcompose()");
-}
+use std::env;
 
-pub fn pconvert() {
-    println!("Executing pconvert()");
-}
+pub fn pconvert(mut args: env::Args) {
+    let file_in = match args.next() {
+        Some(name) => name,
+        None => {
+            println!("Missing input file.\nUsage: pconvert convert <file_in> <file_out>");
+            return;
+        }
+    };
 
-pub fn pbenchmark() {
-    println!("Executing pbenchmark()");
-}
+    let _file_out = match args.next() {
+        Some(name) => name,
+        None => {
+            println!("Missing output path.\nUsage: pconvert convert <file_in> <file_out>");
+            return;
+        }
+    };
 
-pub fn popencl() {
-    println!("Executing popencl()");
-}
+    //load PNG
+    let img = match image::open(file_in).expect("Failed to open input file") {
+        image::DynamicImage::ImageRgba8(img) => img,
+        _ => {
+            println!("aaa");
+            return;
+        }
+    };
+    println!("dimensions {:?}", img.dimensions());
 
-pub fn pversion() {
-    println!("Executing pversion()");
+    //turn the image blueish: "sets red value to 0 and green value to the blue one (blue filter)"
+    //save PNG
 }
