@@ -7,6 +7,7 @@ pub enum BlendAlgorithm {
     Alpha,
     Multiplicative,
     SourceOver,
+    DestinationOver,
 }
 
 impl Display for BlendAlgorithm {
@@ -15,6 +16,7 @@ impl Display for BlendAlgorithm {
             BlendAlgorithm::Alpha => write!(f, "alpha"),
             BlendAlgorithm::Multiplicative => write!(f, "multiplicative"),
             BlendAlgorithm::SourceOver => write!(f, "source_over"),
+            BlendAlgorithm::DestinationOver => write!(f, "destination_over"),
         }
     }
 }
@@ -44,6 +46,7 @@ pub fn get_blending_algorithm(
         BlendAlgorithm::Alpha => blend_alpha,
         BlendAlgorithm::Multiplicative => blend_multiplicative,
         BlendAlgorithm::SourceOver => blend_source_over,
+        BlendAlgorithm::DestinationOver => blend_destination_over,
     }
 }
 
@@ -153,4 +156,33 @@ fn blend_destination_over((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
     let (rb, gb, bb, ab) = (bot_pixel[0], bot_pixel[1], bot_pixel[2], bot_pixel[3]);
     let (rt, gt, bt, at) = (top_pixel[0], top_pixel[1], top_pixel[2], top_pixel[3]);
 
+    let abf = 1.0 * (ab as f32 / 255.0);
+    let atf = 1.0 * (at as f32 / 255.0);
+    let af = atf + abf * (1.0 - atf);
+
+    let r = if af == 0.0 {
+        0.0
+    } else {
+        (rt as f32 * atf + rb as f32 * abf * (1.0 - atf)) / af
+    };
+    let g = if af == 0.0 {
+        0.0
+    } else {
+        (gt as f32 * atf + gb as f32 * abf * (1.0 - atf)) / af
+    };
+    let b = if af == 0.0 {
+        0.0
+    } else {
+        (bt as f32 * atf + bb as f32 * abf * (1.0 - atf)) / af
+    };
+    let a = max(0.0, min(255.0, af * 255.0));
+
+    let r = max(0.0, min(255.0, r));
+    let g = max(0.0, min(255.0, g));
+    let b = max(0.0, min(255.0, b));
+
+    bot_pixel[0] = r as u8;
+    bot_pixel[1] = g as u8;
+    bot_pixel[2] = b as u8;
+    bot_pixel[3] = a as u8;
 }

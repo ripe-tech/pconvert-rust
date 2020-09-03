@@ -57,6 +57,31 @@ pub fn pcompose(args: &mut env::Args) {
     compose(&dir, BlendAlgorithm::SourceOver, Background::White, false);
     compose(&dir, BlendAlgorithm::SourceOver, Background::Blue, false);
     compose(&dir, BlendAlgorithm::SourceOver, Background::Texture, false);
+
+    compose(
+        &dir,
+        BlendAlgorithm::DestinationOver,
+        Background::Alpha,
+        false,
+    );
+    compose(
+        &dir,
+        BlendAlgorithm::DestinationOver,
+        Background::White,
+        false,
+    );
+    compose(
+        &dir,
+        BlendAlgorithm::DestinationOver,
+        Background::Blue,
+        false,
+    );
+    compose(
+        &dir,
+        BlendAlgorithm::DestinationOver,
+        Background::Texture,
+        false,
+    );
 }
 
 pub fn pconvert(args: &mut env::Args) {
