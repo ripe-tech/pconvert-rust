@@ -76,13 +76,11 @@ pub fn pconvert(args: &mut env::Args) {
         }
     };
 
-    //read PNG
     let mut img = read_png(&file_in);
 
-    //turn the image blueish (blue filter)"
+    // turns the image blueish (blue filter)"
     img.pixels_mut().for_each(|x| apply_blue_filter(x));
 
-    //save modified PNG
     img.save_with_format(file_out, ImageFormat::Png)
         .expect("Failure saving modified PNG");
 }
