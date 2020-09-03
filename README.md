@@ -24,6 +24,6 @@ cargo run
 
 ## Usage
 
-```
+```bash
 pconvert-rust convert <file_in> <file_out>
 ```

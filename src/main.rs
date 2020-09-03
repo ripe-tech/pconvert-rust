@@ -8,7 +8,8 @@ fn print_usage() {
 
 fn main() {
     let mut args = env::args();
-    args.next(); // skip program name
+    // skip program name
+    args.next();
 
     match args.next() {
         Some(action) => match &action[..] {

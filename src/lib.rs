@@ -19,7 +19,6 @@ pub fn pconvert(mut args: env::Args) {
         }
     };
 
-    //load PNG
     let mut img = match open(file_in).expect("Failed to open input file") {
         DynamicImage::ImageRgba8(img) => img,
         _ => {
@@ -28,10 +27,9 @@ pub fn pconvert(mut args: env::Args) {
         }
     };
 
-    //turn the image blueish: "sets red value to 0 and green value to the blue one (blue filter)"
+    // turns the image blueish: "sets red value to 0 and green value to the blue one (blue filter)"
     img.pixels_mut().for_each(|x| apply_blue_filter(x));
 
-    //save modified PNG
     img.save_with_format(file_out, ImageFormat::Png)
         .expect("Failure saving modified PNG");
 }
