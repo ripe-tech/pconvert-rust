@@ -37,7 +37,7 @@ pub fn pconvert(mut args: env::Args) {
 }
 
 fn apply_blue_filter(pixel: &mut image::Rgba<u8>) {
-    /* sets red value to 0 and green value to the blue one (blue filter) */
+    // sets red value to 0 and green value to the blue one (blue filter effect)
     pixel[0] = 0;
     pixel[1] = pixel[2];
 }
