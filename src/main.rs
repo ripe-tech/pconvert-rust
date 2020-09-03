@@ -13,6 +13,7 @@ fn main() {
     match args.next() {
         Some(action) => match &action[..] {
             "convert" => pconvert_rust::pconvert(args),
+            "compose" => pconvert_rust::pcompose(args),
             _ => print_usage(),
         },
         None => print_usage(),
