@@ -1,5 +1,6 @@
 use image::{open, DynamicImage, ImageBuffer, ImageFormat, Rgba};
 use std::env;
+use std::fmt::{Display, Formatter, Result};
 use std::process;
 
 pub fn pcompose(args: &mut env::Args) {
@@ -17,10 +18,10 @@ pub fn pcompose(args: &mut env::Args) {
         }
     };
 
-    compose(&dir, "alpha", "alpha", false);
-    compose(&dir, "alpha", "white", false);
-    compose(&dir, "alpha", "blue", false);
-    compose(&dir, "alpha", "texture", false);
+    compose(&dir, BlendAlgorithm::Alpha, Background::Alpha, false);
+    compose(&dir, BlendAlgorithm::Alpha, Background::White, false);
+    compose(&dir, BlendAlgorithm::Alpha, Background::Blue, false);
+    compose(&dir, BlendAlgorithm::Alpha, Background::Texture, false);
 }
 
 pub fn pconvert(args: &mut env::Args) {
@@ -41,7 +42,7 @@ pub fn pconvert(args: &mut env::Args) {
     };
 
     //read PNG
-    let mut img = read_png(file_in);
+    let mut img = read_png(&file_in);
 
     //turn the image blueish (blue filter)"
     img.pixels_mut().for_each(|x| apply_blue_filter(x));
@@ -57,7 +58,7 @@ fn apply_blue_filter(pixel: &mut Rgba<u8>) {
     pixel[1] = pixel[2];
 }
 
-fn read_png(file_in: String) -> ImageBuffer<Rgba<u8>, Vec<u8>> {
+fn read_png(file_in: &str) -> ImageBuffer<Rgba<u8>, Vec<u8>> {
     match open(&file_in) {
         Ok(file) => match file {
             DynamicImage::ImageRgba8(img) => img,
@@ -73,21 +74,21 @@ fn read_png(file_in: String) -> ImageBuffer<Rgba<u8>, Vec<u8>> {
     }
 }
 
+fn compose(dir: &str, algorithm: BlendAlgorithm, background: Background, use_opencl: bool) {
+    let mut bot = read_png(&format!("{}sole.png", dir));
 
-fn compose(dir: &str, algorithm: &str, background: &str, use_opencl: bool) {
-    let mut bot = read_png(format!("{}sole.png", dir));
+    let algorithm_fn = get_blending_algorithm(&algorithm);
+    let top = read_png(&format!("{}back.png", dir));
+    blend_images(&top, &mut bot, algorithm_fn);
 
-    let top = read_png(format!("{}back.png", dir));
-    blend_images(&top, &mut bot, &blend_alpha);
+    let top = read_png(&format!("{}front.png", dir));
+    blend_images(&top, &mut bot, algorithm_fn);
 
-    let top = read_png(format!("{}front.png", dir));
-    blend_images(&top, &mut bot, &blend_alpha);
+    let top = read_png(&format!("{}shoelace.png", dir));
+    blend_images(&top, &mut bot, algorithm_fn);
 
-    let top = read_png(format!("{}shoelace.png", dir));
-    blend_images(&top, &mut bot, &blend_alpha);
-
-    let top = read_png(format!("{}background_{}.png", dir, background));
-    blend_images(&top, &mut bot, &blend_alpha);
+    let top = read_png(&format!("{}background_{}.png", dir, background));
+    blend_images(&top, &mut bot, algorithm_fn);
 
     let file_out = format!(
         "result_{}_{}_{}.png",
@@ -95,7 +96,7 @@ fn compose(dir: &str, algorithm: &str, background: &str, use_opencl: bool) {
         background,
         if use_opencl { "opencl" } else { "cpu" }
     );
-    
+
     match bot.save_with_format(format!("{}{}", dir, file_out), ImageFormat::Png) {
         Ok(_) => println!("Successfully composed {}", file_out),
         Err(err) => eprintln!("{}", err),
@@ -154,4 +155,45 @@ fn max(x: f32, y: f32) -> f32 {
 
 fn min(x: f32, y: f32) -> f32 {
     x.min(y)
+}
+
+fn get_blending_algorithm(
+    algorithm: &BlendAlgorithm,
+) -> &'static impl Fn((&mut Rgba<u8>, &Rgba<u8>)) -> () {
+    match algorithm {
+        BlendAlgorithm::Alpha => &blend_alpha,
+        BlendAlgorithm::Multiplicative => &blend_alpha,
+    }
+}
+
+enum BlendAlgorithm {
+    Alpha,
+    Multiplicative,
+}
+
+impl Display for BlendAlgorithm {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        match self {
+            BlendAlgorithm::Alpha => write!(f, "alpha"),
+            BlendAlgorithm::Multiplicative => write!(f, "multiplicative"),
+        }
+    }
+}
+
+enum Background {
+    Alpha,
+    White,
+    Blue,
+    Texture,
+}
+
+impl Display for Background {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        match self {
+            Background::Alpha => write!(f, "alpha"),
+            Background::White => write!(f, "white"),
+            Background::Blue => write!(f, "blue"),
+            Background::Texture => write!(f, "texture"),
+        }
+    }
 }
