@@ -15,6 +15,6 @@ fn main() {
             "convert" => pconvert_rust::pconvert(args),
             _ => print_usage(),
         },
-        _ => print_usage(),
+        None => print_usage(),
     }
 }
