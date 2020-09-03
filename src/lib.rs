@@ -2,7 +2,7 @@ use image::{open, DynamicImage, ImageBuffer, ImageFormat, Rgba};
 use std::env;
 use std::process;
 
-pub fn pcompose(mut args: env::Args) {
+pub fn pcompose(args: &mut env::Args) {
     let dir = match args.next() {
         Some(name) => {
             if name.chars().last().unwrap() == '/' {
@@ -17,16 +17,13 @@ pub fn pcompose(mut args: env::Args) {
         }
     };
 
-    let mut bot = read_png(format!("{}sole.png", dir));
-    let top = read_png(format!("{}back.png", dir));
-
-    blend_images(&top, &mut bot, blend_alpha);
-
-    bot.save_with_format(format!("{}resultcomposition.png", dir), ImageFormat::Png)
-        .expect("Failure saving composition");
+    compose(&dir, "alpha", "alpha", false);
+    compose(&dir, "alpha", "white", false);
+    compose(&dir, "alpha", "blue", false);
+    compose(&dir, "alpha", "texture", false);
 }
 
-pub fn pconvert(mut args: env::Args) {
+pub fn pconvert(args: &mut env::Args) {
     let file_in = match args.next() {
         Some(name) => name,
         None => {
@@ -65,7 +62,7 @@ fn read_png(file_in: String) -> ImageBuffer<Rgba<u8>, Vec<u8>> {
         Ok(file) => match file {
             DynamicImage::ImageRgba8(img) => img,
             _ => {
-                eprintln!("ERROR: Specified input file must be PNG-RGBA");
+                eprintln!("ERROR: Specified input file must be PNG-RGBA where each component is one byte (RGBA8)");
                 process::exit(-1);
             }
         },
@@ -76,11 +73,40 @@ fn read_png(file_in: String) -> ImageBuffer<Rgba<u8>, Vec<u8>> {
     }
 }
 
+
+fn compose(dir: &str, algorithm: &str, background: &str, use_opencl: bool) {
+    let mut bot = read_png(format!("{}sole.png", dir));
+
+    let top = read_png(format!("{}back.png", dir));
+    blend_images(&top, &mut bot, &blend_alpha);
+
+    let top = read_png(format!("{}front.png", dir));
+    blend_images(&top, &mut bot, &blend_alpha);
+
+    let top = read_png(format!("{}shoelace.png", dir));
+    blend_images(&top, &mut bot, &blend_alpha);
+
+    let top = read_png(format!("{}background_{}.png", dir, background));
+    blend_images(&top, &mut bot, &blend_alpha);
+
+    let file_out = format!(
+        "result_{}_{}_{}.png",
+        algorithm,
+        background,
+        if use_opencl { "opencl" } else { "cpu" }
+    );
+    
+    match bot.save_with_format(format!("{}{}", dir, file_out), ImageFormat::Png) {
+        Ok(_) => println!("Successfully composed {}", file_out),
+        Err(err) => eprintln!("{}", err),
+    }
+}
+
 /* Blends 2 PNGs, updating the bottom reference */
 fn blend_images(
     top: &ImageBuffer<Rgba<u8>, Vec<u8>>,
     bot: &mut ImageBuffer<Rgba<u8>, Vec<u8>>,
-    blending_algorithm: impl Fn((&mut Rgba<u8>, &Rgba<u8>)) -> (),
+    blending_algorithm: &impl Fn((&mut Rgba<u8>, &Rgba<u8>)) -> (),
 ) {
     bot.pixels_mut()
         .zip(top.pixels())

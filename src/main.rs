@@ -12,8 +12,8 @@ fn main() {
 
     match args.next() {
         Some(action) => match &action[..] {
-            "convert" => pconvert_rust::pconvert(args),
-            "compose" => pconvert_rust::pcompose(args),
+            "convert" => pconvert_rust::pconvert(&mut args),
+            "compose" => pconvert_rust::pcompose(&mut args),
             _ => print_usage(),
         },
         None => print_usage(),
