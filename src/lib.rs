@@ -27,6 +27,31 @@ pub fn pcompose(args: &mut env::Args) {
     compose(&dir, BlendAlgorithm::Alpha, Background::White, false);
     compose(&dir, BlendAlgorithm::Alpha, Background::Blue, false);
     compose(&dir, BlendAlgorithm::Alpha, Background::Texture, false);
+
+    compose(
+        &dir,
+        BlendAlgorithm::Multiplicative,
+        Background::Alpha,
+        false,
+    );
+    compose(
+        &dir,
+        BlendAlgorithm::Multiplicative,
+        Background::White,
+        false,
+    );
+    compose(
+        &dir,
+        BlendAlgorithm::Multiplicative,
+        Background::Blue,
+        false,
+    );
+    compose(
+        &dir,
+        BlendAlgorithm::Multiplicative,
+        Background::Texture,
+        false,
+    );
 }
 
 pub fn pconvert(args: &mut env::Args) {
@@ -68,16 +93,16 @@ fn compose(dir: &str, algorithm: BlendAlgorithm, background: Background, use_ope
 
     let algorithm_fn = get_blending_algorithm(&algorithm);
     let top = read_png(&format!("{}back.png", dir));
-    blend_images(&top, &mut bot, algorithm_fn);
+    blend_images(&top, &mut bot, &algorithm_fn);
 
     let top = read_png(&format!("{}front.png", dir));
-    blend_images(&top, &mut bot, algorithm_fn);
+    blend_images(&top, &mut bot, &algorithm_fn);
 
     let top = read_png(&format!("{}shoelace.png", dir));
-    blend_images(&top, &mut bot, algorithm_fn);
+    blend_images(&top, &mut bot, &algorithm_fn);
 
     let top = read_png(&format!("{}background_{}.png", dir, background));
-    blend_images(&top, &mut bot, algorithm_fn);
+    blend_images(&top, &mut bot, &algorithm_fn);
 
     let file_out = format!(
         "result_{}_{}_{}.png",

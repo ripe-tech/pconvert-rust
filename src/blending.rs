@@ -1,9 +1,7 @@
-use super::utils;
+use super::utils::{max, min};
 
 use image::{ImageBuffer, Rgba};
 use std::fmt::{Display, Formatter, Result};
-
-use utils::{max, min};
 
 pub enum BlendAlgorithm {
     Alpha,
@@ -39,10 +37,10 @@ impl Display for Background {
 
 pub fn get_blending_algorithm(
     algorithm: &BlendAlgorithm,
-) -> &'static impl Fn((&mut Rgba<u8>, &Rgba<u8>)) -> () {
+) -> impl Fn((&mut Rgba<u8>, &Rgba<u8>)) -> () {
     match algorithm {
-        BlendAlgorithm::Alpha => &blend_alpha,
-        BlendAlgorithm::Multiplicative => &blend_alpha,
+        BlendAlgorithm::Alpha => blend_alpha,
+        BlendAlgorithm::Multiplicative => blend_multiplicative,
     }
 }
 
@@ -54,7 +52,7 @@ pub fn blend_images(
 ) {
     bot.pixels_mut()
         .zip(top.pixels())
-        .for_each(|x| blending_algorithm(x));
+        .for_each(blending_algorithm);
 }
 
 fn blend_alpha((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
@@ -89,5 +87,26 @@ fn blend_alpha((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
     bot_pixel[0] = r as u8;
     bot_pixel[1] = g as u8;
     bot_pixel[2] = b as u8;
+    bot_pixel[3] = a as u8;
+}
+
+fn blend_multiplicative((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
+    let (rb, gb, bb, ab) = (bot_pixel[0], bot_pixel[1], bot_pixel[2], bot_pixel[3]);
+    let (rt, gt, bt, at) = (top_pixel[0], top_pixel[1], top_pixel[2], top_pixel[3]);
+
+    let atf = 1.0 * (at as f32 / 255.0);
+
+    let r = rb as f32 * (1.0 - atf) + rt as f32 * atf;
+    let g = gb as f32 * (1.0 - atf) + gt as f32 * atf;
+    let b = bb as f32 * (1.0 - atf) + bt as f32 * atf;
+    let a = max(0, min(255, at as u16 + ab as u16));
+
+    let r = max(0, min(255, r as u8));
+    let g = max(0, min(255, g as u8));
+    let b = max(0, min(255, b as u8));
+
+    bot_pixel[0] = r;
+    bot_pixel[1] = g;
+    bot_pixel[2] = b;
     bot_pixel[3] = a as u8;
 }

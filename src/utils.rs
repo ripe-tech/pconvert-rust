@@ -17,10 +17,18 @@ pub fn read_png(file_in: &str) -> ImageBuffer<Rgba<u8>, Vec<u8>> {
     }
 }
 
-pub fn max(x: f32, y: f32) -> f32 {
-    x.max(y)
+pub fn max<T: PartialOrd>(x: T, y: T) -> T {
+    if x > y {
+        x
+    } else {
+        y
+    }
 }
 
-pub fn min(x: f32, y: f32) -> f32 {
-    x.min(y)
+pub fn min<T: PartialOrd>(x: T, y: T) -> T {
+    if x < y {
+        x
+    } else {
+        y
+    }
 }
