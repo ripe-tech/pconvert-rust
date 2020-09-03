@@ -27,3 +27,7 @@ cargo run
 ```bash
 pconvert-rust convert <file_in> <file_out>
 ```
+
+## Build Automation
+
+[![Build Status](https://github.com/ripe-tech/pconvert-rust/workflows/Main%20Workflow/badge.svg)](https://github.com/ripe-tech/pconvert-rust/actions)
