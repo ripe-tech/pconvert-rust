@@ -87,6 +87,66 @@ pub fn pcompose(args: &mut env::Args) {
     compose(&dir, BlendAlgorithm::FirstTop, Background::White, false);
     compose(&dir, BlendAlgorithm::FirstTop, Background::Blue, false);
     compose(&dir, BlendAlgorithm::FirstTop, Background::Texture, false);
+
+    compose(&dir, BlendAlgorithm::FirstBottom, Background::Alpha, false);
+    compose(&dir, BlendAlgorithm::FirstBottom, Background::White, false);
+    compose(&dir, BlendAlgorithm::FirstBottom, Background::Blue, false);
+    compose(
+        &dir,
+        BlendAlgorithm::FirstBottom,
+        Background::Texture,
+        false,
+    );
+
+    compose(&dir, BlendAlgorithm::DisjointOver, Background::Alpha, false);
+    compose(&dir, BlendAlgorithm::DisjointOver, Background::White, false);
+    compose(&dir, BlendAlgorithm::DisjointOver, Background::Blue, false);
+    compose(
+        &dir,
+        BlendAlgorithm::DisjointOver,
+        Background::Texture,
+        false,
+    );
+
+    compose(
+        &dir,
+        BlendAlgorithm::DisjointUnder,
+        Background::Alpha,
+        false,
+    );
+    compose(
+        &dir,
+        BlendAlgorithm::DisjointUnder,
+        Background::White,
+        false,
+    );
+    compose(&dir, BlendAlgorithm::DisjointUnder, Background::Blue, false);
+    compose(
+        &dir,
+        BlendAlgorithm::DisjointUnder,
+        Background::Texture,
+        false,
+    );
+
+    compose(
+        &dir,
+        BlendAlgorithm::DisjointDebug,
+        Background::Alpha,
+        false,
+    );
+    compose(
+        &dir,
+        BlendAlgorithm::DisjointDebug,
+        Background::White,
+        false,
+    );
+    compose(&dir, BlendAlgorithm::DisjointDebug, Background::Blue, false);
+    compose(
+        &dir,
+        BlendAlgorithm::DisjointDebug,
+        Background::Texture,
+        false,
+    );
 }
 
 pub fn pconvert(args: &mut env::Args) {
