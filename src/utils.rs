@@ -20,6 +20,7 @@ pub fn read_png(file_in: &str, demultiply: bool) -> ImageBuffer<Rgba<u8>, Vec<u8
     if demultiply {
         demultiply_image(&mut img)
     }
+
     img
 }
 
