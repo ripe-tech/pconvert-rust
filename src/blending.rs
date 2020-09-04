@@ -71,9 +71,9 @@ pub fn blend_images(
     bot: &mut ImageBuffer<Rgba<u8>, Vec<u8>>,
     blending_algorithm: &impl Fn((&mut Rgba<u8>, &Rgba<u8>)) -> (),
 ) {
-    bot.pixels_mut()
-        .zip(top.pixels())
-        .for_each(blending_algorithm);
+    for pixel_pair in bot.pixels_mut().zip(top.pixels()) {
+        blending_algorithm(pixel_pair);
+    }
 }
 
 fn blend_alpha((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
@@ -111,6 +111,7 @@ fn blend_alpha((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
     bot_pixel[3] = a as u8;
 }
 
+//TODO: debug different result from original pconvert
 fn blend_multiplicative((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
     let (rb, gb, bb, ab) = (bot_pixel[0], bot_pixel[1], bot_pixel[2], bot_pixel[3]);
     let (rt, gt, bt, at) = (top_pixel[0], top_pixel[1], top_pixel[2], top_pixel[3]);
@@ -132,6 +133,7 @@ fn blend_multiplicative((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
     bot_pixel[3] = a as u8;
 }
 
+//TODO: debug different result from original pconvert
 fn blend_source_over((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
     let (rb, gb, bb, ab) = (bot_pixel[0], bot_pixel[1], bot_pixel[2], bot_pixel[3]);
     let (rt, gt, bt, at) = (top_pixel[0], top_pixel[1], top_pixel[2], top_pixel[3]);
@@ -167,6 +169,7 @@ fn blend_source_over((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
     bot_pixel[3] = a as u8;
 }
 
+//TODO: debug different result from original pconvert
 fn blend_destination_over((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
     let (rb, gb, bb, ab) = (bot_pixel[0], bot_pixel[1], bot_pixel[2], bot_pixel[3]);
     let (rt, gt, bt, at) = (top_pixel[0], top_pixel[1], top_pixel[2], top_pixel[3]);
@@ -202,6 +205,7 @@ fn blend_destination_over((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
     bot_pixel[3] = a as u8;
 }
 
+//TODO: debug different result from original pconvert
 fn blend_first_top((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
     let (rb, gb, bb, ab) = (bot_pixel[0], bot_pixel[1], bot_pixel[2], bot_pixel[3]);
     let (rt, gt, bt, at) = (top_pixel[0], top_pixel[1], top_pixel[2], top_pixel[3]);
@@ -222,6 +226,7 @@ fn blend_first_top((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
     bot_pixel[3] = a;
 }
 
+//TODO: debug different result from original pconvert
 fn blend_first_bottom((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
     let (rb, gb, bb, ab) = (bot_pixel[0], bot_pixel[1], bot_pixel[2], bot_pixel[3]);
     let (rt, gt, bt, at) = (top_pixel[0], top_pixel[1], top_pixel[2], top_pixel[3]);
@@ -242,6 +247,7 @@ fn blend_first_bottom((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
     bot_pixel[3] = a;
 }
 
+//TODO: debug different result from original pconvert
 fn blend_disjoint_over((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
     let (rb, gb, bb, ab) = (bot_pixel[0], bot_pixel[1], bot_pixel[2], bot_pixel[3]);
     let (rt, gt, bt, at) = (top_pixel[0], top_pixel[1], top_pixel[2], top_pixel[3]);
@@ -276,6 +282,7 @@ fn blend_disjoint_over((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
     bot_pixel[3] = a as u8;
 }
 
+//TODO: debug different result from original pconvert
 fn blend_disjoint_under((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
     let (rb, gb, bb, ab) = (bot_pixel[0], bot_pixel[1], bot_pixel[2], bot_pixel[3]);
     let (rt, gt, bt, at) = (top_pixel[0], top_pixel[1], top_pixel[2], top_pixel[3]);
@@ -330,4 +337,56 @@ fn blend_disjoint_debug((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
     bot_pixel[1] = g;
     bot_pixel[2] = b;
     bot_pixel[3] = a as u8;
+}
+
+pub fn demultiply_image(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
+    for pixel in img.pixels_mut() {
+        demultiply_pixel(pixel);
+    }
+}
+
+fn demultiply_pixel(pixel: &mut Rgba<u8>) {
+    let (r, g, b, a) = (pixel[0], pixel[1], pixel[2], pixel[3]);
+    let af = a as f32 / 255.0;
+
+    let r = (r as f32 * af).round() as u8;
+    let g = (g as f32 * af).round() as u8;
+    let b = (b as f32 * af).round() as u8;
+
+    pixel[0] = r;
+    pixel[1] = g;
+    pixel[2] = b;
+}
+
+pub fn multiply_image(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
+    for pixel in img.pixels_mut() {
+        multiply_pixel(pixel);
+    }
+}
+
+fn multiply_pixel(pixel: &mut Rgba<u8>) {
+    let (r, g, b, a) = (pixel[0], pixel[1], pixel[2], pixel[3]);
+    let af = a as f32 / 255.0;
+
+    let r = (r as f32 / af).round() as u8;
+    let g = (g as f32 / af).round() as u8;
+    let b = (b as f32 / af).round() as u8;
+
+    pixel[0] = r;
+    pixel[1] = g;
+    pixel[2] = b;
+}
+
+pub fn is_algorithm_multiplied(algorithm: &BlendAlgorithm) -> bool {
+    match algorithm {
+        BlendAlgorithm::Alpha => false,
+        BlendAlgorithm::Multiplicative => false,
+        BlendAlgorithm::SourceOver => false,
+        BlendAlgorithm::DestinationOver => false,
+        BlendAlgorithm::FirstTop => false,
+        BlendAlgorithm::FirstBottom => false,
+        BlendAlgorithm::DisjointOver => true,
+        BlendAlgorithm::DisjointUnder => true,
+        BlendAlgorithm::DisjointDebug => true,
+    }
 }

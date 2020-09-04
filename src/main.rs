@@ -8,7 +8,7 @@ fn print_usage() {
 
 fn main() {
     let mut args = env::args();
-    
+
     // skip program name, facilitating the parsing
     // of the extra argument from command line
     args.next();

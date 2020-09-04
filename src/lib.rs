@@ -5,7 +5,10 @@ use image::{ImageFormat, Rgba};
 use std::env;
 use std::process;
 
-use blending::{blend_images, get_blending_algorithm, Background, BlendAlgorithm};
+use blending::{
+    blend_images, get_blending_algorithm, is_algorithm_multiplied, multiply_image, Background,
+    BlendAlgorithm,
+};
 use utils::read_png;
 
 pub fn pcompose(args: &mut env::Args) {
@@ -166,7 +169,7 @@ pub fn pconvert(args: &mut env::Args) {
         }
     };
 
-    let mut img = read_png(&file_in);
+    let mut img = read_png(&file_in, false);
 
     // turns the image blueish (blue filter)"
     img.pixels_mut().for_each(|x| apply_blue_filter(x));
@@ -182,19 +185,25 @@ fn apply_blue_filter(pixel: &mut Rgba<u8>) {
 }
 
 fn compose(dir: &str, algorithm: BlendAlgorithm, background: Background, use_opencl: bool) {
-    let mut bot = read_png(&format!("{}sole.png", dir));
+    let demultiply = is_algorithm_multiplied(&algorithm);
+
+    let mut bot = read_png(&format!("{}sole.png", dir), demultiply);
 
     let algorithm_fn = get_blending_algorithm(&algorithm);
-    let top = read_png(&format!("{}back.png", dir));
+    let top = read_png(&format!("{}back.png", dir), demultiply);
     blend_images(&top, &mut bot, &algorithm_fn);
 
-    let top = read_png(&format!("{}front.png", dir));
+    let top = read_png(&format!("{}front.png", dir), demultiply);
     blend_images(&top, &mut bot, &algorithm_fn);
 
-    let top = read_png(&format!("{}shoelace.png", dir));
+    let top = read_png(&format!("{}shoelace.png", dir), demultiply);
     blend_images(&top, &mut bot, &algorithm_fn);
 
-    let top = read_png(&format!("{}background_{}.png", dir, background));
+    if demultiply {
+        multiply_image(&mut bot)
+    }
+
+    let top = read_png(&format!("{}background_{}.png", dir, background), false);
     blend_images(&top, &mut bot, &algorithm_fn);
 
     let file_out = format!(
