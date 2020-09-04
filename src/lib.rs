@@ -205,8 +205,8 @@ fn compose(dir: &str, algorithm: BlendAlgorithm, background: Background, use_ope
         multiply_image(&mut bot)
     }
 
-    let top = read_png(&format!("{}background_{}.png", dir, background), false);
-    blend_images(&top, &mut bot, &algorithm_fn);
+    let mut top = read_png(&format!("{}background_{}.png", dir, background), false);
+    blend_images(&bot, &mut top, &algorithm_fn);
 
     let file_out = format!(
         "result_{}_{}_{}.png",
@@ -215,14 +215,15 @@ fn compose(dir: &str, algorithm: BlendAlgorithm, background: Background, use_ope
         if use_opencl { "opencl" } else { "cpu" }
     );
 
-    let file = File::create("icon.png").unwrap();
-    let ref mut buff = BufWriter::new(file);
-    let encoder = PngEncoder::new_with_quality(buff, CompressionType::Fast, FilterType::NoFilter);
-    encoder
-        .encode(&bot, bot.width(), bot.height(), ColorType::Rgba8)
-        .expect("Failure applying compression or filter to PNG");
+    // TODO: Take a better look at encoding with compression and filter
+    // let file = File::create("icon.png").unwrap();
+    // let ref mut buff = BufWriter::new(file);
+    // let encoder = PngEncoder::new_with_quality(buff, CompressionType::Fast, FilterType::NoFilter);
+    // encoder
+    //     .encode(&bot, bot.width(), bot.height(), ColorType::Rgba8)
+    //     .expect("Failure applying compression or filter to PNG");
 
-    match bot.save_with_format(format!("{}{}", dir, file_out), ImageFormat::Png) {
+    match top.save_with_format(format!("{}{}", dir, file_out), ImageFormat::Png) {
         Ok(_) => println!("Successfully composed {}", file_out),
         Err(err) => eprintln!("{}", err),
     }
