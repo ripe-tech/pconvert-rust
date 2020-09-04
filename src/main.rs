@@ -8,14 +8,15 @@ fn print_usage() {
 
 fn main() {
     let mut args = env::args();
-    
-    // skip program name, facilitating the parsing
+
+    // skips program name, facilitating the parsing
     // of the extra argument from command line
     args.next();
 
     match args.next() {
         Some(action) => match &action[..] {
-            "convert" => pconvert_rust::pconvert(args),
+            "convert" => pconvert_rust::pconvert(&mut args),
+            "compose" => pconvert_rust::pcompose(&mut args),
             _ => print_usage(),
         },
         None => print_usage(),
