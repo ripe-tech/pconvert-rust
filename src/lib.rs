@@ -1,5 +1,6 @@
 mod blending;
 mod utils;
+mod pyinterface;
 
 use blending::{
     blend_images, get_blending_algorithm, is_algorithm_multiplied, multiply_image, Background,
@@ -169,7 +170,7 @@ pub fn pconvert(args: &mut env::Args) {
         }
     };
 
-    let mut img = read_png(&file_in, false);
+    let mut img = read_png(file_in, false);
 
     // turns the image blueish (blue filter)"
     img.pixels_mut().for_each(|x| apply_blue_filter(x));
@@ -187,24 +188,24 @@ fn apply_blue_filter(pixel: &mut Rgba<u8>) {
 fn compose(dir: &str, algorithm: BlendAlgorithm, background: Background, use_opencl: bool) {
     let demultiply = is_algorithm_multiplied(&algorithm);
 
-    let mut bot = read_png(&format!("{}sole.png", dir), demultiply);
+    let mut bot = read_png(format!("{}sole.png", dir), demultiply);
 
     let algorithm_fn = get_blending_algorithm(&algorithm);
-    let top = read_png(&format!("{}back.png", dir), demultiply);
+    let top = read_png(format!("{}back.png", dir), demultiply);
     blend_images(&top, &mut bot, &algorithm_fn);
 
-    let top = read_png(&format!("{}front.png", dir), demultiply);
+    let top = read_png(format!("{}front.png", dir), demultiply);
     blend_images(&top, &mut bot, &algorithm_fn);
 
-    let top = read_png(&format!("{}shoelace.png", dir), demultiply);
+    let top = read_png(format!("{}shoelace.png", dir), demultiply);
     blend_images(&top, &mut bot, &algorithm_fn);
 
     if demultiply {
         multiply_image(&mut bot)
     }
 
-    let mut top = read_png(&format!("{}background_{}.png", dir, background), false);
-    blend_images(&bot, &mut top, &algorithm_fn);
+    let mut composition = read_png(format!("{}background_{}.png", dir, background), false);
+    blend_images(&bot, &mut composition, &algorithm_fn);
 
     let file_out = format!(
         "{}result_{}_{}_{}.png",
@@ -213,5 +214,5 @@ fn compose(dir: &str, algorithm: BlendAlgorithm, background: Background, use_ope
         background,
         if use_opencl { "opencl" } else { "cpu" }
     );
-    write_png(&file_out, top);
+    write_png(file_out, &composition);
 }
