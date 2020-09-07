@@ -5,13 +5,11 @@ use blending::{
     blend_images, get_blending_algorithm, is_algorithm_multiplied, multiply_image, Background,
     BlendAlgorithm,
 };
-use image::png::{CompressionType, FilterType, PngEncoder};
-use image::{ColorType, ImageFormat, Rgba};
+use image::{ImageFormat, Rgba};
 use std::env;
-use std::fs::File;
-use std::io::BufWriter;
+
 use std::process;
-use utils::read_png;
+use utils::{read_png, write_png};
 
 pub fn pcompose(args: &mut env::Args) {
     let dir = match args.next() {
@@ -209,22 +207,11 @@ fn compose(dir: &str, algorithm: BlendAlgorithm, background: Background, use_ope
     blend_images(&bot, &mut top, &algorithm_fn);
 
     let file_out = format!(
-        "result_{}_{}_{}.png",
+        "{}result_{}_{}_{}.png",
+        dir,
         algorithm,
         background,
         if use_opencl { "opencl" } else { "cpu" }
     );
-
-    // TODO: Take a better look at encoding with compression and filter
-    // let file = File::create("icon.png").unwrap();
-    // let ref mut buff = BufWriter::new(file);
-    // let encoder = PngEncoder::new_with_quality(buff, CompressionType::Fast, FilterType::NoFilter);
-    // encoder
-    //     .encode(&bot, bot.width(), bot.height(), ColorType::Rgba8)
-    //     .expect("Failure applying compression or filter to PNG");
-
-    match top.save_with_format(format!("{}{}", dir, file_out), ImageFormat::Png) {
-        Ok(_) => println!("Successfully composed {}", file_out),
-        Err(err) => eprintln!("{}", err),
-    }
+    write_png(&file_out, top);
 }
