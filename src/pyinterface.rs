@@ -10,6 +10,9 @@ use std::str::FromStr;
 
 #[pymodule]
 fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
+    m.add("VERSION", env!("CARGO_PKG_VERSION"))?;
+    m.add("ALGORITHMS", BlendAlgorithm::all())?;
+
     #[pyfn(m, "blend_images")]
     fn blend_images_py(
         bot_path: String,

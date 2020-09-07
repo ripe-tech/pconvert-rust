@@ -1,11 +1,5 @@
 use std::env;
 
-fn print_usage() {
-    println!(
-        "Usage: pconvert-rust <command> [args...]\nwhere command can be one of the following: compose, convert, benchmark, opencl, version"
-    );
-}
-
 fn main() {
     let mut args = env::args();
 
@@ -21,4 +15,10 @@ fn main() {
         },
         None => print_usage(),
     }
+}
+
+fn print_usage() {
+    println!(
+        "Usage: pconvert-rust <command> [args...]\nwhere command can be one of the following: compose, convert, benchmark, opencl, version"
+    );
 }
