@@ -1,7 +1,10 @@
 use super::utils::{max, min};
 
 use image::{ImageBuffer, Rgba};
-use std::fmt::{Display, Formatter, Result};
+use std::fmt;
+use std::fmt::{Display, Formatter};
+use std::result;
+use std::str::FromStr;
 
 pub enum BlendAlgorithm {
     Alpha,
@@ -15,8 +18,27 @@ pub enum BlendAlgorithm {
     DisjointDebug,
 }
 
+impl FromStr for BlendAlgorithm {
+    type Err = String;
+
+    fn from_str(s: &str) -> result::Result<Self, Self::Err> {
+        match s {
+            "alpha" => Ok(BlendAlgorithm::Alpha),
+            "multiplicative" => Ok(BlendAlgorithm::Multiplicative),
+            "source_over" => Ok(BlendAlgorithm::SourceOver),
+            "destination_over" => Ok(BlendAlgorithm::DestinationOver),
+            "first_top" => Ok(BlendAlgorithm::FirstTop),
+            "first_bottom" => Ok(BlendAlgorithm::FirstBottom),
+            "disjoint_over" => Ok(BlendAlgorithm::DisjointOver),
+            "disjoint_under" => Ok(BlendAlgorithm::DisjointUnder),
+            "disjoint_debug" => Ok(BlendAlgorithm::DisjointDebug),
+            _ => Err(format!("'{}' is not a valid value for BlendAlgorithm", s)),
+        }
+    }
+}
+
 impl Display for BlendAlgorithm {
-    fn fmt(&self, f: &mut Formatter) -> Result {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self {
             BlendAlgorithm::Alpha => write!(f, "alpha"),
             BlendAlgorithm::Multiplicative => write!(f, "multiplicative"),
@@ -39,7 +61,7 @@ pub enum Background {
 }
 
 impl Display for Background {
-    fn fmt(&self, f: &mut Formatter) -> Result {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self {
             Background::Alpha => write!(f, "alpha"),
             Background::White => write!(f, "white"),
