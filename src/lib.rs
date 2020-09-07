@@ -1,6 +1,6 @@
 mod blending;
-mod utils;
 mod pyinterface;
+mod utils;
 
 use blending::{
     blend_images, get_blending_algorithm, is_algorithm_multiplied, multiply_image, Background,
