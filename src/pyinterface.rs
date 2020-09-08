@@ -55,16 +55,12 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         algorithm: Option<String>,
         is_inline: Option<bool>,
     ) {
-        let algorithm = match algorithm {
-            Some(algorithm) => BlendAlgorithm::from_str(&algorithm).unwrap(),
-            None => BlendAlgorithm::from_str("multiplicative").unwrap(),
-        };
+        let algorithm_str = algorithm.unwrap_or(String::from("multiplicative"));
+        let algorithm =
+            BlendAlgorithm::from_str(&algorithm_str).unwrap_or(BlendAlgorithm::Multiplicative);
 
         //TODO: actually make use of this
-        let _is_inline = match is_inline {
-            Some(is_inline) => is_inline,
-            None => false,
-        };
+        let _is_inline = is_inline.unwrap_or(false);
 
         let demultiply = is_algorithm_multiplied(&algorithm);
         let algorithm_fn = get_blending_algorithm(&algorithm);
@@ -77,22 +73,54 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
     }
 
     #[pyfn(m, "blend_multiple")]
-    fn blend_multiple_py(img_paths: &PyTuple, out_path: String) {
+    fn blend_multiple_py(
+        img_paths: &PyTuple,
+        out_path: String,
+        algorithm: Option<String>,
+        algorithms: Option<Vec<String>>,
+        _is_inline: Option<bool>,
+    ) {
         if img_paths.len() < 1 {
             eprintln!("ERROR: Specify at least one image path");
             std::process::exit(-1);
         }
 
-        let algorithm = BlendAlgorithm::Multiplicative;
-        let demultiply = is_algorithm_multiplied(&algorithm);
-        let algorithm_fn = get_blending_algorithm(&algorithm);
+        let algorithms_to_apply: Vec<String>;
+        if let Some(algorithms) = algorithms {
+            if algorithms.len() != img_paths.len() - 1 {
+                eprintln!("ERROR: The list of algorithms to apply must be of size {} (one per image blending operation)", img_paths.len() - 1);
+                std::process::exit(-1);
+            } else {
+                algorithms_to_apply = algorithms;
+            }
+        } else if let Some(algorithm) = algorithm {
+            algorithms_to_apply = vec![algorithm; img_paths.len() - 1]
+        } else {
+            algorithms_to_apply = vec!["multiplicative".to_owned(); img_paths.len() - 1]
+        }
 
-        let mut paths_iter = img_paths.iter();
-        let mut composition = read_png(paths_iter.next().unwrap().extract().unwrap(), demultiply);
-        while let Some(path) = paths_iter.next() {
-            let current = read_png(path.extract().unwrap(), demultiply);
+        let mut zip_iter = img_paths.iter().zip(algorithms_to_apply.iter());
+        let first_pair = zip_iter.next().unwrap();
+        let first_path = first_pair.0.extract::<String>().unwrap();
+        let first_algorithm = first_pair.1;
+
+        let demultiply = is_algorithm_multiplied(
+            &BlendAlgorithm::from_str(first_algorithm).unwrap_or(BlendAlgorithm::Multiplicative),
+        );
+        let mut composition = read_png(first_path, demultiply);
+        while let Some(pair) = zip_iter.next() {
+            let path = pair.0.extract::<String>().unwrap();
+            let algorithm = pair.1;
+
+            let algorithm =
+                BlendAlgorithm::from_str(algorithm).unwrap_or(BlendAlgorithm::Multiplicative);
+            let demultiply = is_algorithm_multiplied(&algorithm);
+            let algorithm_fn = get_blending_algorithm(&algorithm);
+
+            let current = read_png(path, demultiply);
             blend_images(&current, &mut composition, &algorithm_fn);
         }
+
         write_png(out_path, &composition);
     }
 
