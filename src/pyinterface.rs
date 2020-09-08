@@ -1,15 +1,12 @@
-use pyo3::prelude::*;
-use pyo3::types::PyTuple;
-
 use super::blending::{
     blend_images, get_blending_algorithm, is_algorithm_multiplied, BlendAlgorithm,
 };
-
 use super::utils::{read_png, write_png};
-use std::str::FromStr;
-
 use chrono::Utc;
+use pyo3::prelude::*;
+use pyo3::types::PyTuple;
 use std::process::Command;
+use std::str::FromStr;
 
 #[pymodule]
 fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
@@ -102,17 +99,22 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         let mut zip_iter = img_paths.iter().zip(algorithms_to_apply.iter());
         let first_pair = zip_iter.next().unwrap();
         let first_path = first_pair.0.extract::<String>().unwrap();
-        
+
         let first_algorithm = first_pair.1;
-        let demultiply = is_algorithm_multiplied(
-            &BlendAlgorithm::from_str(first_algorithm).unwrap_or(BlendAlgorithm::Multiplicative),
-        );
+        let demultiply =
+            is_algorithm_multiplied(&BlendAlgorithm::from_str(first_algorithm).expect(&format!(
+                "Blending algorithm '{}' does not exist",
+                first_algorithm
+            )));
         let mut composition = read_png(first_path, demultiply);
         while let Some(pair) = zip_iter.next() {
             let path = pair.0.extract::<String>().unwrap();
             let algorithm = pair.1;
 
-            let algorithm = BlendAlgorithm::from_str(algorithm).expect(format!("Blending algorithm '{}' does not exist", algorithm));
+            let algorithm = BlendAlgorithm::from_str(algorithm).expect(&format!(
+                "Blending algorithm '{}' does not exist",
+                algorithm
+            ));
             let demultiply = is_algorithm_multiplied(&algorithm);
             let algorithm_fn = get_blending_algorithm(&algorithm);
             let current_layer = read_png(path, demultiply);

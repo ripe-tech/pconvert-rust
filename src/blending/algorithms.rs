@@ -1,5 +1,4 @@
 use crate::utils::{max, min};
-
 use image::Rgba;
 
 pub fn blend_alpha((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {

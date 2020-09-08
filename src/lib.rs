@@ -8,7 +8,6 @@ use blending::{
 };
 use image::{ImageFormat, Rgba};
 use std::env;
-
 use std::process;
 use utils::{read_png, write_png};
 
