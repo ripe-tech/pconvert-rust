@@ -1,8 +1,9 @@
+use crate::constants;
+
 use super::blending::{
     blend_images, get_blending_algorithm, is_algorithm_multiplied, BlendAlgorithm,
 };
 use super::utils::{read_png, write_png};
-use chrono::Utc;
 use pyo3::prelude::*;
 use pyo3::types::PyTuple;
 use std::process::Command;
@@ -11,20 +12,10 @@ use std::str::FromStr;
 #[pymodule]
 fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
     /* Module exported constants */
-    let now_utc = Utc::now();
-    m.add(
-        "COMPILATION_DATE",
-        format!("{}", now_utc.format("%b %d %Y")),
-    )?;
-    m.add(
-        "COMPILATION_TIME",
-        format!("{}", now_utc.format("%H:%M:%S")),
-    )?;
+    m.add("COMPILATION_DATE", constants::COMPILATION_DATE)?;
+    m.add("COMPILATION_TIME", constants::COMPILATION_TIME)?;
 
-    m.add(
-        "VERSION",
-        option_env!("CARGO_PKG_VERSION").unwrap_or("UNKNOWN"),
-    )?;
+    m.add("VERSION", constants::VERSION)?;
 
     m.add("ALGORITHMS", BlendAlgorithm::all())?;
 
@@ -40,7 +31,7 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
             .unwrap_or(String::from("UNKNOWN")),
     )?;
 
-    m.add("LIBPNG_VERSION", "0.23.9")?;
+    m.add("LIBPNG_VERSION", "UNKNOWN")?;
 
     m.add("FEATURES", vec!["cpu", "python"])?;
 

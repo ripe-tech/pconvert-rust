@@ -11,6 +11,8 @@ fn main() {
         Some(action) => match &action[..] {
             "convert" => pconvert_rust::pconvert(&mut args),
             "compose" => pconvert_rust::pcompose(&mut args),
+            "extreme" => pconvert_rust::extreme(&mut args),
+            "test" => pconvert_rust::test(),
             _ => print_usage(),
         },
         None => print_usage(),

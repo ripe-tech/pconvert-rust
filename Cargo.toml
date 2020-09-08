@@ -10,11 +10,13 @@ crate-type = ["rlib", "cdylib"]
 
 [dependencies]
 image = "0.23.9"
-chrono = "0.4.13"
 
 [dependencies.pyo3]
 version = "0.11.1"
 features = ["extension-module"]
+
+[build-dependencies]
+chrono = "0.4.13"
 
 [profile.dev]
 opt-level = 3

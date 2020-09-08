@@ -1,4 +1,5 @@
 mod blending;
+mod constants;
 mod pyinterface;
 mod utils;
 
@@ -10,6 +11,45 @@ use image::{ImageFormat, Rgba};
 use std::env;
 use std::process;
 use utils::{read_png, write_png};
+
+pub fn test() {
+    // println!("{}", constants::CONSTFIXE);
+}
+
+//temporary testing purposes, will be deleted in favor of a benchmarking framework
+pub fn extreme(args: &mut env::Args) {
+    use std::fs::OpenOptions;
+    use std::io::Write;
+    use std::time::Instant;
+
+    let dir = match args.next() {
+        Some(name) => {
+            if name.chars().last().unwrap() == '/' {
+                name
+            } else {
+                format!("{}/", name)
+            }
+        }
+        None => {
+            println!("Usage: pconvert-rust extreme <directory>");
+            process::exit(0);
+        }
+    };
+
+    let now = Instant::now();
+    for _ in 0..1000000 {
+        compose(&dir, BlendAlgorithm::Alpha, Background::Alpha, false);
+    }
+
+    let mut file = OpenOptions::new()
+        .create(true)
+        .write(true)
+        .append(true)
+        .open("blend-alpha-no-inline-1000000.txt")
+        .unwrap();
+
+    write!(file, "{}, ", now.elapsed().as_secs_f64()).unwrap();
+}
 
 pub fn pcompose(args: &mut env::Args) {
     let dir = match args.next() {
