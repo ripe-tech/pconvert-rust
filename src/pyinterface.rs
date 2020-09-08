@@ -102,8 +102,8 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         let mut zip_iter = img_paths.iter().zip(algorithms_to_apply.iter());
         let first_pair = zip_iter.next().unwrap();
         let first_path = first_pair.0.extract::<String>().unwrap();
+        
         let first_algorithm = first_pair.1;
-
         let demultiply = is_algorithm_multiplied(
             &BlendAlgorithm::from_str(first_algorithm).unwrap_or(BlendAlgorithm::Multiplicative),
         );
@@ -112,15 +112,12 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
             let path = pair.0.extract::<String>().unwrap();
             let algorithm = pair.1;
 
-            let algorithm =
-                BlendAlgorithm::from_str(algorithm).unwrap_or(BlendAlgorithm::Multiplicative);
+            let algorithm = BlendAlgorithm::from_str(algorithm).expect(format!("Blending algorithm '{}' does not exist", algorithm));
             let demultiply = is_algorithm_multiplied(&algorithm);
             let algorithm_fn = get_blending_algorithm(&algorithm);
-
-            let current = read_png(path, demultiply);
-            blend_images(&current, &mut composition, &algorithm_fn);
+            let current_layer = read_png(path, demultiply);
+            blend_images(&current_layer, &mut composition, &algorithm_fn);
         }
-
         write_png(out_path, &composition);
     }
 
