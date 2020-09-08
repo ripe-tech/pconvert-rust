@@ -8,10 +8,44 @@ use super::blending::{
 use super::utils::{read_png, write_png};
 use std::str::FromStr;
 
+use chrono::Utc;
+use std::process::Command;
+
 #[pymodule]
 fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
-    m.add("VERSION", env!("CARGO_PKG_VERSION"))?;
+    /* Module exported constants */
+    let now_utc = Utc::now();
+    m.add(
+        "COMPILATION_DATE",
+        format!("{}", now_utc.format("%b %d %Y")),
+    )?;
+    m.add(
+        "COMPILATION_TIME",
+        format!("{}", now_utc.format("%H:%M:%S")),
+    )?;
+
+    m.add(
+        "VERSION",
+        option_env!("CARGO_PKG_VERSION").unwrap_or("UNKNOWN"),
+    )?;
+
     m.add("ALGORITHMS", BlendAlgorithm::all())?;
+
+    m.add("COMPILER", "rustc")?;
+
+    m.add(
+        "COMPILER_VERSION",
+        Command::new("rustc")
+            .arg("--version")
+            .output()
+            .ok()
+            .and_then(|output| String::from_utf8(output.stdout).ok())
+            .unwrap_or(String::from("UNKNOWN")),
+    )?;
+
+    m.add("LIBPNG_VERSION", "0.23.9")?;
+
+    m.add("FEATURES", vec!["cpu", "python"])?;
 
     #[pyfn(m, "blend_images")]
     fn blend_images_py(
