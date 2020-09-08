@@ -43,22 +43,6 @@ impl FromStr for BlendAlgorithm {
     }
 }
 
-impl BlendAlgorithm {
-    pub fn all() -> Vec<&'static str> {
-        vec![
-            "alpha",
-            "multiplicative",
-            "source_over",
-            "destination_over",
-            "first_top",
-            "first_bottom",
-            "disjoint_over",
-            "disjoint_under",
-            "disjoint_debug",
-        ]
-    }
-}
-
 impl Display for BlendAlgorithm {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self {

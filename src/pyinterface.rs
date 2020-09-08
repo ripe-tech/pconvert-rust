@@ -1,39 +1,30 @@
-use crate::constants;
-
 use super::blending::{
     blend_images, get_blending_algorithm, is_algorithm_multiplied, BlendAlgorithm,
 };
 use super::utils::{read_png, write_png};
+use crate::constants;
 use pyo3::prelude::*;
 use pyo3::types::PyTuple;
-use std::process::Command;
 use std::str::FromStr;
 
 #[pymodule]
 fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
     /* Module exported constants */
     m.add("COMPILATION_DATE", constants::COMPILATION_DATE)?;
+
     m.add("COMPILATION_TIME", constants::COMPILATION_TIME)?;
 
     m.add("VERSION", constants::VERSION)?;
 
-    m.add("ALGORITHMS", BlendAlgorithm::all())?;
+    m.add("ALGORITHMS", constants::ALGORITHMS.to_vec())?;
 
-    m.add("COMPILER", "rustc")?;
+    m.add("COMPILER", constants::COMPILER)?;
 
-    m.add(
-        "COMPILER_VERSION",
-        Command::new("rustc")
-            .arg("--version")
-            .output()
-            .ok()
-            .and_then(|output| String::from_utf8(output.stdout).ok())
-            .unwrap_or(String::from("UNKNOWN")),
-    )?;
+    m.add("COMPILER_VERSION", constants::COMPILER_VERSION)?;
 
-    m.add("LIBPNG_VERSION", "UNKNOWN")?;
+    m.add("LIBPNG_VERSION", constants::LIBPNG_VERSION)?;
 
-    m.add("FEATURES", vec!["cpu", "python"])?;
+    m.add("FEATURES", constants::FEATURES.to_vec())?;
 
     #[pyfn(m, "blend_images")]
     fn blend_images_py(
