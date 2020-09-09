@@ -28,10 +28,15 @@ pub fn read_png(file_in: String, demultiply: bool) -> ImageBuffer<Rgba<u8>, Vec<
     img
 }
 
-pub fn write_png(file_out: String, png: &ImageBuffer<Rgba<u8>, Vec<u8>>) {
+pub fn write_png(
+    file_out: String,
+    png: &ImageBuffer<Rgba<u8>, Vec<u8>>,
+    compression: CompressionType,
+    filter: FilterType,
+) {
     let file = File::create(&file_out).unwrap();
     let buff = BufWriter::new(file);
-    let encoder = PngEncoder::new_with_quality(buff, CompressionType::Fast, FilterType::NoFilter);
+    let encoder = PngEncoder::new_with_quality(buff, compression, filter);
     match encoder.encode(&png, png.width(), png.height(), ColorType::Rgba8) {
         Ok(_) => println!("Successfully saved {}", &file_out),
         Err(_) => eprintln!("ERROR: writing {}", &file_out),

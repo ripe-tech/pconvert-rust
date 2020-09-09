@@ -3,6 +3,7 @@ use super::blending::{
 };
 use super::utils::{read_png, write_png};
 use crate::constants;
+use image::png::{CompressionType, FilterType};
 use pyo3::prelude::*;
 use pyo3::types::PySequence;
 use std::str::FromStr;
@@ -48,7 +49,12 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         let top = read_png(top_path, demultiply);
         blend_images(&top, &mut bot, &algorithm_fn);
 
-        write_png(target_path, &bot);
+        write_png(
+            target_path,
+            &bot,
+            CompressionType::Fast,
+            FilterType::NoFilter,
+        );
     }
 
     #[pyfn(m, "blend_multiple")]
@@ -111,7 +117,12 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
             let current_layer = read_png(path, demultiply);
             blend_images(&current_layer, &mut composition, &algorithm_fn);
         }
-        write_png(out_path, &composition);
+        write_png(
+            out_path,
+            &composition,
+            CompressionType::Fast,
+            FilterType::NoFilter,
+        );
         println!("Printing from Rust code #3");
     }
 
