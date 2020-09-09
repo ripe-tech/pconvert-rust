@@ -1,6 +1,6 @@
 mod blending;
 mod constants;
-mod pyinterface;
+mod pymodule;
 mod utils;
 
 use blending::{

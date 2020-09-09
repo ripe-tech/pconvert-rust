@@ -4,7 +4,7 @@ use super::blending::{
 use super::utils::{read_png, write_png};
 use crate::constants;
 use pyo3::prelude::*;
-use pyo3::types::PyTuple;
+use pyo3::types::PySequence;
 use std::str::FromStr;
 
 #[pymodule]
@@ -53,34 +53,42 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
 
     #[pyfn(m, "blend_multiple")]
     fn blend_multiple_py(
-        img_paths: &PyTuple,
+        img_paths: &PySequence,
         out_path: String,
         algorithm: Option<String>,
         algorithms: Option<Vec<String>>,
-        _is_inline: Option<bool>,
+        is_inline: Option<bool>,
     ) {
-        if img_paths.len() < 1 {
+        println!("Printing from Rust code #1");
+        let num_images = img_paths.len().unwrap() as usize;
+
+        if num_images < 1 {
             eprintln!("ERROR: Specify at least one image path");
             std::process::exit(-1);
         }
 
+        //TODO: actually make use of this
+        let _is_inline = is_inline.unwrap_or(false);
+
         let algorithms_to_apply: Vec<String>;
         if let Some(algorithms) = algorithms {
-            if algorithms.len() != img_paths.len() - 1 {
-                eprintln!("ERROR: The list of algorithms to apply must be of size {} (one per image blending operation)", img_paths.len() - 1);
+            if algorithms.len() != num_images - 1 {
+                eprintln!("ERROR: The list of algorithms to apply must be of size {} (one per image blending operation)", num_images - 1);
                 std::process::exit(-1);
             } else {
                 algorithms_to_apply = algorithms;
             }
         } else if let Some(algorithm) = algorithm {
-            algorithms_to_apply = vec![algorithm; img_paths.len() - 1]
+            algorithms_to_apply = vec![algorithm; num_images - 1]
         } else {
-            algorithms_to_apply = vec!["multiplicative".to_owned(); img_paths.len() - 1]
+            algorithms_to_apply = vec!["multiplicative".to_owned(); num_images - 1]
         }
 
-        let mut zip_iter = img_paths.iter().zip(algorithms_to_apply.iter());
+        println!("Printing from Rust code #2");
+
+        let mut zip_iter = img_paths.iter().unwrap().zip(algorithms_to_apply.iter());
         let first_pair = zip_iter.next().unwrap();
-        let first_path = first_pair.0.extract::<String>().unwrap();
+        let first_path = first_pair.0.unwrap().extract::<String>().unwrap();
 
         let first_algorithm = first_pair.1;
         let demultiply =
@@ -90,19 +98,21 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
             )));
         let mut composition = read_png(first_path, demultiply);
         while let Some(pair) = zip_iter.next() {
-            let path = pair.0.extract::<String>().unwrap();
+            let path = pair.0.unwrap().extract::<String>().unwrap();
             let algorithm = pair.1;
 
             let algorithm = BlendAlgorithm::from_str(algorithm).expect(&format!(
                 "Blending algorithm '{}' does not exist",
                 algorithm
             ));
+            println!("Printing from Rust code loop with algorithm {}", algorithm);
             let demultiply = is_algorithm_multiplied(&algorithm);
             let algorithm_fn = get_blending_algorithm(&algorithm);
             let current_layer = read_png(path, demultiply);
             blend_images(&current_layer, &mut composition, &algorithm_fn);
         }
         write_png(out_path, &composition);
+        println!("Printing from Rust code #3");
     }
 
     Ok(())

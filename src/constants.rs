@@ -1,5 +1,5 @@
-pub const COMPILATION_DATE: &str = "Sep 08 2020";
-pub const COMPILATION_TIME: &str = "16:43:46";
+pub const COMPILATION_DATE: &str = "Sep 09 2020";
+pub const COMPILATION_TIME: &str = "09:32:57";
 pub const VERSION: &str = "0.1.0";
 pub const ALGORITHMS: [&'static str; 9] = [
     "alpha",
