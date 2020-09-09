@@ -1,5 +1,5 @@
 pub const COMPILATION_DATE: &str = "Sep 09 2020";
-pub const COMPILATION_TIME: &str = "14:07:18";
+pub const COMPILATION_TIME: &str = "15:02:40";
 pub const VERSION: &str = "0.1.0";
 pub const ALGORITHMS: [&'static str; 9] = ["alpha","multiplicative","source_over","destination_over","first_top","first_bottom","disjoint_over","disjoint_under","disjoint_debug"];
 pub const COMPILER: &str = "rustc";

@@ -38,7 +38,7 @@ pub fn write_png(
     let buff = BufWriter::new(file);
     let encoder = PngEncoder::new_with_quality(buff, compression, filter);
     match encoder.encode(&png, png.width(), png.height(), ColorType::Rgba8) {
-        Ok(_) => println!("Successfully saved {}", &file_out),
+        Ok(_) => (),
         Err(_) => eprintln!("ERROR: writing {}", &file_out),
     }
 }

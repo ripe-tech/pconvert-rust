@@ -13,6 +13,7 @@ use image::png::{CompressionType, FilterType};
 use image::{ImageFormat, Rgba};
 use std::env;
 use std::process;
+use std::str;
 use std::str::FromStr;
 use utils::{read_png, write_png};
 
@@ -372,22 +373,44 @@ pub fn pbenchmark(args: &mut env::Args) {
         }
     };
 
-    let algorithms = constants::ALGORITHMS;
+    // let algorithms = constants::ALGORITHMS;
+    // let compressions = [
+    //     CompressionType::Default,
+    //     CompressionType::Best,
+    //     CompressionType::Fast,
+    //     CompressionType::Huffman,
+    //     CompressionType::Rle,
+    // ];
+    // let filters = [
+    //     FilterType::NoFilter,
+    //     FilterType::Avg,
+    //     FilterType::Paeth,
+    //     FilterType::Sub,
+    //     FilterType::Up,
+    // ];
+
+    //current pconvert benchmark
+    let algorithms = vec![
+        "multiplicative",
+        "source_over",
+        "alpha",
+        "disjoint_over",
+        "disjoint_under",
+    ];
     let compressions = [
         CompressionType::Default,
         CompressionType::Best,
         CompressionType::Fast,
-        CompressionType::Huffman,
-        CompressionType::Rle,
     ];
-    let filters = [
-        FilterType::NoFilter,
-        FilterType::Avg,
-        FilterType::Paeth,
-        FilterType::Sub,
-        FilterType::Up,
-    ];
+    let filters = [FilterType::NoFilter];
 
+    println!(
+        "{:<20}{:<20}{:<20}{:<20}",
+        "Algorithm", "Compression", "Filter", "Times"
+    );
+    println!("{}", str::from_utf8(&vec![b'-'; 100]).unwrap());
+
+    let mut total_benchmark = Benchmark::new();
     for algorithm in algorithms.iter() {
         for compression in compressions.iter() {
             for filter in filters.iter() {
@@ -400,9 +423,19 @@ pub fn pbenchmark(args: &mut env::Args) {
                     *filter,
                     &mut benchmark,
                 );
+                println!(
+                    "{:<20}{:<20}{:<20}{:<20}",
+                    algorithm,
+                    format!("{:#?}", compression),
+                    format!("{:#?}", filter),
+                    &benchmark
+                );
+                total_benchmark = total_benchmark + benchmark;
             }
         }
+        println!();
     }
+    println!("\nTotal time: {:<20}", &total_benchmark);
 }
 
 fn apply_blue_filter(pixel: &mut Rgba<u8>) {
