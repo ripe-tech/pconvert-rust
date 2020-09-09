@@ -485,9 +485,7 @@ fn compose(
     });
 
     if demultiply {
-        benchmark.execute(Benchmark::add_blend_time, || {
-            multiply_image(&mut bot)
-        });
+        benchmark.execute(Benchmark::add_blend_time, || multiply_image(&mut bot));
     }
 
     let mut composition = read_png(format!("{}background_{}.png", dir, background), false);

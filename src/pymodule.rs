@@ -65,7 +65,6 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         algorithms: Option<Vec<String>>,
         is_inline: Option<bool>,
     ) {
-        println!("Printing from Rust code #1");
         let num_images = img_paths.len().unwrap() as usize;
 
         if num_images < 1 {
@@ -90,8 +89,6 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
             algorithms_to_apply = vec!["multiplicative".to_owned(); num_images - 1]
         }
 
-        println!("Printing from Rust code #2");
-
         let mut zip_iter = img_paths.iter().unwrap().zip(algorithms_to_apply.iter());
         let first_pair = zip_iter.next().unwrap();
         let first_path = first_pair.0.unwrap().extract::<String>().unwrap();
@@ -111,7 +108,7 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
                 "Blending algorithm '{}' does not exist",
                 algorithm
             ));
-            println!("Printing from Rust code loop with algorithm {}", algorithm);
+            println!("Using algorithm {}", algorithm);
             let demultiply = is_algorithm_multiplied(&algorithm);
             let algorithm_fn = get_blending_algorithm(&algorithm);
             let current_layer = read_png(path, demultiply);
@@ -123,7 +120,6 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
             CompressionType::Fast,
             FilterType::NoFilter,
         );
-        println!("Printing from Rust code #3");
     }
 
     Ok(())
