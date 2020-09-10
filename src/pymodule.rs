@@ -38,7 +38,6 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         let algorithm =
             BlendAlgorithm::from_str(&algorithm_str).unwrap_or(BlendAlgorithm::Multiplicative);
 
-        //TODO: actually make use of this
         let _is_inline = is_inline.unwrap_or(false);
 
         let demultiply = is_algorithm_multiplied(&algorithm);
@@ -59,7 +58,6 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         algorithms: Option<Vec<String>>,
         is_inline: Option<bool>,
     ) {
-        println!("Printing from Rust code #1");
         let num_images = img_paths.len().unwrap() as usize;
 
         if num_images < 1 {
@@ -67,7 +65,6 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
             std::process::exit(-1);
         }
 
-        //TODO: actually make use of this
         let _is_inline = is_inline.unwrap_or(false);
 
         let algorithms_to_apply: Vec<String>;
@@ -83,8 +80,6 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         } else {
             algorithms_to_apply = vec!["multiplicative".to_owned(); num_images - 1]
         }
-
-        println!("Printing from Rust code #2");
 
         let mut zip_iter = img_paths.iter().unwrap().zip(algorithms_to_apply.iter());
         let first_pair = zip_iter.next().unwrap();
@@ -105,14 +100,12 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
                 "Blending algorithm '{}' does not exist",
                 algorithm
             ));
-            println!("Printing from Rust code loop with algorithm {}", algorithm);
             let demultiply = is_algorithm_multiplied(&algorithm);
             let algorithm_fn = get_blending_algorithm(&algorithm);
             let current_layer = read_png(path, demultiply);
             blend_images(&current_layer, &mut composition, &algorithm_fn);
         }
         write_png(out_path, &composition);
-        println!("Printing from Rust code #3");
     }
 
     Ok(())
