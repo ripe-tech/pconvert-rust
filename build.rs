@@ -35,6 +35,7 @@ fn main() {
     let mut file = OpenOptions::new()
         .truncate(true)
         .write(true)
+        .create(true)
         .open(dest_path)
         .expect(&format!("Can't open '{}'", BUILD_OUT_FILE));
 
