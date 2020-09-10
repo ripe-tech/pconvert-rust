@@ -77,22 +77,6 @@ impl Display for Background {
     }
 }
 
-pub fn get_blending_algorithm(
-    algorithm: &BlendAlgorithm,
-) -> impl Fn((&mut Rgba<u8>, &Rgba<u8>)) -> () {
-    match algorithm {
-        BlendAlgorithm::Alpha => blend_alpha,
-        BlendAlgorithm::Multiplicative => blend_multiplicative,
-        BlendAlgorithm::SourceOver => blend_source_over,
-        BlendAlgorithm::DestinationOver => blend_destination_over,
-        BlendAlgorithm::FirstTop => blend_first_top,
-        BlendAlgorithm::FirstBottom => blend_first_bottom,
-        BlendAlgorithm::DisjointOver => blend_disjoint_over,
-        BlendAlgorithm::DisjointUnder => blend_disjoint_under,
-        BlendAlgorithm::DisjointDebug => blend_disjoint_debug,
-    }
-}
-
 pub fn blend_images(
     top: &ImageBuffer<Rgba<u8>, Vec<u8>>,
     bot: &mut ImageBuffer<Rgba<u8>, Vec<u8>>,
@@ -139,6 +123,22 @@ fn multiply_pixel(pixel: &mut Rgba<u8>) {
     pixel[0] = r;
     pixel[1] = g;
     pixel[2] = b;
+}
+
+pub fn get_blending_algorithm(
+    algorithm: &BlendAlgorithm,
+) -> impl Fn((&mut Rgba<u8>, &Rgba<u8>)) -> () {
+    match algorithm {
+        BlendAlgorithm::Alpha => blend_alpha,
+        BlendAlgorithm::Multiplicative => blend_multiplicative,
+        BlendAlgorithm::SourceOver => blend_source_over,
+        BlendAlgorithm::DestinationOver => blend_destination_over,
+        BlendAlgorithm::FirstTop => blend_first_top,
+        BlendAlgorithm::FirstBottom => blend_first_bottom,
+        BlendAlgorithm::DisjointOver => blend_disjoint_over,
+        BlendAlgorithm::DisjointUnder => blend_disjoint_under,
+        BlendAlgorithm::DisjointDebug => blend_disjoint_debug,
+    }
 }
 
 pub fn is_algorithm_multiplied(algorithm: &BlendAlgorithm) -> bool {
