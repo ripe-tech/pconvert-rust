@@ -389,21 +389,6 @@ pub fn pbenchmark(args: &mut env::Args) {
         FilterType::Up,
     ];
 
-    //current pconvert benchmark
-    // let algorithms = vec![
-    //     "multiplicative",
-    //     "source_over",
-    //     "alpha",
-    //     "disjoint_over",
-    //     "disjoint_under",
-    // ];
-    // let compressions = [
-    //     CompressionType::Default,
-    //     CompressionType::Best,
-    //     CompressionType::Fast,
-    // ];
-    // let filters = [FilterType::NoFilter];
-
     println!(
         "{:<20}{:<20}{:<20}{:<20}",
         "Algorithm", "Compression", "Filter", "Times"
