@@ -31,10 +31,16 @@ install_requires = []
 setup(
     name = "pconvert-rust",
     version = "0.1.0",
+    author = "Platforme International",
+    author_email = "development@platforme.com",
+    description = "PNG Convert Rust",
+    license = "Apache License, Version 2.0",
+    keywords = "pconvert rust fast",
+    url = "https://www.platforme.com",
     packages = ["pconvert_rust"],
-    rust_extensions = [RustExtension("pconvert_rust.pconvert_rust", binding=Binding.PyO3)],
+    rust_extensions = [RustExtension("pconvert_rust.pconvert_rust", binding = Binding.PyO3)],
     install_requires = install_requires,
     setup_requires = setup_requires,
     include_package_data = True,
-    zip_safe = False,
+    zip_safe = False
 )
