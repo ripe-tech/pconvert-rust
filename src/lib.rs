@@ -424,8 +424,18 @@ pub fn pbenchmark(args: &mut env::Args) {
 }
 
 pub fn pversion(_args: &mut env::Args) {
-    println!("P(NG)Convert Rust {}\n", "0.1.0");
-    println!("Copyright (c) 2008-2020 Platforme International Limited All rights reserved.\n");
+    println!(
+        "P(NG)Convert Rust {} ({} {}) [{} {} {} bit] [libpng {}] {:?}",
+        constants::VERSION,
+        constants::COMPILATION_DATE,
+        constants::COMPILATION_TIME,
+        constants::COMPILER,
+        constants::COMPILER_VERSION,
+        constants::PLATFORM_CPU_BITS,
+        constants::LIBPNG_VERSION,
+        constants::FEATURES
+    );
+    println!("Copyright (c) 2008-2020 Platforme International Limited. All rights reserved.");
 }
 
 fn apply_blue_filter(pixel: &mut Rgba<u8>) {
