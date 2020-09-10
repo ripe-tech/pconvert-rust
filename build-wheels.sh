@@ -1,4 +1,6 @@
 #!/bin/bash
+# -*- coding: utf-8 -*-
+
 set -ex
 
 curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain stable -y
