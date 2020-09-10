@@ -10,4 +10,4 @@ constants.rs
 /dist
 /build
 /target
-/src/appier.egg-info
+/pconvert_rust.egg-info
