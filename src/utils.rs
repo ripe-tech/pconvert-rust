@@ -4,28 +4,24 @@ use image::ColorType;
 use image::{open, DynamicImage, ImageBuffer, Rgba};
 use std::fs::File;
 use std::io::BufWriter;
-use std::process;
 
-pub fn read_png(file_in: String, demultiply: bool) -> ImageBuffer<Rgba<u8>, Vec<u8>> {
+pub fn read_png(
+    file_in: String,
+    demultiply: bool,
+) -> Result<ImageBuffer<Rgba<u8>, Vec<u8>>, &'static str> {
     let mut img = match open(&file_in) {
         Ok(file) => match file {
             DynamicImage::ImageRgba8(img) => img,
-            _ => {
-                eprintln!("ERROR: Specified input file must be PNG-RGBA where each component is one byte (RGBA8)");
-                process::exit(-1);
-            }
+            _ => return Err("Unsupported type: PNG files must be RGBA8"),
         },
-        Err(_) => {
-            eprintln!("ERROR: Failure opening file {}", &file_in);
-            process::exit(-1);
-        }
+        Err(err) => return Err(&err.to_string()),
     };
 
     if demultiply {
         demultiply_image(&mut img)
     }
 
-    img
+    Ok(img)
 }
 
 pub fn write_png(
