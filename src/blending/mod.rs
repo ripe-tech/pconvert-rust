@@ -1,16 +1,15 @@
 mod algorithms;
 
-use image::{ImageBuffer, Rgba};
-use std::fmt;
-use std::fmt::{Display, Formatter};
-use std::result;
-use std::str::FromStr;
-
 use algorithms::{
     blend_alpha, blend_destination_over, blend_disjoint_debug, blend_disjoint_over,
     blend_disjoint_under, blend_first_bottom, blend_first_top, blend_multiplicative,
     blend_source_over,
 };
+use image::{ImageBuffer, Rgba};
+use std::fmt;
+use std::fmt::{Display, Formatter};
+use std::result;
+use std::str::FromStr;
 
 pub enum BlendAlgorithm {
     Alpha,
@@ -38,7 +37,7 @@ impl FromStr for BlendAlgorithm {
             "disjoint_over" => Ok(BlendAlgorithm::DisjointOver),
             "disjoint_under" => Ok(BlendAlgorithm::DisjointUnder),
             "disjoint_debug" => Ok(BlendAlgorithm::DisjointDebug),
-            _ => Err(format!("'{}' is not a valid value for BlendAlgorithm", s)),
+            s => Err(s.to_string()),
         }
     }
 }
