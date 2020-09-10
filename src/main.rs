@@ -1,6 +1,7 @@
+use pconvert_rust::errors::PConvertError;
 use std::env;
 
-fn main() {
+fn main() -> Result<(), PConvertError> {
     let mut args = env::args();
 
     // skips program name, facilitating the parsing
@@ -13,9 +14,15 @@ fn main() {
             "compose" => pconvert_rust::pcompose(&mut args),
             "benchmark" => pconvert_rust::pbenchmark(&mut args),
             "version" => pconvert_rust::pversion(&mut args),
-            _ => print_usage(),
+            _ => {
+                print_usage();
+                Ok(())
+            }
         },
-        None => print_usage(),
+        None => {
+            print_usage();
+            Ok(())
+        }
     }
 }
 

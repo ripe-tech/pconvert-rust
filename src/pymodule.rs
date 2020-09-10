@@ -1,6 +1,7 @@
 use super::blending::{
     blend_images, get_blending_algorithm, is_algorithm_multiplied, BlendAlgorithm,
 };
+use super::errors::PConvertError;
 use super::utils::{read_png, write_png};
 use crate::constants;
 use image::png::{CompressionType, FilterType};
@@ -10,7 +11,6 @@ use std::str::FromStr;
 
 #[pymodule]
 fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
-
     m.add("COMPILATION_DATE", constants::COMPILATION_DATE)?;
 
     m.add("COMPILATION_TIME", constants::COMPILATION_TIME)?;
@@ -34,7 +34,7 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         target_path: String,
         algorithm: Option<String>,
         is_inline: Option<bool>,
-    ) {
+    ) -> PyResult<()> {
         let algorithm_str = algorithm.unwrap_or(String::from("multiplicative"));
         let algorithm =
             BlendAlgorithm::from_str(&algorithm_str).unwrap_or(BlendAlgorithm::Multiplicative);
@@ -44,8 +44,8 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         let demultiply = is_algorithm_multiplied(&algorithm);
         let algorithm_fn = get_blending_algorithm(&algorithm);
 
-        let mut bot = read_png(bot_path, demultiply);
-        let top = read_png(top_path, demultiply);
+        let mut bot = read_png(bot_path, demultiply)?;
+        let top = read_png(top_path, demultiply)?;
         blend_images(&top, &mut bot, &algorithm_fn);
 
         write_png(
@@ -53,7 +53,9 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
             &bot,
             CompressionType::Fast,
             FilterType::NoFilter,
-        );
+        )?;
+
+        Ok(())
     }
 
     #[pyfn(m, "blend_multiple")]
@@ -63,12 +65,13 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         algorithm: Option<String>,
         algorithms: Option<Vec<String>>,
         is_inline: Option<bool>,
-    ) {
-        let num_images = img_paths.len().unwrap() as usize;
+    ) -> PyResult<()> {
+        let num_images = img_paths.len()? as usize;
 
         if num_images < 1 {
-            eprintln!("ERROR: Specify at least one image path");
-            std::process::exit(-1);
+            return Err(PyErr::from(PConvertError::ArgumentError(
+                "ArgumentError: 'img_paths' must contain at least one path".to_string(),
+            )));
         }
 
         let _is_inline = is_inline.unwrap_or(false);
@@ -76,8 +79,10 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         let algorithms_to_apply: Vec<String>;
         if let Some(algorithms) = algorithms {
             if algorithms.len() != num_images - 1 {
-                eprintln!("ERROR: The list of algorithms to apply must be of size {} (one per image blending operation)", num_images - 1);
-                std::process::exit(-1);
+                return Err(PyErr::from(PConvertError::ArgumentError(format!(
+                    "ArgumentError: 'algorithms' must be of size {} (one per blending operation)",
+                    num_images - 1
+                ))));
             } else {
                 algorithms_to_apply = algorithms;
             }
@@ -87,29 +92,40 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
             algorithms_to_apply = vec!["multiplicative".to_owned(); num_images - 1]
         }
 
-        let mut zip_iter = img_paths.iter().unwrap().zip(algorithms_to_apply.iter());
+        let mut zip_iter = img_paths.iter()?.zip(algorithms_to_apply.iter());
         let first_pair = zip_iter.next().unwrap();
-        let first_path = first_pair.0.unwrap().extract::<String>().unwrap();
+        let first_path = first_pair.0?.extract::<String>().unwrap();
 
         let first_algorithm = first_pair.1;
-        let demultiply =
-            is_algorithm_multiplied(&BlendAlgorithm::from_str(first_algorithm).expect(&format!(
-                "Blending algorithm '{}' does not exist",
-                first_algorithm
-            )));
-        let mut composition = read_png(first_path, demultiply);
+        let algorithm = match BlendAlgorithm::from_str(first_algorithm) {
+            Ok(algorithm) => algorithm,
+            Err(algorithm) => {
+                return Err(PyErr::from(PConvertError::ArgumentError(format!(
+                    "ArgumentError: invalid algorithm '{}'",
+                    algorithm
+                ))))
+            }
+        };
+        let demultiply = is_algorithm_multiplied(&algorithm);
+
+        let mut composition = read_png(first_path, demultiply)?;
         while let Some(pair) = zip_iter.next() {
-            let path = pair.0.unwrap().extract::<String>().unwrap();
+            let path = pair.0?.extract::<String>()?;
             let algorithm = pair.1;
 
-            let algorithm = BlendAlgorithm::from_str(algorithm).expect(&format!(
-                "Blending algorithm '{}' does not exist",
-                algorithm
-            ));
+            let algorithm = match BlendAlgorithm::from_str(algorithm) {
+                Ok(algorithm) => algorithm,
+                Err(algorithm) => {
+                    return Err(PyErr::from(PConvertError::ArgumentError(format!(
+                        "ArgumentError: invalid algorithm '{}'",
+                        algorithm
+                    ))))
+                }
+            };
 
             let demultiply = is_algorithm_multiplied(&algorithm);
             let algorithm_fn = get_blending_algorithm(&algorithm);
-            let current_layer = read_png(path, demultiply);
+            let current_layer = read_png(path, demultiply)?;
             blend_images(&current_layer, &mut composition, &algorithm_fn);
         }
 
@@ -118,7 +134,9 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
             &composition,
             CompressionType::Fast,
             FilterType::NoFilter,
-        );
+        )?;
+
+        Ok(())
     }
 
     Ok(())

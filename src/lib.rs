@@ -1,6 +1,7 @@
 mod benchmark;
 mod blending;
 mod constants;
+pub mod errors;
 mod pymodule;
 mod utils;
 
@@ -9,15 +10,15 @@ use blending::{
     blend_images, get_blending_algorithm, is_algorithm_multiplied, multiply_image, Background,
     BlendAlgorithm,
 };
+use errors::PConvertError;
 use image::png::{CompressionType, FilterType};
 use image::{ImageFormat, Rgba};
 use std::env;
-use std::process;
 use std::str;
 use std::str::FromStr;
 use utils::{read_png, write_png};
 
-pub fn pcompose(args: &mut env::Args) {
+pub fn pcompose(args: &mut env::Args) -> Result<(), PConvertError> {
     let dir = match args.next() {
         Some(name) => {
             if name.chars().last().unwrap() == '/' {
@@ -27,8 +28,9 @@ pub fn pcompose(args: &mut env::Args) {
             }
         }
         None => {
-            println!("Usage: pconvert-rust compose <directory>");
-            process::exit(0);
+            return Err(PConvertError::ArgumentError(
+                "ArgumentError: 'directory' not specified".to_string(),
+            ))
         }
     };
 
@@ -41,7 +43,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
     compose(
         &dir,
         BlendAlgorithm::Alpha,
@@ -49,7 +51,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
     compose(
         &dir,
         BlendAlgorithm::Alpha,
@@ -57,7 +59,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
     compose(
         &dir,
         BlendAlgorithm::Alpha,
@@ -65,7 +67,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
 
     compose(
         &dir,
@@ -74,7 +76,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
     compose(
         &dir,
         BlendAlgorithm::Multiplicative,
@@ -82,7 +84,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
     compose(
         &dir,
         BlendAlgorithm::Multiplicative,
@@ -90,7 +92,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
     compose(
         &dir,
         BlendAlgorithm::Multiplicative,
@@ -98,7 +100,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
 
     compose(
         &dir,
@@ -107,7 +109,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
     compose(
         &dir,
         BlendAlgorithm::SourceOver,
@@ -115,7 +117,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
     compose(
         &dir,
         BlendAlgorithm::SourceOver,
@@ -123,7 +125,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
     compose(
         &dir,
         BlendAlgorithm::SourceOver,
@@ -131,7 +133,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
 
     compose(
         &dir,
@@ -140,7 +142,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
     compose(
         &dir,
         BlendAlgorithm::DestinationOver,
@@ -148,7 +150,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
     compose(
         &dir,
         BlendAlgorithm::DestinationOver,
@@ -156,7 +158,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
     compose(
         &dir,
         BlendAlgorithm::DestinationOver,
@@ -164,7 +166,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
 
     compose(
         &dir,
@@ -173,7 +175,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
     compose(
         &dir,
         BlendAlgorithm::FirstTop,
@@ -181,7 +183,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
     compose(
         &dir,
         BlendAlgorithm::FirstTop,
@@ -189,7 +191,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
     compose(
         &dir,
         BlendAlgorithm::FirstTop,
@@ -197,7 +199,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
 
     compose(
         &dir,
@@ -206,7 +208,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
     compose(
         &dir,
         BlendAlgorithm::FirstBottom,
@@ -214,7 +216,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
     compose(
         &dir,
         BlendAlgorithm::FirstBottom,
@@ -222,7 +224,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
     compose(
         &dir,
         BlendAlgorithm::FirstBottom,
@@ -230,7 +232,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
 
     compose(
         &dir,
@@ -239,7 +241,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
     compose(
         &dir,
         BlendAlgorithm::DisjointOver,
@@ -247,7 +249,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
     compose(
         &dir,
         BlendAlgorithm::DisjointOver,
@@ -255,7 +257,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
     compose(
         &dir,
         BlendAlgorithm::DisjointOver,
@@ -263,7 +265,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
 
     compose(
         &dir,
@@ -272,7 +274,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
     compose(
         &dir,
         BlendAlgorithm::DisjointUnder,
@@ -280,7 +282,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
     compose(
         &dir,
         BlendAlgorithm::DisjointUnder,
@@ -288,7 +290,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
     compose(
         &dir,
         BlendAlgorithm::DisjointUnder,
@@ -296,7 +298,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
 
     compose(
         &dir,
@@ -305,7 +307,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
     compose(
         &dir,
         BlendAlgorithm::DisjointDebug,
@@ -313,7 +315,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
     compose(
         &dir,
         BlendAlgorithm::DisjointDebug,
@@ -321,7 +323,7 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
     compose(
         &dir,
         BlendAlgorithm::DisjointDebug,
@@ -329,36 +331,42 @@ pub fn pcompose(args: &mut env::Args) {
         CompressionType::Fast,
         FilterType::NoFilter,
         &mut benchmark,
-    );
+    )?;
+
+    Ok(())
 }
 
-pub fn pconvert(args: &mut env::Args) {
+pub fn pconvert(args: &mut env::Args) -> Result<(), PConvertError> {
     let file_in = match args.next() {
         Some(name) => name,
         None => {
-            println!("Missing input file.\nUsage: pconvert convert <file_in> <file_out>");
-            process::exit(0);
+            return Err(PConvertError::ArgumentError(
+                "ArgumentError: 'file_in' not specified".to_string(),
+            ))
         }
     };
 
     let file_out = match args.next() {
         Some(name) => name,
         None => {
-            println!("Missing output path.\nUsage: pconvert convert <file_in> <file_out>");
-            process::exit(0);
+            return Err(PConvertError::ArgumentError(
+                "ArgumentError: 'file_out' not specified".to_string(),
+            ))
         }
     };
 
-    let mut img = read_png(file_in, false);
+    let mut img = read_png(file_in, false)?;
 
-    // turns the image blueish (blue filter)"
-    img.pixels_mut().for_each(|x| apply_blue_filter(x));
+    for pixel in img.pixels_mut() {
+        apply_blue_filter(pixel);
+    }
 
-    img.save_with_format(file_out, ImageFormat::Png)
-        .expect("Failure saving modified PNG");
+    img.save_with_format(file_out, ImageFormat::Png)?;
+
+    Ok(())
 }
 
-pub fn pbenchmark(args: &mut env::Args) {
+pub fn pbenchmark(args: &mut env::Args) -> Result<(), PConvertError> {
     let dir = match args.next() {
         Some(name) => {
             if name.chars().last().unwrap() == '/' {
@@ -368,8 +376,9 @@ pub fn pbenchmark(args: &mut env::Args) {
             }
         }
         None => {
-            println!("Usage: pconvert-rust benchmark <directory>");
-            process::exit(0);
+            return Err(PConvertError::ArgumentError(
+                "ArgumentError: 'directory' not specified".to_string(),
+            ))
         }
     };
 
@@ -407,7 +416,7 @@ pub fn pbenchmark(args: &mut env::Args) {
                     *compression,
                     *filter,
                     &mut benchmark,
-                );
+                )?;
                 println!(
                     "{:<20}{:<20}{:<20}{:<20}",
                     algorithm,
@@ -421,11 +430,13 @@ pub fn pbenchmark(args: &mut env::Args) {
         println!();
     }
     println!("\nTotal time: {:<20}", &total_benchmark);
+    Ok(())
 }
 
-pub fn pversion(_args: &mut env::Args) {
+pub fn pversion(_args: &mut env::Args) -> Result<(), PConvertError> {
     println!("P(NG)Convert Rust {}\n", "0.1.0");
     println!("Copyright (c) 2008-2020 Platforme International Limited All rights reserved.\n");
+    Ok(())
 }
 
 fn apply_blue_filter(pixel: &mut Rgba<u8>) {
@@ -441,18 +452,18 @@ fn compose(
     compression: CompressionType,
     filter: FilterType,
     benchmark: &mut Benchmark,
-) {
+) -> Result<(), PConvertError> {
     let demultiply = is_algorithm_multiplied(&algorithm);
 
     let mut bot = benchmark.execute(Benchmark::add_read_png_time, || {
         read_png(format!("{}sole.png", dir), demultiply)
-    });
+    })?;
 
     let algorithm_fn = get_blending_algorithm(&algorithm);
 
     let top = benchmark.execute(Benchmark::add_read_png_time, || {
         read_png(format!("{}back.png", dir), demultiply)
-    });
+    })?;
 
     benchmark.execute(Benchmark::add_blend_time, || {
         blend_images(&top, &mut bot, &algorithm_fn)
@@ -460,7 +471,7 @@ fn compose(
 
     let top = benchmark.execute(Benchmark::add_read_png_time, || {
         read_png(format!("{}front.png", dir), demultiply)
-    });
+    })?;
 
     benchmark.execute(Benchmark::add_blend_time, || {
         blend_images(&top, &mut bot, &algorithm_fn)
@@ -468,7 +479,7 @@ fn compose(
 
     let top = benchmark.execute(Benchmark::add_read_png_time, || {
         read_png(format!("{}shoelace.png", dir), demultiply)
-    });
+    })?;
 
     benchmark.execute(Benchmark::add_blend_time, || {
         blend_images(&top, &mut bot, &algorithm_fn)
@@ -478,7 +489,10 @@ fn compose(
         benchmark.execute(Benchmark::add_blend_time, || multiply_image(&mut bot));
     }
 
-    let mut composition = read_png(format!("{}background_{}.png", dir, background), false);
+    let mut composition = benchmark.execute(Benchmark::add_read_png_time, || {
+        read_png(format!("{}background_{}.png", dir, background), false)
+    })?;
+
     benchmark.execute(Benchmark::add_blend_time, || {
         blend_images(&bot, &mut composition, &algorithm_fn)
     });
@@ -489,5 +503,7 @@ fn compose(
     );
     benchmark.execute(Benchmark::add_write_png_time, || {
         write_png(file_out, &composition, compression, filter)
-    });
+    })?;
+
+    Ok(())
 }
