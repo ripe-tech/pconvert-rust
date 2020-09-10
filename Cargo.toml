@@ -1,11 +1,22 @@
 [package]
-name = "pconvert-rust"
+name = "pconvert_rust"
 version = "0.1.0"
 authors = ["Platforme International"]
 edition = "2018"
 
+[lib]
+name = "pconvert_rust"
+crate-type = ["rlib", "cdylib"]
+
 [dependencies]
 image = "0.23.9"
+
+[dependencies.pyo3]
+version = "0.11.1"
+features = ["extension-module"]
+
+[build-dependencies]
+chrono = "0.4.13"
 
 [profile.dev]
 opt-level = 3
