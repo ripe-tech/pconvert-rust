@@ -10,20 +10,16 @@ fn main() -> Result<(), PConvertError> {
 
     match args.next() {
         Some(action) => match &action[..] {
-            "convert" => pconvert_rust::pconvert(&mut args),
-            "compose" => pconvert_rust::pcompose(&mut args),
-            "benchmark" => pconvert_rust::pbenchmark(&mut args),
-            "version" => pconvert_rust::pversion(),
-            _ => {
-                print_usage();
-                Ok(())
-            }
+            "convert" => pconvert_rust::pconvert(&mut args)?,
+            "compose" => pconvert_rust::pcompose(&mut args)?,
+            "benchmark" => pconvert_rust::pbenchmark(&mut args)?,
+            "version" => pconvert_rust::pversion()?,
+            _ => print_usage(),
         },
-        None => {
-            print_usage();
-            Ok(())
-        }
-    }
+        None => print_usage(),
+    };
+
+    Ok(())
 }
 
 fn print_usage() {
