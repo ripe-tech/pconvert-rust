@@ -8,20 +8,34 @@ use std::str;
 const BUILD_OUT_FILE: &str = "constants.rs";
 const SOURCE_DIR: &str = "./src";
 
-/*
-Build script (https://doc.rust-lang.org/cargo/reference/build-scripts.html)
-
-This file is executed before the remaining compilation.
-Here we export metadata constants to a `constants.rs` file which is then imported and used by the remaining crate.
-
-For example, while in C you may have a `__DATE__` preprocessor macro to save the compilation date, since there is none in Rust,
-we do so with this script.
-*/
+/// Build script (https://doc.rust-lang.org/cargo/reference/build-scripts.html)
+/// This script is executed as the first step in the compilation process.
+/// Here we export metadata constants to a `constants.rs` file which is then imported and used by the remaining crate.
+///
+/// # Examples
+///
+/// In C you can use the preprocessor macro `__DATE__` to save the compilation date like:
+///
+/// ```c
+/// #define PCONVERT_COMPILATION_DATE __DATE__
+/// ```
+///
+/// Rust does not have such preprocessor macros, so we use this script and do:
+///
+/// ```rust
+/// let now_utc = chrono::Utc::now();
+/// write_str_constant_to_file(
+///     &mut file,
+///     "COMPILATION_DATE",
+///     &format!("{}", now_utc.format("%b %d %Y")),
+/// );
+/// ```
 fn main() {
     let dest_path = Path::new(SOURCE_DIR).join(Path::new(BUILD_OUT_FILE));
     let mut file = OpenOptions::new()
         .truncate(true)
         .write(true)
+        .create(true)
         .open(dest_path)
         .expect(&format!("Can't open '{}'", BUILD_OUT_FILE));
 
