@@ -1,5 +1,5 @@
 [package]
-name = "pconvert_rust"
+name = "pconvert-rust"
 version = "0.1.0"
 authors = ["Platforme International"]
 edition = "2018"

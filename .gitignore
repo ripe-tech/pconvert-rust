@@ -4,3 +4,9 @@ constants.rs
 /target
 
 result*
+
+*.egg-info
+
+__pycache__
+
+build
