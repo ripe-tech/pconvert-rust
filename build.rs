@@ -75,17 +75,17 @@ fn main() {
 
     write_str_constant_to_file(&mut file, "COMPILER", "rustc");
 
-    let mut compiler = Command::new("rustc")
+    let mut compiler_version = Command::new("rustc")
         .arg("--version")
         .output()
         .ok()
         .and_then(|output| String::from_utf8(output.stdout).ok())
         .unwrap_or("UNKNOWN".to_string());
 
-    if compiler.ends_with("\n") {
-        compiler.pop();
+    if compiler_version.ends_with("\n") {
+        compiler_version.pop();
     }
-    write_str_constant_to_file(&mut file, "COMPILER_VERSION", &compiler);
+    write_str_constant_to_file(&mut file, "COMPILER_VERSION", &compiler_version);
 
     write_str_constant_to_file(&mut file, "LIBPNG_VERSION", "UNKNOWN");
 

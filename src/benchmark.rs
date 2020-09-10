@@ -27,9 +27,9 @@ impl Benchmark {
         H: FnOnce(&mut Self, u128),
     {
         let start = Instant::now();
-        let r = target_fn();
+        let result = target_fn();
         update_fn(self, start.elapsed().as_millis());
-        r
+        result
     }
 
     pub fn add_blend_time(benchmark: &mut Benchmark, blend_time: u128) {
