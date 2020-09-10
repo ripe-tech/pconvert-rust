@@ -36,8 +36,7 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         is_inline: Option<bool>,
     ) -> PyResult<()> {
         let algorithm_str = algorithm.unwrap_or(String::from("multiplicative"));
-        let algorithm =
-            BlendAlgorithm::from_str(&algorithm_str).unwrap_or(BlendAlgorithm::Multiplicative);
+        let algorithm = get_input_algorithm(&algorithm_str)?;
 
         let _is_inline = is_inline.unwrap_or(false);
 
@@ -97,32 +96,14 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         let first_path = first_pair.0?.extract::<String>().unwrap();
 
         let first_algorithm = first_pair.1;
-        let algorithm = match BlendAlgorithm::from_str(first_algorithm) {
-            Ok(algorithm) => algorithm,
-            Err(algorithm) => {
-                return Err(PyErr::from(PConvertError::ArgumentError(format!(
-                    "ArgumentError: invalid algorithm '{}'",
-                    algorithm
-                ))))
-            }
-        };
+        let algorithm = get_input_algorithm(first_algorithm)?;
         let demultiply = is_algorithm_multiplied(&algorithm);
 
         let mut composition = read_png(first_path, demultiply)?;
         while let Some(pair) = zip_iter.next() {
             let path = pair.0?.extract::<String>()?;
             let algorithm = pair.1;
-
-            let algorithm = match BlendAlgorithm::from_str(algorithm) {
-                Ok(algorithm) => algorithm,
-                Err(algorithm) => {
-                    return Err(PyErr::from(PConvertError::ArgumentError(format!(
-                        "ArgumentError: invalid algorithm '{}'",
-                        algorithm
-                    ))))
-                }
-            };
-
+            let algorithm = get_input_algorithm(algorithm)?;
             let demultiply = is_algorithm_multiplied(&algorithm);
             let algorithm_fn = get_blending_algorithm(&algorithm);
             let current_layer = read_png(path, demultiply)?;
@@ -140,4 +121,14 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
     }
 
     Ok(())
+}
+
+fn get_input_algorithm(algorithm: &String) -> Result<BlendAlgorithm, PyErr> {
+    match BlendAlgorithm::from_str(algorithm) {
+        Ok(algorithm) => Ok(algorithm),
+        Err(algorithm) => Err(PyErr::from(PConvertError::ArgumentError(format!(
+            "ArgumentError: invalid algorithm '{}'",
+            algorithm
+        )))),
+    }
 }

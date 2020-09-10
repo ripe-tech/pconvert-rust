@@ -27,7 +27,5 @@ fn main() -> Result<(), PConvertError> {
 }
 
 fn print_usage() {
-    println!(
-        "Usage: pconvert-rust <command> [args...]\nwhere command can be one of the following: compose, convert, benchmark, opencl, version"
-    );
+    println!("Usage: pconvert-rust <command> [args...]\nwhere command can be one of the following: compose, convert, benchmark, opencl, version");
 }
