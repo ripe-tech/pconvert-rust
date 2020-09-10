@@ -91,7 +91,11 @@ fn main() {
 
     write_vec_constant_to_file(&mut file, "FEATURES", vec!["cpu", "python"]);
 
-    write_str_constant_to_file(&mut file, "PLATFORM_CPU_BITS", &(std::mem::size_of::<usize>() * 8).to_string());
+    write_str_constant_to_file(
+        &mut file,
+        "PLATFORM_CPU_BITS",
+        &(std::mem::size_of::<usize>() * 8).to_string(),
+    );
 }
 
 fn write_str_constant_to_file(file: &mut File, key: &str, val: &str) {
