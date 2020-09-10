@@ -9,7 +9,7 @@ use std::str::FromStr;
 
 #[pymodule]
 fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
-    /* Module exported constants */
+
     m.add("COMPILATION_DATE", constants::COMPILATION_DATE)?;
 
     m.add("COMPILATION_TIME", constants::COMPILATION_TIME)?;
