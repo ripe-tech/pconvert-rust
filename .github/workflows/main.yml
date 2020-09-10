@@ -11,4 +11,5 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - run: cargo build
+      - run: cargo run version
       - run: cargo run benchmark assets/demo/

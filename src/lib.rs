@@ -438,6 +438,11 @@ pub fn pbenchmark(args: &mut env::Args) {
     println!("\nTotal time: {:<20}", &total_benchmark);
 }
 
+pub fn pversion(_args: &mut env::Args) {
+    println!("P(NG)Convert Rust {}\n", "0.1.0");
+    println!("Copyright (c) 2008-2020 Platforme International Limited All rights reserved.\n");
+}
+
 fn apply_blue_filter(pixel: &mut Rgba<u8>) {
     // sets red value to 0 and green value to the blue one (blue filter effect)
     pixel[0] = 0;
