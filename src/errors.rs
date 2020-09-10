@@ -14,15 +14,15 @@ pub enum PConvertError {
 }
 
 impl Display for PConvertError {
-    fn fmt(&self, f: &mut Formatter) -> Result {
+    fn fmt(&self, formatter: &mut Formatter) -> Result {
         match &*self {
             PConvertError::UnsupportedImageTypeError => write!(
-                f,
+                formatter,
                 "UnsupportedImageTypeError: images should be PNGs encoded as RGBA8"
             ),
-            PConvertError::ImageLibError(err) => err.fmt(f),
-            PConvertError::IOError(err) => err.fmt(f),
-            PConvertError::ArgumentError(msg) => write!(f, "{}", msg),
+            PConvertError::ImageLibError(err) => err.fmt(formatter),
+            PConvertError::IOError(err) => err.fmt(formatter),
+            PConvertError::ArgumentError(msg) => write!(formatter, "{}", msg),
         }
     }
 }
