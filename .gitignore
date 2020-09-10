@@ -1,16 +1,14 @@
+
+*.pyc
+
+.DS_Store
+
 Cargo.lock
 constants.rs
 
+/.vscode/settings.json
+
+/dist
+/build
 /target
-
-result*
-
-*.egg-info
-
-__pycache__
-
-build
-
-dist
-
-*.so
+/src/appier.egg-info
