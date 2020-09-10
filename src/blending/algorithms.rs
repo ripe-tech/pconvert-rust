@@ -173,7 +173,6 @@ pub fn blend_first_bottom((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
     bot_pixel[3] = a;
 }
 
-//TODO: debug different result from original pconvert
 #[inline]
 pub fn blend_disjoint_over((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
     let (rb, gb, bb, ab) = (bot_pixel[0], bot_pixel[1], bot_pixel[2], bot_pixel[3]);

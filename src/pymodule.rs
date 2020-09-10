@@ -10,7 +10,7 @@ use std::str::FromStr;
 
 #[pymodule]
 fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
-    /* Module exported constants */
+
     m.add("COMPILATION_DATE", constants::COMPILATION_DATE)?;
 
     m.add("COMPILATION_TIME", constants::COMPILATION_TIME)?;
@@ -39,7 +39,6 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         let algorithm =
             BlendAlgorithm::from_str(&algorithm_str).unwrap_or(BlendAlgorithm::Multiplicative);
 
-        //TODO: actually make use of this
         let _is_inline = is_inline.unwrap_or(false);
 
         let demultiply = is_algorithm_multiplied(&algorithm);
@@ -72,7 +71,6 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
             std::process::exit(-1);
         }
 
-        //TODO: actually make use of this
         let _is_inline = is_inline.unwrap_or(false);
 
         let algorithms_to_apply: Vec<String>;
@@ -108,12 +106,13 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
                 "Blending algorithm '{}' does not exist",
                 algorithm
             ));
-            println!("Using algorithm {}", algorithm);
+
             let demultiply = is_algorithm_multiplied(&algorithm);
             let algorithm_fn = get_blending_algorithm(&algorithm);
             let current_layer = read_png(path, demultiply);
             blend_images(&current_layer, &mut composition, &algorithm_fn);
         }
+
         write_png(
             out_path,
             &composition,

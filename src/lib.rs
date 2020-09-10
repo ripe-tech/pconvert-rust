@@ -389,21 +389,6 @@ pub fn pbenchmark(args: &mut env::Args) {
         FilterType::Up,
     ];
 
-    //current pconvert benchmark
-    // let algorithms = vec![
-    //     "multiplicative",
-    //     "source_over",
-    //     "alpha",
-    //     "disjoint_over",
-    //     "disjoint_under",
-    // ];
-    // let compressions = [
-    //     CompressionType::Default,
-    //     CompressionType::Best,
-    //     CompressionType::Fast,
-    // ];
-    // let filters = [FilterType::NoFilter];
-
     println!(
         "{:<20}{:<20}{:<20}{:<20}",
         "Algorithm", "Compression", "Filter", "Times"
@@ -436,6 +421,11 @@ pub fn pbenchmark(args: &mut env::Args) {
         println!();
     }
     println!("\nTotal time: {:<20}", &total_benchmark);
+}
+
+pub fn pversion(_args: &mut env::Args) {
+    println!("P(NG)Convert Rust {}\n", "0.1.0");
+    println!("Copyright (c) 2008-2020 Platforme International Limited All rights reserved.\n");
 }
 
 fn apply_blue_filter(pixel: &mut Rgba<u8>) {

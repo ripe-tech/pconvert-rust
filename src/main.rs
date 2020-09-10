@@ -12,6 +12,7 @@ fn main() {
             "convert" => pconvert_rust::pconvert(&mut args),
             "compose" => pconvert_rust::pcompose(&mut args),
             "benchmark" => pconvert_rust::pbenchmark(&mut args),
+            "version" => pconvert_rust::pversion(&mut args),
             _ => print_usage(),
         },
         None => print_usage(),
