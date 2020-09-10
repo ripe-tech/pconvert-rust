@@ -433,9 +433,19 @@ pub fn pbenchmark(args: &mut env::Args) -> Result<(), PConvertError> {
     Ok(())
 }
 
-pub fn pversion(_args: &mut env::Args) -> Result<(), PConvertError> {
-    println!("P(NG)Convert Rust {}\n", "0.1.0");
-    println!("Copyright (c) 2008-2020 Platforme International Limited All rights reserved.\n");
+pub fn pversion() -> Result<(), PConvertError> {
+    println!(
+        "P(NG)Convert Rust {} ({} {}) [{} {} {} bit] [libpng {}] {:?}",
+        constants::VERSION,
+        constants::COMPILATION_DATE,
+        constants::COMPILATION_TIME,
+        constants::COMPILER,
+        constants::COMPILER_VERSION,
+        constants::PLATFORM_CPU_BITS,
+        constants::LIBPNG_VERSION,
+        constants::FEATURES
+    );
+    println!("Copyright (c) 2008-2020 Platforme International Limited. All rights reserved.");
     Ok(())
 }
 
