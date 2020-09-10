@@ -1,6 +1,13 @@
+*.pyc
+
+.DS_Store
+
 Cargo.lock
 constants.rs
 
-/target
+/.vscode/settings.json
 
-result*
+/dist
+/build
+/target
+/pconvert_rust.egg-info
