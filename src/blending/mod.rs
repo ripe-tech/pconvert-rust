@@ -2,8 +2,8 @@ mod algorithms;
 
 use algorithms::{
     blend_alpha, blend_destination_over, blend_disjoint_debug, blend_disjoint_over,
-    blend_disjoint_under, blend_first_bottom, blend_first_top, blend_multiplicative,
-    blend_source_over,
+    blend_disjoint_under, blend_first_bottom, blend_first_top, blend_mask_top,
+    blend_multiplicative, blend_source_over,
 };
 use image::{ImageBuffer, Rgba};
 use std::fmt;
@@ -21,6 +21,7 @@ pub enum BlendAlgorithm {
     DisjointOver,
     DisjointUnder,
     DisjointDebug,
+    MaskTop,
 }
 
 impl FromStr for BlendAlgorithm {
@@ -37,6 +38,7 @@ impl FromStr for BlendAlgorithm {
             "disjoint_over" => Ok(BlendAlgorithm::DisjointOver),
             "disjoint_under" => Ok(BlendAlgorithm::DisjointUnder),
             "disjoint_debug" => Ok(BlendAlgorithm::DisjointDebug),
+            "mask_top" => Ok(BlendAlgorithm::MaskTop),
             s => Err(s.to_string()),
         }
     }
@@ -54,6 +56,7 @@ impl Display for BlendAlgorithm {
             BlendAlgorithm::DisjointOver => write!(f, "disjoint_over"),
             BlendAlgorithm::DisjointUnder => write!(f, "disjoint_under"),
             BlendAlgorithm::DisjointDebug => write!(f, "disjoint_debug"),
+            BlendAlgorithm::MaskTop => write!(f, "mask_top"),
         }
     }
 }
@@ -137,6 +140,7 @@ pub fn get_blending_algorithm(
         BlendAlgorithm::DisjointOver => blend_disjoint_over,
         BlendAlgorithm::DisjointUnder => blend_disjoint_under,
         BlendAlgorithm::DisjointDebug => blend_disjoint_debug,
+        BlendAlgorithm::MaskTop => blend_mask_top,
     }
 }
 
@@ -151,5 +155,6 @@ pub fn is_algorithm_multiplied(algorithm: &BlendAlgorithm) -> bool {
         BlendAlgorithm::DisjointOver => true,
         BlendAlgorithm::DisjointUnder => true,
         BlendAlgorithm::DisjointDebug => true,
+        BlendAlgorithm::MaskTop => false,
     }
 }
