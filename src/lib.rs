@@ -333,6 +333,39 @@ pub fn pcompose(args: &mut env::Args) -> Result<(), PConvertError> {
         &mut benchmark,
     )?;
 
+    compose(
+        &dir,
+        BlendAlgorithm::MaskTop,
+        Background::Alpha,
+        CompressionType::Fast,
+        FilterType::NoFilter,
+        &mut benchmark,
+    )?;
+    compose(
+        &dir,
+        BlendAlgorithm::MaskTop,
+        Background::White,
+        CompressionType::Fast,
+        FilterType::NoFilter,
+        &mut benchmark,
+    )?;
+    compose(
+        &dir,
+        BlendAlgorithm::MaskTop,
+        Background::Blue,
+        CompressionType::Fast,
+        FilterType::NoFilter,
+        &mut benchmark,
+    )?;
+    compose(
+        &dir,
+        BlendAlgorithm::MaskTop,
+        Background::Texture,
+        CompressionType::Fast,
+        FilterType::NoFilter,
+        &mut benchmark,
+    )?;
+
     Ok(())
 }
 

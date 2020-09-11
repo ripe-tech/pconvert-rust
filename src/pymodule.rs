@@ -91,19 +91,16 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
             algorithms_to_apply = vec!["multiplicative".to_owned(); num_images - 1]
         }
 
-        let mut zip_iter = img_paths.iter()?.zip(algorithms_to_apply.iter());
-        let first_pair = zip_iter.next().unwrap();
-        let first_path = first_pair.0?.extract::<String>().unwrap();
-
-        let first_algorithm = first_pair.1;
-        let algorithm = get_input_algorithm(first_algorithm)?;
-        let demultiply = is_algorithm_multiplied(&algorithm);
-
-        let mut composition = read_png(first_path, demultiply)?;
+        let mut img_paths_iter = img_paths.iter()?;
+        let first_algorithm = get_input_algorithm(&algorithms_to_apply[0])?;
+        let mut composition = read_png(
+            img_paths_iter.next().unwrap()?.to_string(),
+            is_algorithm_multiplied(&first_algorithm),
+        )?;
+        let mut zip_iter = img_paths_iter.zip(algorithms_to_apply.iter());
         while let Some(pair) = zip_iter.next() {
             let path = pair.0?.extract::<String>()?;
-            let algorithm = pair.1;
-            let algorithm = get_input_algorithm(algorithm)?;
+            let algorithm = get_input_algorithm(pair.1)?;
             let demultiply = is_algorithm_multiplied(&algorithm);
             let algorithm_fn = get_blending_algorithm(&algorithm);
             let current_layer = read_png(path, demultiply)?;
