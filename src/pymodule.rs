@@ -133,18 +133,21 @@ fn validate_algorithm(algorithm: &String) -> Result<BlendAlgorithm, PyErr> {
 
 fn validate_algorithms(
     algorithms: &PySequence,
-) -> Result<Vec<(BlendAlgorithm, BlendAlgorithmParams)>, PyErr> {
-    let result = Vec::new();
+) -> Result<Vec<(BlendAlgorithm, Option<BlendAlgorithmParams>)>, PyErr> {
+    let mut result = Vec::new();
 
     for i in 0..algorithms.len()? {
 
         let element = algorithms.get_item(i)?;
 
         if let Ok(string) = element.cast_as::<PyString>() {
-            println!("Got string {}", string);
-            validate_algorithm(string.to_string());
+            println!("Got string {}", string); //TODO: remove
+            let algorithm = validate_algorithm(&string.to_string()?.into_owned())?;
+            result.push((algorithm, None));
         } else if let Ok(tuple) = element.cast_as::<PyTuple>() {
-            println!("Got tuple {}", tuple);
+            println!("Got tuple {}", tuple); //TODO: remove
+            let algorithm = validate_algorithm(&tuple.get_item(0).to_string())?;
+            //TODO get the other variables
         }
     }
 
