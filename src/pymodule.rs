@@ -95,10 +95,10 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
 
         let mut img_paths_iter = img_paths.iter()?;
         let first_algorithm = validate_algorithm(&algorithms_to_apply[0])?;
-        let mut composition = read_png(
-            img_paths_iter.next().unwrap()?.to_string(),
-            is_algorithm_multiplied(&first_algorithm),
-        )?;
+
+        let first_path = img_paths_iter.next().unwrap()?.to_string();
+        let first_demultiply = is_algorithm_multiplied(&first_algorithm);
+        let mut composition = read_png(first_path, first_demultiply)?;
         let mut zip_iter = img_paths_iter.zip(algorithms_to_apply.iter());
         while let Some(pair) = zip_iter.next() {
             let path = pair.0?.extract::<String>()?;
