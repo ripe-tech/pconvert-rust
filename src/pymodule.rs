@@ -148,6 +148,13 @@ fn validate_algorithms(
             println!("Got tuple {}", tuple); //TODO: remove
             let algorithm = validate_algorithm(&tuple.get_item(0).to_string())?;
             //TODO get the other variables
+            let mut params = BlendAlgorithmParams::new();
+            for pair in tuple.iter() {
+                let key_value = pair.cast_as::<PyTuple>()?;
+                params.insert(key_value.get_item(0).to_string(), key_value.get_item(1).to_string());
+            }
+            let algorithm_config = (algorithm, Some(params));
+            result.push(algorithm_config);
         }
     }
 
