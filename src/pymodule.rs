@@ -35,8 +35,8 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         algorithm: Option<String>,
         is_inline: Option<bool>,
     ) -> PyResult<()> {
-        let algorithm_str = algorithm.unwrap_or(String::from("multiplicative"));
-        let algorithm = get_input_algorithm(&algorithm_str)?;
+        let algorithm = algorithm.unwrap_or(String::from("multiplicative"));
+        let algorithm = validate_algorithm(&algorithm)?;
 
         let _is_inline = is_inline.unwrap_or(false);
 
@@ -62,7 +62,7 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         img_paths: &PySequence,
         out_path: String,
         algorithm: Option<String>,
-        algorithms: Option<Vec<String>>,
+        algorithms: Option<&PySequence>,
         is_inline: Option<bool>,
     ) -> PyResult<()> {
         let num_images = img_paths.len()? as usize;
@@ -77,13 +77,15 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
 
         let algorithms_to_apply: Vec<String>;
         if let Some(algorithms) = algorithms {
-            if algorithms.len() != num_images - 1 {
+            if algorithms.len()? != num_images as isize - 1 {
                 return Err(PyErr::from(PConvertError::ArgumentError(format!(
                     "ArgumentError: 'algorithms' must be of size {} (one per blending operation)",
                     num_images - 1
                 ))));
             } else {
-                algorithms_to_apply = algorithms;
+                // algorithms_to_apply = algorithms;
+                algorithms_to_apply = vec!["multiplicative".to_owned(); num_images - 1]
+                // TODO REMOVE test
             }
         } else if let Some(algorithm) = algorithm {
             algorithms_to_apply = vec![algorithm; num_images - 1]
@@ -92,7 +94,7 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         }
 
         let mut img_paths_iter = img_paths.iter()?;
-        let first_algorithm = get_input_algorithm(&algorithms_to_apply[0])?;
+        let first_algorithm = validate_algorithm(&algorithms_to_apply[0])?;
         let mut composition = read_png(
             img_paths_iter.next().unwrap()?.to_string(),
             is_algorithm_multiplied(&first_algorithm),
@@ -100,7 +102,7 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         let mut zip_iter = img_paths_iter.zip(algorithms_to_apply.iter());
         while let Some(pair) = zip_iter.next() {
             let path = pair.0?.extract::<String>()?;
-            let algorithm = get_input_algorithm(pair.1)?;
+            let algorithm = validate_algorithm(pair.1)?;
             let demultiply = is_algorithm_multiplied(&algorithm);
             let algorithm_fn = get_blending_algorithm(&algorithm);
             let current_layer = read_png(path, demultiply)?;
@@ -120,7 +122,7 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
     Ok(())
 }
 
-fn get_input_algorithm(algorithm: &String) -> Result<BlendAlgorithm, PyErr> {
+fn validate_algorithm(algorithm: &String) -> Result<BlendAlgorithm, PyErr> {
     match BlendAlgorithm::from_str(algorithm) {
         Ok(algorithm) => Ok(algorithm),
         Err(algorithm) => Err(PyErr::from(PConvertError::ArgumentError(format!(
