@@ -1,8 +1,12 @@
+use super::BlendAlgorithmParams;
 use crate::utils::{max, min};
 use image::Rgba;
 
 #[inline]
-pub fn blend_alpha((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
+pub fn blend_alpha(
+    (bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>),
+    _params: &Option<BlendAlgorithmParams>,
+) {
     let (rb, gb, bb, ab) = (bot_pixel[0], bot_pixel[1], bot_pixel[2], bot_pixel[3]);
     let (rt, gt, bt, at) = (top_pixel[0], top_pixel[1], top_pixel[2], top_pixel[3]);
 
@@ -38,7 +42,10 @@ pub fn blend_alpha((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
 }
 
 #[inline]
-pub fn blend_multiplicative((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
+pub fn blend_multiplicative(
+    (bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>),
+    _params: &Option<BlendAlgorithmParams>,
+) {
     let (rb, gb, bb, ab) = (bot_pixel[0], bot_pixel[1], bot_pixel[2], bot_pixel[3]);
     let (rt, gt, bt, at) = (top_pixel[0], top_pixel[1], top_pixel[2], top_pixel[3]);
 
@@ -60,7 +67,10 @@ pub fn blend_multiplicative((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) 
 }
 
 #[inline]
-pub fn blend_source_over((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
+pub fn blend_source_over(
+    (bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>),
+    _params: &Option<BlendAlgorithmParams>,
+) {
     let (rb, gb, bb, ab) = (bot_pixel[0], bot_pixel[1], bot_pixel[2], bot_pixel[3]);
     let (rt, gt, bt, at) = (top_pixel[0], top_pixel[1], top_pixel[2], top_pixel[3]);
 
@@ -96,7 +106,10 @@ pub fn blend_source_over((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
 }
 
 #[inline]
-pub fn blend_destination_over((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
+pub fn blend_destination_over(
+    (bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>),
+    _params: &Option<BlendAlgorithmParams>,
+) {
     let (rb, gb, bb, ab) = (bot_pixel[0], bot_pixel[1], bot_pixel[2], bot_pixel[3]);
     let (rt, gt, bt, at) = (top_pixel[0], top_pixel[1], top_pixel[2], top_pixel[3]);
 
@@ -132,7 +145,10 @@ pub fn blend_destination_over((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)
 }
 
 #[inline]
-pub fn blend_mask_top((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
+pub fn blend_mask_top(
+    (bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>),
+    _params: &Option<BlendAlgorithmParams>,
+) {
     let (rb, gb, bb, ab) = (bot_pixel[0], bot_pixel[1], bot_pixel[2], bot_pixel[3]);
     let (rt, gt, bt, at) = (top_pixel[0], top_pixel[1], top_pixel[2], top_pixel[3]);
 
@@ -158,7 +174,10 @@ pub fn blend_mask_top((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
 }
 
 #[inline]
-pub fn blend_first_top((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
+pub fn blend_first_top(
+    (bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>),
+    _params: &Option<BlendAlgorithmParams>,
+) {
     let (rb, gb, bb, ab) = (bot_pixel[0], bot_pixel[1], bot_pixel[2], bot_pixel[3]);
     let (rt, gt, bt, at) = (top_pixel[0], top_pixel[1], top_pixel[2], top_pixel[3]);
 
@@ -179,7 +198,10 @@ pub fn blend_first_top((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
 }
 
 #[inline]
-pub fn blend_first_bottom((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
+pub fn blend_first_bottom(
+    (bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>),
+    _params: &Option<BlendAlgorithmParams>,
+) {
     let (rb, gb, bb, ab) = (bot_pixel[0], bot_pixel[1], bot_pixel[2], bot_pixel[3]);
     let (rt, gt, bt, at) = (top_pixel[0], top_pixel[1], top_pixel[2], top_pixel[3]);
 
@@ -200,7 +222,10 @@ pub fn blend_first_bottom((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
 }
 
 #[inline]
-pub fn blend_disjoint_over((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
+pub fn blend_disjoint_over(
+    (bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>),
+    _params: &Option<BlendAlgorithmParams>,
+) {
     let (rb, gb, bb, ab) = (bot_pixel[0], bot_pixel[1], bot_pixel[2], bot_pixel[3]);
     let (rt, gt, bt, at) = (top_pixel[0], top_pixel[1], top_pixel[2], top_pixel[3]);
 
@@ -235,7 +260,10 @@ pub fn blend_disjoint_over((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
 }
 
 #[inline]
-pub fn blend_disjoint_under((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
+pub fn blend_disjoint_under(
+    (bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>),
+    _params: &Option<BlendAlgorithmParams>,
+) {
     let (rb, gb, bb, ab) = (bot_pixel[0], bot_pixel[1], bot_pixel[2], bot_pixel[3]);
     let (rt, gt, bt, at) = (top_pixel[0], top_pixel[1], top_pixel[2], top_pixel[3]);
 
@@ -270,7 +298,10 @@ pub fn blend_disjoint_under((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) 
 }
 
 #[inline]
-pub fn blend_disjoint_debug((bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>)) {
+pub fn blend_disjoint_debug(
+    (bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>),
+    _params: &Option<BlendAlgorithmParams>,
+) {
     let ab = bot_pixel[3];
     let at = top_pixel[3];
 

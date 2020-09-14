@@ -6,11 +6,15 @@ use algorithms::{
     blend_multiplicative, blend_source_over,
 };
 use image::{ImageBuffer, Rgba};
+use std::collections::HashMap;
 use std::fmt;
 use std::fmt::{Display, Formatter};
 use std::result;
 use std::str::FromStr;
 
+pub type BlendAlgorithmParams = HashMap<String, String>;
+
+#[derive(Clone)]
 pub enum BlendAlgorithm {
     Alpha,
     Multiplicative,
@@ -82,10 +86,11 @@ impl Display for Background {
 pub fn blend_images(
     top: &ImageBuffer<Rgba<u8>, Vec<u8>>,
     bot: &mut ImageBuffer<Rgba<u8>, Vec<u8>>,
-    blending_algorithm: &impl Fn((&mut Rgba<u8>, &Rgba<u8>)) -> (),
+    blending_algorithm: &impl Fn((&mut Rgba<u8>, &Rgba<u8>), &Option<BlendAlgorithmParams>) -> (),
+    params: &Option<BlendAlgorithmParams>,
 ) {
     for pixel_pair in bot.pixels_mut().zip(top.pixels()) {
-        blending_algorithm(pixel_pair);
+        blending_algorithm(pixel_pair, params);
     }
 }
 
@@ -129,7 +134,7 @@ fn multiply_pixel(pixel: &mut Rgba<u8>) {
 
 pub fn get_blending_algorithm(
     algorithm: &BlendAlgorithm,
-) -> impl Fn((&mut Rgba<u8>, &Rgba<u8>)) -> () {
+) -> impl Fn((&mut Rgba<u8>, &Rgba<u8>), &Option<BlendAlgorithmParams>) -> () {
     match algorithm {
         BlendAlgorithm::Alpha => blend_alpha,
         BlendAlgorithm::Multiplicative => blend_multiplicative,

@@ -509,7 +509,7 @@ fn compose(
     })?;
 
     benchmark.execute(Benchmark::add_blend_time, || {
-        blend_images(&top, &mut bot, &algorithm_fn)
+        blend_images(&top, &mut bot, &algorithm_fn, &None)
     });
 
     let top = benchmark.execute(Benchmark::add_read_png_time, || {
@@ -517,7 +517,7 @@ fn compose(
     })?;
 
     benchmark.execute(Benchmark::add_blend_time, || {
-        blend_images(&top, &mut bot, &algorithm_fn)
+        blend_images(&top, &mut bot, &algorithm_fn, &None)
     });
 
     let top = benchmark.execute(Benchmark::add_read_png_time, || {
@@ -525,7 +525,7 @@ fn compose(
     })?;
 
     benchmark.execute(Benchmark::add_blend_time, || {
-        blend_images(&top, &mut bot, &algorithm_fn)
+        blend_images(&top, &mut bot, &algorithm_fn, &None)
     });
 
     if demultiply {
@@ -537,7 +537,7 @@ fn compose(
     })?;
 
     benchmark.execute(Benchmark::add_blend_time, || {
-        blend_images(&bot, &mut composition, &algorithm_fn)
+        blend_images(&bot, &mut composition, &algorithm_fn, &None)
     });
 
     let file_out = format!(
