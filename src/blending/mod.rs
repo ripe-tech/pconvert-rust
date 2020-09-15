@@ -1,4 +1,5 @@
 mod algorithms;
+pub mod params;
 
 use algorithms::{
     blend_alpha, blend_destination_over, blend_disjoint_debug, blend_disjoint_over,
@@ -6,22 +7,24 @@ use algorithms::{
     blend_multiplicative, blend_source_over,
 };
 use image::{ImageBuffer, Rgba};
+use params::BlendAlgorithmParams;
 use std::fmt;
 use std::fmt::{Display, Formatter};
 use std::result;
 use std::str::FromStr;
 
+#[derive(Clone)]
 pub enum BlendAlgorithm {
     Alpha,
     Multiplicative,
     SourceOver,
     DestinationOver,
+    MaskTop,
     FirstTop,
     FirstBottom,
     DisjointOver,
     DisjointUnder,
     DisjointDebug,
-    MaskTop,
 }
 
 impl FromStr for BlendAlgorithm {
@@ -33,12 +36,12 @@ impl FromStr for BlendAlgorithm {
             "multiplicative" => Ok(BlendAlgorithm::Multiplicative),
             "source_over" => Ok(BlendAlgorithm::SourceOver),
             "destination_over" => Ok(BlendAlgorithm::DestinationOver),
+            "mask_top" => Ok(BlendAlgorithm::MaskTop),
             "first_top" => Ok(BlendAlgorithm::FirstTop),
             "first_bottom" => Ok(BlendAlgorithm::FirstBottom),
             "disjoint_over" => Ok(BlendAlgorithm::DisjointOver),
             "disjoint_under" => Ok(BlendAlgorithm::DisjointUnder),
             "disjoint_debug" => Ok(BlendAlgorithm::DisjointDebug),
-            "mask_top" => Ok(BlendAlgorithm::MaskTop),
             s => Err(s.to_string()),
         }
     }
@@ -51,12 +54,12 @@ impl Display for BlendAlgorithm {
             BlendAlgorithm::Multiplicative => write!(f, "multiplicative"),
             BlendAlgorithm::SourceOver => write!(f, "source_over"),
             BlendAlgorithm::DestinationOver => write!(f, "destination_over"),
+            BlendAlgorithm::MaskTop => write!(f, "mask_top"),
             BlendAlgorithm::FirstTop => write!(f, "first_top"),
             BlendAlgorithm::FirstBottom => write!(f, "first_bottom"),
             BlendAlgorithm::DisjointOver => write!(f, "disjoint_over"),
             BlendAlgorithm::DisjointUnder => write!(f, "disjoint_under"),
             BlendAlgorithm::DisjointDebug => write!(f, "disjoint_debug"),
-            BlendAlgorithm::MaskTop => write!(f, "mask_top"),
         }
     }
 }
@@ -82,10 +85,11 @@ impl Display for Background {
 pub fn blend_images(
     top: &ImageBuffer<Rgba<u8>, Vec<u8>>,
     bot: &mut ImageBuffer<Rgba<u8>, Vec<u8>>,
-    blending_algorithm: &impl Fn((&mut Rgba<u8>, &Rgba<u8>)) -> (),
+    blending_algorithm: &impl Fn((&mut Rgba<u8>, &Rgba<u8>), &Option<BlendAlgorithmParams>) -> (),
+    params: &Option<BlendAlgorithmParams>,
 ) {
     for pixel_pair in bot.pixels_mut().zip(top.pixels()) {
-        blending_algorithm(pixel_pair);
+        blending_algorithm(pixel_pair, params);
     }
 }
 
@@ -129,18 +133,18 @@ fn multiply_pixel(pixel: &mut Rgba<u8>) {
 
 pub fn get_blending_algorithm(
     algorithm: &BlendAlgorithm,
-) -> impl Fn((&mut Rgba<u8>, &Rgba<u8>)) -> () {
+) -> impl Fn((&mut Rgba<u8>, &Rgba<u8>), &Option<BlendAlgorithmParams>) -> () {
     match algorithm {
         BlendAlgorithm::Alpha => blend_alpha,
         BlendAlgorithm::Multiplicative => blend_multiplicative,
         BlendAlgorithm::SourceOver => blend_source_over,
         BlendAlgorithm::DestinationOver => blend_destination_over,
+        BlendAlgorithm::MaskTop => blend_mask_top,
         BlendAlgorithm::FirstTop => blend_first_top,
         BlendAlgorithm::FirstBottom => blend_first_bottom,
         BlendAlgorithm::DisjointOver => blend_disjoint_over,
         BlendAlgorithm::DisjointUnder => blend_disjoint_under,
         BlendAlgorithm::DisjointDebug => blend_disjoint_debug,
-        BlendAlgorithm::MaskTop => blend_mask_top,
     }
 }
 
@@ -150,11 +154,11 @@ pub fn is_algorithm_multiplied(algorithm: &BlendAlgorithm) -> bool {
         BlendAlgorithm::Multiplicative => false,
         BlendAlgorithm::SourceOver => false,
         BlendAlgorithm::DestinationOver => false,
+        BlendAlgorithm::MaskTop => false,
         BlendAlgorithm::FirstTop => false,
         BlendAlgorithm::FirstBottom => false,
         BlendAlgorithm::DisjointOver => true,
         BlendAlgorithm::DisjointUnder => true,
         BlendAlgorithm::DisjointDebug => true,
-        BlendAlgorithm::MaskTop => false,
     }
 }
