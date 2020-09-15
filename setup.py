@@ -37,7 +37,10 @@ setuptools.setup(
     license = "Apache License, Version 2.0",
     keywords = "pconvert rust fast",
     url = "https://www.platforme.com",
-    packages = ["pconvert_rust"],
+    packages = [
+        "pconvert_rust",
+        "pconvert_rust.test"
+    ],
     rust_extensions = [
         setuptools_rust.RustExtension(
             "pconvert_rust.pconvert_rust",
