@@ -12,7 +12,7 @@ addons:
 install:
   - sudo pip3 install -r requirements.txt
   - sudo pip3 install setuptools_rust
-script: sudo python3 setup.py build test
+script: source $HOME/.cargo/env && sudo python3 setup.py build test
 deploy:
   provider: pypi
   user: platforme
