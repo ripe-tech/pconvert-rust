@@ -9,11 +9,8 @@ addons:
     packages:
       - python3
       - python3-pip
-before_install:
-  - pip3 install --upgrade pip setuptools
 install:
   - pip3 install -r requirements.txt
-  - pip3 install coveralls
 script: python3 setup.py build test
 deploy:
   provider: pypi
