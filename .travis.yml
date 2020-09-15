@@ -4,6 +4,11 @@ rust:
   - stable
   - beta
   - nightly
+addons:
+  apt:
+    packages:
+      - python3
+      - python3-pip
 before_install:
   - pip install --upgrade pip setuptools
 install:
