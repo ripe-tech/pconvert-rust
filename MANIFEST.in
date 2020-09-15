@@ -1,0 +1,2 @@
+include Cargo.toml pyproject.tom build-wheels.sh LICENSE
+recursive-include src *.rs
