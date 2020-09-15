@@ -11,8 +11,8 @@ addons:
       - python3-pip
 install:
   - sudo pip3 install -r requirements.txt
-  - sudo pip3 install setuptools_rust
-script: source $HOME/.cargo/env && sudo python3 setup.py build test
+  - sudo pip3 install --upgrade setuptools setuptools_rust
+script: python3 setup.py build test
 deploy:
   provider: pypi
   user: platforme
