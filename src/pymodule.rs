@@ -37,7 +37,7 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         is_inline: Option<bool>,
     ) -> PyResult<()> {
         let algorithm = algorithm.unwrap_or(String::from("multiplicative"));
-        let algorithm = validate_algorithm(&algorithm)?;
+        let algorithm = parse_algorithm(&algorithm)?;
 
         let _is_inline = is_inline.unwrap_or(false);
 
@@ -85,9 +85,9 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
 
         let algorithms_to_apply: Vec<(BlendAlgorithm, Option<BlendAlgorithmParams>)> =
             if let Some(algorithms) = algorithms {
-                validate_algorithms(algorithms)?
+                build_params(algorithms)?
             } else if let Some(algorithm) = algorithm {
-                let algorithm = validate_algorithm(&algorithm)?;
+                let algorithm = parse_algorithm(&algorithm)?;
                 vec![(algorithm, None); num_images - 1]
             } else {
                 vec![(BlendAlgorithm::Multiplicative, None); num_images - 1]
@@ -120,7 +120,7 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
     Ok(())
 }
 
-fn validate_algorithm(algorithm: &String) -> Result<BlendAlgorithm, PyErr> {
+fn parse_algorithm(algorithm: &String) -> Result<BlendAlgorithm, PyErr> {
     match BlendAlgorithm::from_str(algorithm) {
         Ok(algorithm) => Ok(algorithm),
         Err(algorithm) => Err(PyErr::from(PConvertError::ArgumentError(format!(
@@ -130,7 +130,7 @@ fn validate_algorithm(algorithm: &String) -> Result<BlendAlgorithm, PyErr> {
     }
 }
 
-fn validate_algorithms(
+fn build_params(
     algorithms: &PySequence,
 ) -> Result<Vec<(BlendAlgorithm, Option<BlendAlgorithmParams>)>, PyErr> {
     let mut result = Vec::new();
@@ -139,11 +139,11 @@ fn validate_algorithms(
         let element = algorithms.get_item(i)?;
 
         if let Ok(string) = element.cast_as::<PyString>() {
-            let algorithm = validate_algorithm(&string.to_string()?.into_owned())?;
+            let algorithm = parse_algorithm(&string.to_string()?.into_owned())?;
             result.push((algorithm, None));
         } else if let Ok(sequence) = element.cast_as::<PySequence>() {
             let algorithm = sequence.get_item(0)?.extract::<String>()?;
-            let algorithm = validate_algorithm(&algorithm)?;
+            let algorithm = parse_algorithm(&algorithm)?;
 
             let mut blending_params = BlendAlgorithmParams::new();
             let params_sequence = sequence.get_item(1)?;
