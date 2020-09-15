@@ -1,18 +1,9 @@
 dist: trusty
-language: python
-python:
-  - "3.5"
-  - "3.6"
-matrix:
-  include:
-  - python: 3.7
-    dist: xenial
-  - python: 3.8
-    dist: xenial
-  - python: pypy
-    dist: xenial
-  - python: pypy3
-    dist: xenial
+language: rust
+rust:
+  - stable
+  - beta
+  - nightly
 before_install:
   - pip install --upgrade pip setuptools
 install:
