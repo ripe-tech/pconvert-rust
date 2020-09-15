@@ -1,0 +1,31 @@
+dist: trusty
+language: python
+python:
+  - "3.5"
+  - "3.6"
+matrix:
+  include:
+  - python: 3.7
+    dist: xenial
+  - python: 3.8
+    dist: xenial
+  - python: pypy
+    dist: xenial
+  - python: pypy3
+    dist: xenial
+before_install:
+  - pip install --upgrade pip setuptools
+install:
+  - pip install -r requirements.txt
+  - pip install coveralls
+script: coverage run --source=pconvert setup.py build test
+after_success: coveralls
+deploy:
+  provider: pypi
+  user: platforme
+  password:
+    secure: eHZ1bC5+nqUUSYGWaFMiZcyI6qxmtVhaJpY/ZTBpjpvmFeSQVRUCj0vh9WTzcRdGEU5C0Iv0QyveDmZThEBQR5IE3YQqVniMLBpQFs1U0ZZ89u8d/QUFbqTrSJ+KxLLYDE5L8DkohXXa9WOQNP5tRk23bZguQDbJdNKR7n4YX8OIrsJKSe4hrCntgUq9NiJymocuHrn+h2sPLZZcHpZkG04CUATg9MEjv5sR20iKeIVX7DeFjKR23YWHtFukYLnzfbrIrEOwiL9UjvowdedVVFKypKnPqDKMOIy+VFqqpmbWvjF5Et5pjVssZvnYmvJZxRACpU9okZQnauk8k/9QsDmrFcY8n4ZSlBrzbny5KpjgxbmhvPPxhO43HBj1b39tJXRTONJa2XoBidY1i3lVyFoFhy9lCL/mAmxwHPLHNVz6UlW9JkfCV0EDS6WYRdb6V9HhG/jtXE6OFU3N6FPWBn5FTLXtcW5simgdLG6OgVUd/vUDk7st2t/jaeDZg7poPuD/kwk87i5FAX3zNYr2IYwcAruvtlTsHGOkWF9OllLKcZcMco8fdbH5DyncgVIv19hNxA/MTalvGVpkHtGZIZA1xukbTKY4ShOGMFhxzOJi3CvdO0J4PCs24KCxS/joCxNfLpwKc+2qYquQl3RtCxKpZeHfuIGmgZoyI0y4D4c=
+  distributions: sdist bdist_wheel
+  on:
+    tags: true
+    python: "3.5"

@@ -39,8 +39,10 @@ setuptools.setup(
     url = "https://www.platforme.com",
     packages = ["pconvert_rust"],
     rust_extensions = [
-        setuptools_rust.RustExtension("pconvert_rust.pconvert_rust",
-        binding = setuptools_rust.Binding.PyO3)
+        setuptools_rust.RustExtension(
+            "pconvert_rust.pconvert_rust",
+            binding = setuptools_rust.Binding.PyO3
+        )
     ],
     install_requires = install_requires,
     setup_requires = setup_requires,
