@@ -30,7 +30,7 @@ install_requires = []
 
 setuptools.setup(
     name = "pconvert-rust",
-    version = "0.1.0",
+    version = "0.1.1",
     author = "Platforme International",
     author_email = "development@platforme.com",
     description = "PNG Convert Rust",
