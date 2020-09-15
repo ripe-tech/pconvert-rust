@@ -2,6 +2,7 @@ mod benchmark;
 mod blending;
 mod constants;
 pub mod errors;
+mod parallelism;
 mod pymodule;
 mod utils;
 
@@ -415,6 +416,11 @@ pub fn pbenchmark(args: &mut env::Args) -> Result<(), PConvertError> {
         }
     };
 
+    let run_parallel = match args.next() {
+        Some(boolean) => boolean.eq("true"),
+        _ => false,
+    };
+
     let algorithms = constants::ALGORITHMS;
     let compressions = [
         CompressionType::Default,
@@ -442,14 +448,26 @@ pub fn pbenchmark(args: &mut env::Args) -> Result<(), PConvertError> {
         for compression in compressions.iter() {
             for filter in filters.iter() {
                 let mut benchmark = Benchmark::new();
-                compose(
-                    &dir,
-                    BlendAlgorithm::from_str(&algorithm).unwrap(),
-                    Background::Alpha,
-                    *compression,
-                    *filter,
-                    &mut benchmark,
-                )?;
+                if run_parallel {
+                    compose_parallel(
+                        &dir,
+                        BlendAlgorithm::from_str(&algorithm).unwrap(),
+                        Background::Alpha,
+                        *compression,
+                        *filter,
+                        &mut benchmark,
+                    )?;
+                } else {
+                    compose(
+                        &dir,
+                        BlendAlgorithm::from_str(&algorithm).unwrap(),
+                        Background::Alpha,
+                        *compression,
+                        *filter,
+                        &mut benchmark,
+                    )?;
+                }
+
                 println!(
                     "{:<20}{:<20}{:<20}{:<20}",
                     algorithm,
@@ -548,5 +566,16 @@ fn compose(
         write_png(file_out, &composition, compression, filter)
     })?;
 
+    Ok(())
+}
+
+fn compose_parallel(
+    dir: &str,
+    algorithm: BlendAlgorithm,
+    background: Background,
+    compression: CompressionType,
+    filter: FilterType,
+    benchmark: &mut Benchmark,
+) -> Result<(), PConvertError> {
     Ok(())
 }
