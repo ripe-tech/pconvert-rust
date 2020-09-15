@@ -1,13 +1,13 @@
+use super::blending::params::{BlendAlgorithmParams, ParamValue};
 use super::blending::{
     blend_images, get_blending_algorithm, is_algorithm_multiplied, BlendAlgorithm,
-    BlendAlgorithmParams,
 };
 use super::errors::PConvertError;
 use super::utils::{read_png, write_png};
 use crate::constants;
 use image::png::{CompressionType, FilterType};
 use pyo3::prelude::*;
-use pyo3::types::{PySequence, PyString, PyTuple};
+use pyo3::types::{PyBool, PyFloat, PyInt, PyLong, PySequence, PyString};
 use std::str::FromStr;
 
 #[pymodule]
@@ -86,7 +86,6 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         let algorithms_to_apply: Vec<(BlendAlgorithm, Option<BlendAlgorithmParams>)> =
             if let Some(algorithms) = algorithms {
                 validate_algorithms(algorithms)?
-                // vec![(BlendAlgorithm::Multiplicative, None); num_images - 1] // TODO REMOVE
             } else if let Some(algorithm) = algorithm {
                 let algorithm = validate_algorithm(&algorithm)?;
                 vec![(algorithm, None); num_images - 1]
@@ -137,24 +136,53 @@ fn validate_algorithms(
     let mut result = Vec::new();
 
     for i in 0..algorithms.len()? {
-
         let element = algorithms.get_item(i)?;
 
         if let Ok(string) = element.cast_as::<PyString>() {
-            println!("Got string {}", string); //TODO: remove
             let algorithm = validate_algorithm(&string.to_string()?.into_owned())?;
             result.push((algorithm, None));
-        } else if let Ok(tuple) = element.cast_as::<PyTuple>() {
-            println!("Got tuple {}", tuple); //TODO: remove
-            let algorithm = validate_algorithm(&tuple.get_item(0).to_string())?;
-            //TODO get the other variables
-            let mut params = BlendAlgorithmParams::new();
-            for pair in tuple.iter() {
-                let key_value = pair.cast_as::<PyTuple>()?;
-                params.insert(key_value.get_item(0).to_string(), key_value.get_item(1).to_string());
+        } else if let Ok(sequence) = element.cast_as::<PySequence>() {
+            let algorithm = sequence.get_item(0)?.extract::<String>()?;
+            let algorithm = validate_algorithm(&algorithm)?;
+
+            let mut blending_params = BlendAlgorithmParams::new();
+            let params_sequence = sequence.get_item(1)?;
+            if let Ok(params_sequence) = params_sequence.cast_as::<PySequence>() {
+                for j in 0..params_sequence.len()? {
+                    if let Ok(property_value) = params_sequence.get_item(j)?.cast_as::<PySequence>()
+                    {
+                        let param_name = property_value.get_item(0)?.extract::<String>()?;
+                        let param_value = property_value.get_item(1)?;
+                        if let Ok(boolean) = param_value.cast_as::<PyBool>() {
+                            let boolean = boolean.is_true();
+                            blending_params.insert(param_name, ParamValue::Bool(boolean));
+                        } else if let Ok(float) = param_value.cast_as::<PyFloat>() {
+                            let float = float.value();
+                            blending_params.insert(param_name, ParamValue::Float(float));
+                        } else if let Ok(int) = param_value.cast_as::<PyInt>() {
+                            let int = int.extract::<i32>()?;
+                            blending_params.insert(param_name, ParamValue::Int(int));
+                        } else if let Ok(long) = param_value.cast_as::<PyLong>() {
+                            let long = long.extract::<i64>()?;
+                            blending_params.insert(param_name, ParamValue::Long(long));
+                        } else if let Ok(string) = param_value.cast_as::<PyString>() {
+                            let string = string.to_string()?.into_owned();
+                            blending_params.insert(param_name, ParamValue::Str(string));
+                        } else {
+                            return Err(PyErr::from(PConvertError::ArgumentError(format!(
+                                "Invalid type for parameter {}",
+                                param_name
+                            ))));
+                        }
+                    }
+                }
+            } else {
+                return Err(PyErr::from(PConvertError::ArgumentError(
+                    "Parameters should be given as a python sequence object".to_string(),
+                )));
             }
-            let algorithm_config = (algorithm, Some(params));
-            result.push(algorithm_config);
+
+            result.push((algorithm, Some(blending_params)));
         }
     }
 

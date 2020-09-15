@@ -1,4 +1,5 @@
 mod algorithms;
+pub mod params;
 
 use algorithms::{
     blend_alpha, blend_destination_over, blend_disjoint_debug, blend_disjoint_over,
@@ -6,13 +7,11 @@ use algorithms::{
     blend_multiplicative, blend_source_over,
 };
 use image::{ImageBuffer, Rgba};
-use std::collections::HashMap;
+use params::BlendAlgorithmParams;
 use std::fmt;
 use std::fmt::{Display, Formatter};
 use std::result;
 use std::str::FromStr;
-
-pub type BlendAlgorithmParams = HashMap<String, String>;
 
 #[derive(Clone)]
 pub enum BlendAlgorithm {
