@@ -1,4 +1,4 @@
-use super::params::BlendAlgorithmParams;
+use super::params::{BlendAlgorithmParams, ParamValue};
 use crate::utils::{max, min};
 use image::Rgba;
 
@@ -147,12 +147,19 @@ pub fn blend_destination_over(
 #[inline]
 pub fn blend_mask_top(
     (bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>),
-    _params: &Option<BlendAlgorithmParams>,
+    params: &Option<BlendAlgorithmParams>,
 ) {
     let (rb, gb, bb, ab) = (bot_pixel[0], bot_pixel[1], bot_pixel[2], bot_pixel[3]);
     let (rt, gt, bt, at) = (top_pixel[0], top_pixel[1], top_pixel[2], top_pixel[3]);
 
-    let factor = 1.0;
+    let factor = params
+        .as_ref()
+        .and_then(|params| params.get("factor"))
+        .and_then(|param| match param {
+            ParamValue::Float(float) => Some(*float),
+            _ => None,
+        })
+        .unwrap_or(1.0) as f32;
 
     let atf = factor * (at as f32 / 255.0);
     let abf = 1.0 - atf;
