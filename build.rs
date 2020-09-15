@@ -65,6 +65,7 @@ fn main() {
             "multiplicative",
             "source_over",
             "destination_over",
+            "mask_top",
             "first_top",
             "first_bottom",
             "disjoint_over",
