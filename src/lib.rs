@@ -581,7 +581,7 @@ fn compose_parallel(
     let demultiply = is_algorithm_multiplied(&algorithm);
     let algorithm_fn = get_blending_algorithm(&algorithm);
 
-    let thread_pool = ThreadPool::new(5)?;
+    let mut thread_pool = ThreadPool::new(5)?;
 
     // send png reading tasks to multiple threads
     let png_file_names = vec![
@@ -593,6 +593,7 @@ fn compose_parallel(
     ];
 
     let mut result_channels = Vec::with_capacity(png_file_names.len());
+    thread_pool.start();
     for png_file_name in png_file_names {
         let path = format!("{}{}", dir, png_file_name);
         let result_channel =

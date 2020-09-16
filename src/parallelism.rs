@@ -6,6 +6,7 @@ use std::thread::{spawn, JoinHandle};
 pub struct ThreadPool {
     workers: Vec<Worker>,
     work_channel_sender: mpsc::Sender<WorkMessage>,
+    work_channel_receiver_mutex: Arc<Mutex<mpsc::Receiver<WorkMessage>>>,
 }
 
 impl ThreadPool {
@@ -15,20 +16,36 @@ impl ThreadPool {
                 "Thread Pool size should be a positive number".to_string(),
             ));
         }
-
         let (work_channel_sender, work_channel_receiver) = mpsc::channel();
-
-        let work_channel_receiver = Arc::new(Mutex::new(work_channel_receiver));
-
-        let mut workers = Vec::with_capacity(size);
-        for _ in 0..size {
-            workers.push(Worker::new(Arc::clone(&work_channel_receiver)));
-        }
+        let workers = Vec::with_capacity(size);
+        let work_channel_receiver_mutex = Arc::new(Mutex::new(work_channel_receiver));
 
         Ok(ThreadPool {
             workers,
             work_channel_sender,
+            work_channel_receiver_mutex,
         })
+    }
+
+    pub fn start(&mut self) {
+        for _ in 0..self.workers.capacity() {
+            self.workers
+                .push(Worker::new(Arc::clone(&self.work_channel_receiver_mutex)));
+        }
+    }
+
+    fn stop(&mut self) {
+        for _ in &self.workers {
+            self.work_channel_sender
+                .send(WorkMessage::Terminate)
+                .unwrap_or_default();
+        }
+
+        for worker in &mut self.workers {
+            if let Some(thread) = worker.thread.take() {
+                thread.join().unwrap_or_default();
+            }
+        }
     }
 
     pub fn execute<F>(&self, func: F) -> mpsc::Receiver<ResultMessage>
@@ -47,17 +64,7 @@ impl ThreadPool {
 
 impl Drop for ThreadPool {
     fn drop(&mut self) {
-        for _ in &self.workers {
-            self.work_channel_sender
-                .send(WorkMessage::Terminate)
-                .unwrap_or_default();
-        }
-
-        for worker in &mut self.workers {
-            if let Some(thread) = worker.thread.take() {
-                thread.join().unwrap_or_default();
-            }
-        }
+        self.stop();
     }
 }
 
