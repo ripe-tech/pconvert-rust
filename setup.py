@@ -25,9 +25,6 @@ except ImportError:
     else:
         import setuptools_rust
 
-setup_requires = ["setuptools-rust>=0.10.1", "wheel"]
-install_requires = []
-
 setuptools.setup(
     name = "pconvert-rust",
     version = "0.1.2",
@@ -47,8 +44,8 @@ setuptools.setup(
             binding = setuptools_rust.Binding.PyO3
         )
     ],
-    install_requires = install_requires,
-    setup_requires = setup_requires,
+    install_requires = [],
+    setup_requires = ["setuptools-rust>=0.10.1", "wheel"],
     include_package_data = True,
     zip_safe = False,
     classifiers = [
