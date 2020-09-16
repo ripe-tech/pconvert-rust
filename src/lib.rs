@@ -576,7 +576,7 @@ fn compose_parallel(
     background: Background,
     compression: CompressionType,
     filter: FilterType,
-    _benchmark: &mut Benchmark,
+    benchmark: &mut Benchmark,
 ) -> Result<(), PConvertError> {
     let demultiply = is_algorithm_multiplied(&algorithm);
     let algorithm_fn = get_blending_algorithm(&algorithm);
@@ -601,31 +601,43 @@ fn compose_parallel(
     }
 
     // blending phase
-    let mut bot = match result_channels[0].recv().unwrap() {
-        ResultMessage::ImageResult(result) => result,
-    }?;
-    let top = match result_channels[1].recv().unwrap() {
-        ResultMessage::ImageResult(result) => result,
-    }?;
+    let mut bot = benchmark.execute(Benchmark::add_read_png_time, || {
+        match result_channels[0].recv().unwrap() {
+            ResultMessage::ImageResult(result) => result,
+        }
+    })?;
+
+    let top = benchmark.execute(Benchmark::add_read_png_time, || {
+        match result_channels[1].recv().unwrap() {
+            ResultMessage::ImageResult(result) => result,
+        }
+    })?;
     blend_images(&top, &mut bot, &algorithm_fn, &None);
 
-    let top = match result_channels[2].recv().unwrap() {
-        ResultMessage::ImageResult(result) => result,
-    }?;
+    let top = benchmark.execute(Benchmark::add_read_png_time, || {
+        match result_channels[2].recv().unwrap() {
+            ResultMessage::ImageResult(result) => result,
+        }
+    })?;
     blend_images(&top, &mut bot, &algorithm_fn, &None);
 
-    let top = match result_channels[3].recv().unwrap() {
-        ResultMessage::ImageResult(result) => result,
-    }?;
+    let top = benchmark.execute(Benchmark::add_read_png_time, || {
+        match result_channels[3].recv().unwrap() {
+            ResultMessage::ImageResult(result) => result,
+        }
+    })?;
     blend_images(&top, &mut bot, &algorithm_fn, &None);
 
     if demultiply {
         multiply_image(&mut bot);
     }
 
-    let mut composition = match result_channels[4].recv().unwrap() {
-        ResultMessage::ImageResult(result) => result,
-    }?;
+    let mut composition =
+        benchmark.execute(Benchmark::add_read_png_time, || {
+            match result_channels[4].recv().unwrap() {
+                ResultMessage::ImageResult(result) => result,
+            }
+        })?;
     blend_images(&bot, &mut composition, &algorithm_fn, &None);
 
     // write composition png
