@@ -581,19 +581,31 @@ fn compose_parallel(
     filter: FilterType,
     benchmark: &mut Benchmark,
 ) -> Result<(), PConvertError> {
-    let thread_pool = ThreadPool::new(5)?;
-
     let demultiply = is_algorithm_multiplied(&algorithm);
 
-    let (sender, receiver) = mpsc::channel();
+    let thread_pool = ThreadPool::new(5)?;
+
+    let (sender, receiver1) = mpsc::channel();
+    let cloned_dir = dir.clone();
     thread_pool.execute(
-        move || ResultMessage::ImageResult(read_png(format!("{}sole.png", dir), demultiply)),
+        move || ResultMessage::ImageResult(read_png(format!("{}sole.png", cloned_dir), demultiply)),
         sender,
     );
 
-    let result = receiver.recv().unwrap();
+    let (sender, receiver2) = mpsc::channel();
+    let cloned_dir = dir.clone();
+    thread_pool.execute(
+        move || ResultMessage::ImageResult(read_png(format!("{}sole.png", cloned_dir), demultiply)),
+        sender,
+    );
 
-    println!("{:?}", result);
+    if let ResultMessage::ImageResult(result) = receiver1.recv().unwrap() {
+        println!("#1: {:?}", result?.dimensions());
+    }
+
+    if let ResultMessage::ImageResult(result) = receiver2.recv().unwrap() {
+        println!("#2: {:?}", result?.dimensions());
+    }
 
     Ok(())
 }
