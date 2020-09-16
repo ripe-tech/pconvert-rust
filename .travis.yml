@@ -17,7 +17,7 @@ env:
 script: python3 setup.py build test
 deploy:
   provider: script
-  script: ./deploy.sh
+  script: bash deploy.sh
   on:
     tags: true
     rust: stable
