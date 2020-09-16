@@ -1,8 +1,8 @@
 use super::blending::demultiply_image;
 use super::errors::PConvertError;
+use image::io::Reader;
 use image::png::{CompressionType, FilterType, PngEncoder};
-use image::ColorType;
-use image::{open, DynamicImage, ImageBuffer, Rgba};
+use image::{ColorType, DynamicImage, ImageBuffer, ImageFormat, Rgba};
 use std::fs::File;
 use std::io::BufWriter;
 
@@ -10,12 +10,12 @@ pub fn read_png(
     file_in: String,
     demultiply: bool,
 ) -> Result<ImageBuffer<Rgba<u8>, Vec<u8>>, PConvertError> {
-    let mut img = match open(&file_in) {
-        Ok(file) => match file {
-            DynamicImage::ImageRgba8(img) => img,
-            _ => return Err(PConvertError::UnsupportedImageTypeError),
-        },
-        Err(err) => return Err(PConvertError::ImageLibError(err)),
+    let reader = Reader::open(file_in)?;
+    let reader = Reader::with_format(reader.into_inner(), ImageFormat::Png);
+
+    let mut img = match reader.decode() {
+        Ok(DynamicImage::ImageRgba8(img)) => img,
+        _ => return Err(PConvertError::UnsupportedImageTypeError),
     };
 
     if demultiply {
