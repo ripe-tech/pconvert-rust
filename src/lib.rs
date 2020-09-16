@@ -14,9 +14,11 @@ use blending::{
 use errors::PConvertError;
 use image::png::{CompressionType, FilterType};
 use image::{ImageFormat, Rgba};
+use parallelism::{ResultMessage, ThreadPool};
 use std::env;
 use std::str;
 use std::str::FromStr;
+use std::sync::{mpsc, Arc};
 use utils::{read_png, write_png};
 
 pub fn pcompose(args: &mut env::Args) -> Result<(), PConvertError> {
@@ -417,24 +419,24 @@ pub fn pbenchmark(args: &mut env::Args) -> Result<(), PConvertError> {
     };
 
     let run_parallel = match args.next() {
-        Some(boolean) => boolean.eq("true"),
+        Some(flag) => flag.eq("--parallel"),
         _ => false,
     };
 
     let algorithms = constants::ALGORITHMS;
     let compressions = [
         CompressionType::Default,
-        CompressionType::Best,
-        CompressionType::Fast,
-        CompressionType::Huffman,
-        CompressionType::Rle,
+        // CompressionType::Best,
+        // CompressionType::Fast,
+        // CompressionType::Huffman,
+        // CompressionType::Rle,
     ];
     let filters = [
         FilterType::NoFilter,
-        FilterType::Avg,
-        FilterType::Paeth,
-        FilterType::Sub,
-        FilterType::Up,
+        // FilterType::Avg,
+        // FilterType::Paeth,
+        // FilterType::Sub,
+        // FilterType::Up,
     ];
 
     println!(
@@ -443,6 +445,8 @@ pub fn pbenchmark(args: &mut env::Args) -> Result<(), PConvertError> {
     );
     println!("{}", str::from_utf8(&vec![b'-'; 100]).unwrap());
 
+    let dir_arc = Arc::new(dir);
+
     let mut total_benchmark = Benchmark::new();
     for algorithm in algorithms.iter() {
         for compression in compressions.iter() {
@@ -450,7 +454,7 @@ pub fn pbenchmark(args: &mut env::Args) -> Result<(), PConvertError> {
                 let mut benchmark = Benchmark::new();
                 if run_parallel {
                     compose_parallel(
-                        &dir,
+                        dir_arc.clone(),
                         BlendAlgorithm::from_str(&algorithm).unwrap(),
                         Background::Alpha,
                         *compression,
@@ -459,7 +463,7 @@ pub fn pbenchmark(args: &mut env::Args) -> Result<(), PConvertError> {
                     )?;
                 } else {
                     compose(
-                        &dir,
+                        &dir_arc,
                         BlendAlgorithm::from_str(&algorithm).unwrap(),
                         Background::Alpha,
                         *compression,
@@ -570,12 +574,26 @@ fn compose(
 }
 
 fn compose_parallel(
-    dir: &str,
+    dir: Arc<String>,
     algorithm: BlendAlgorithm,
     background: Background,
     compression: CompressionType,
     filter: FilterType,
     benchmark: &mut Benchmark,
 ) -> Result<(), PConvertError> {
+    let thread_pool = ThreadPool::new(5)?;
+
+    let demultiply = is_algorithm_multiplied(&algorithm);
+
+    let (sender, receiver) = mpsc::channel();
+    thread_pool.execute(
+        move || ResultMessage::ImageResult(read_png(format!("{}sole.png", dir), demultiply)),
+        sender,
+    );
+
+    let result = receiver.recv().unwrap();
+
+    println!("{:?}", result);
+
     Ok(())
 }
