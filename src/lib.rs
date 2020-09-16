@@ -425,17 +425,17 @@ pub fn pbenchmark(args: &mut env::Args) -> Result<(), PConvertError> {
     let algorithms = constants::ALGORITHMS;
     let compressions = [
         CompressionType::Default,
-        // CompressionType::Best,
-        // CompressionType::Fast,
-        // CompressionType::Huffman,
-        // CompressionType::Rle,
+        CompressionType::Best,
+        CompressionType::Fast,
+        CompressionType::Huffman,
+        CompressionType::Rle,
     ];
     let filters = [
         FilterType::NoFilter,
-        // FilterType::Avg,
-        // FilterType::Paeth,
-        // FilterType::Sub,
-        // FilterType::Up,
+        FilterType::Avg,
+        FilterType::Paeth,
+        FilterType::Sub,
+        FilterType::Up,
     ];
 
     println!(
@@ -612,21 +612,27 @@ fn compose_parallel(
             ResultMessage::ImageResult(result) => result,
         }
     })?;
-    blend_images(&top, &mut bot, &algorithm_fn, &None);
+    benchmark.execute(Benchmark::add_blend_time, || {
+        blend_images(&top, &mut bot, &algorithm_fn, &None)
+    });
 
     let top = benchmark.execute(Benchmark::add_read_png_time, || {
         match result_channels[2].recv().unwrap() {
             ResultMessage::ImageResult(result) => result,
         }
     })?;
-    blend_images(&top, &mut bot, &algorithm_fn, &None);
+    benchmark.execute(Benchmark::add_blend_time, || {
+        blend_images(&top, &mut bot, &algorithm_fn, &None)
+    });
 
     let top = benchmark.execute(Benchmark::add_read_png_time, || {
         match result_channels[3].recv().unwrap() {
             ResultMessage::ImageResult(result) => result,
         }
     })?;
-    blend_images(&top, &mut bot, &algorithm_fn, &None);
+    benchmark.execute(Benchmark::add_blend_time, || {
+        blend_images(&top, &mut bot, &algorithm_fn, &None)
+    });
 
     if demultiply {
         multiply_image(&mut bot);
@@ -638,14 +644,18 @@ fn compose_parallel(
                 ResultMessage::ImageResult(result) => result,
             }
         })?;
-    blend_images(&bot, &mut composition, &algorithm_fn, &None);
+    benchmark.execute(Benchmark::add_blend_time, || {
+        blend_images(&bot, &mut composition, &algorithm_fn, &None)
+    });
 
     // write composition png
     let file_out = format!(
         "{}result_{}_{}_{:#?}_{:#?}.png",
         dir, algorithm, background, compression, filter
     );
-    write_png(file_out, &composition, compression, filter)?;
+    benchmark.execute(Benchmark::add_write_png_time, || {
+        write_png(file_out, &composition, compression, filter)
+    })?;
 
     Ok(())
 }
