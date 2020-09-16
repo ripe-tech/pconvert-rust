@@ -595,7 +595,6 @@ fn compose_parallel(
     let mut result_channels = Vec::with_capacity(png_file_names.len());
     for png_file_name in png_file_names {
         let path = format!("{}{}", dir, png_file_name);
-        println!("{}", path);
         let result_channel =
             thread_pool.execute(move || ResultMessage::ImageResult(read_png(path, demultiply)));
         result_channels.push(result_channel);
