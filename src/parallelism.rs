@@ -5,7 +5,7 @@ use std::thread::{spawn, JoinHandle};
 
 pub struct ThreadPool {
     workers: Vec<Worker>,
-    sender: mpsc::Sender<WorkMessage>,
+    work_channel_sender: mpsc::Sender<WorkMessage>,
 }
 
 impl ThreadPool {
@@ -16,41 +16,46 @@ impl ThreadPool {
             ));
         }
 
-        let (sender, receiver) = mpsc::channel();
+        let (work_channel_sender, work_channel_receiver) = mpsc::channel();
 
-        let receiver = Arc::new(Mutex::new(receiver));
+        let work_channel_receiver = Arc::new(Mutex::new(work_channel_receiver));
 
         let mut workers = Vec::with_capacity(size);
-
         for _ in 0..size {
-            workers.push(Worker::new(Arc::clone(&receiver)));
+            workers.push(Worker::new(Arc::clone(&work_channel_receiver)));
         }
 
-        Ok(ThreadPool { workers, sender })
+        Ok(ThreadPool {
+            workers,
+            work_channel_sender,
+        })
     }
 
-    pub fn execute<F>(&self, func: F, return_channel: mpsc::Sender<ResultMessage>)
+    pub fn execute<F>(&self, func: F) -> mpsc::Receiver<ResultMessage>
     where
         F: FnOnce() -> ResultMessage + Send + 'static,
     {
+        let (result_channel_sender, result_channel_receiver) = mpsc::channel();
         let task = Box::new(func);
-        self.sender
-            .send(WorkMessage::NewTask(task, return_channel))
-            .unwrap();
+        self.work_channel_sender
+            .send(WorkMessage::NewTask(task, result_channel_sender))
+            .unwrap_or_default();
+
+        result_channel_receiver
     }
 }
 
 impl Drop for ThreadPool {
     fn drop(&mut self) {
-        println!("Sending <Terminate> messages to all workers");
         for _ in &self.workers {
-            self.sender.send(WorkMessage::Terminate).unwrap();
+            self.work_channel_sender
+                .send(WorkMessage::Terminate)
+                .unwrap_or_default();
         }
 
-        println!("Shutting down all workers");
         for worker in &mut self.workers {
             if let Some(thread) = worker.thread.take() {
-                thread.join().unwrap();
+                thread.join().unwrap_or_default();
             }
         }
     }
@@ -65,9 +70,9 @@ impl Worker {
         let thread = spawn(move || loop {
             let message = receiver.lock().unwrap().recv().unwrap();
             match message {
-                WorkMessage::NewTask(task, return_channel) => {
+                WorkMessage::NewTask(task, result_channel_sender) => {
                     let result = task();
-                    return_channel.send(result).unwrap();
+                    result_channel_sender.send(result).unwrap_or_default();
                 }
 
                 WorkMessage::Terminate => {
@@ -88,7 +93,6 @@ enum WorkMessage {
     Terminate,
 }
 
-#[derive(Debug)]
 pub enum ResultMessage {
     ImageResult(Result<ImageBuffer<Rgba<u8>, Vec<u8>>, PConvertError>),
 }

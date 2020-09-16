@@ -18,7 +18,6 @@ use parallelism::{ResultMessage, ThreadPool};
 use std::env;
 use std::str;
 use std::str::FromStr;
-use std::sync::{mpsc, Arc};
 use utils::{read_png, write_png};
 
 pub fn pcompose(args: &mut env::Args) -> Result<(), PConvertError> {
@@ -445,8 +444,6 @@ pub fn pbenchmark(args: &mut env::Args) -> Result<(), PConvertError> {
     );
     println!("{}", str::from_utf8(&vec![b'-'; 100]).unwrap());
 
-    let dir_arc = Arc::new(dir);
-
     let mut total_benchmark = Benchmark::new();
     for algorithm in algorithms.iter() {
         for compression in compressions.iter() {
@@ -454,7 +451,7 @@ pub fn pbenchmark(args: &mut env::Args) -> Result<(), PConvertError> {
                 let mut benchmark = Benchmark::new();
                 if run_parallel {
                     compose_parallel(
-                        dir_arc.clone(),
+                        &dir,
                         BlendAlgorithm::from_str(&algorithm).unwrap(),
                         Background::Alpha,
                         *compression,
@@ -463,7 +460,7 @@ pub fn pbenchmark(args: &mut env::Args) -> Result<(), PConvertError> {
                     )?;
                 } else {
                     compose(
-                        &dir_arc,
+                        &dir,
                         BlendAlgorithm::from_str(&algorithm).unwrap(),
                         Background::Alpha,
                         *compression,
@@ -574,38 +571,70 @@ fn compose(
 }
 
 fn compose_parallel(
-    dir: Arc<String>,
+    dir: &str,
     algorithm: BlendAlgorithm,
     background: Background,
     compression: CompressionType,
     filter: FilterType,
-    benchmark: &mut Benchmark,
+    _benchmark: &mut Benchmark,
 ) -> Result<(), PConvertError> {
     let demultiply = is_algorithm_multiplied(&algorithm);
+    let algorithm_fn = get_blending_algorithm(&algorithm);
 
     let thread_pool = ThreadPool::new(5)?;
 
-    let (sender, receiver1) = mpsc::channel();
-    let cloned_dir = dir.clone();
-    thread_pool.execute(
-        move || ResultMessage::ImageResult(read_png(format!("{}sole.png", cloned_dir), demultiply)),
-        sender,
-    );
+    // send png reading tasks to multiple threads
+    let png_file_names = vec![
+        "sole.png".to_owned(),
+        "back.png".to_owned(),
+        "front.png".to_owned(),
+        "shoelace.png".to_owned(),
+        format!("background_{}.png", background),
+    ];
 
-    let (sender, receiver2) = mpsc::channel();
-    let cloned_dir = dir.clone();
-    thread_pool.execute(
-        move || ResultMessage::ImageResult(read_png(format!("{}sole.png", cloned_dir), demultiply)),
-        sender,
-    );
-
-    if let ResultMessage::ImageResult(result) = receiver1.recv().unwrap() {
-        println!("#1: {:?}", result?.dimensions());
+    let mut result_channels = Vec::with_capacity(png_file_names.len());
+    for png_file_name in png_file_names {
+        let path = format!("{}{}", dir, png_file_name);
+        println!("{}", path);
+        let result_channel =
+            thread_pool.execute(move || ResultMessage::ImageResult(read_png(path, demultiply)));
+        result_channels.push(result_channel);
     }
 
-    if let ResultMessage::ImageResult(result) = receiver2.recv().unwrap() {
-        println!("#2: {:?}", result?.dimensions());
+    // blending phase
+    let mut bot = match result_channels[0].recv().unwrap() {
+        ResultMessage::ImageResult(result) => result,
+    }?;
+    let top = match result_channels[1].recv().unwrap() {
+        ResultMessage::ImageResult(result) => result,
+    }?;
+    blend_images(&top, &mut bot, &algorithm_fn, &None);
+
+    let top = match result_channels[2].recv().unwrap() {
+        ResultMessage::ImageResult(result) => result,
+    }?;
+    blend_images(&top, &mut bot, &algorithm_fn, &None);
+
+    let top = match result_channels[3].recv().unwrap() {
+        ResultMessage::ImageResult(result) => result,
+    }?;
+    blend_images(&top, &mut bot, &algorithm_fn, &None);
+
+    if demultiply {
+        multiply_image(&mut bot);
     }
+
+    let mut composition = match result_channels[4].recv().unwrap() {
+        ResultMessage::ImageResult(result) => result,
+    }?;
+    blend_images(&bot, &mut composition, &algorithm_fn, &None);
+
+    // write composition png
+    let file_out = format!(
+        "{}result_{}_{}_{:#?}_{:#?}.png",
+        dir, algorithm, background, compression, filter
+    );
+    write_png(file_out, &composition, compression, filter)?;
 
     Ok(())
 }
