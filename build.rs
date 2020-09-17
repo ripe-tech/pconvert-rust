@@ -85,7 +85,6 @@ fn main() {
         .ok()
         .and_then(|output| String::from_utf8(output.stdout).ok())
         .unwrap_or("UNKNOWN".to_string());
-
     let re = Regex::new("rustc ([\\d.\\d.\\d]*)").unwrap();
     let compiler_version = re
         .captures(&compiler_version)
