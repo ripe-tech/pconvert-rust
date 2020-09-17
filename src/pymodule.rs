@@ -28,6 +28,8 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
 
     m.add("FEATURES", constants::FEATURES.to_vec())?;
 
+    m.add("PLATFORM_CPU_BITS", constants::PLATFORM_CPU_BITS)?;
+
     #[pyfn(m, "blend_images")]
     fn blend_images_py(
         bot_path: String,
