@@ -95,11 +95,11 @@ fn main() {
     write_str_constant_to_file(&mut file, "COMPILER_VERSION", &compiler_version);
 
     let re = Regex::new("image = \"(.*)\"").unwrap();
-    let image_crate_version = format!(
+    let libpng_version = format!(
         "image-{}",
         re.captures(TOML).unwrap().get(1).unwrap().as_str()
     );
-    write_str_constant_to_file(&mut file, "LIBPNG_VERSION", &image_crate_version);
+    write_str_constant_to_file(&mut file, "LIBPNG_VERSION", &libpng_version);
 
     write_vec_constant_to_file(&mut file, "FEATURES", vec!["cpu", "python"]);
 
