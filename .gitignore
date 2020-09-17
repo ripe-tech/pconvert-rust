@@ -7,6 +7,8 @@ constants.rs
 
 /.vscode/settings.json
 
+/.eggs
+
 /dist
 /build
 /target
