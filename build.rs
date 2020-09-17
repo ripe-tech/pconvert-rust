@@ -1,13 +1,3 @@
-use chrono::Utc;
-use std::fs::{File, OpenOptions};
-use std::io::Write;
-use std::path::Path;
-use std::process::Command;
-use std::str;
-
-const BUILD_OUT_FILE: &str = "constants.rs";
-const SOURCE_DIR: &str = "./src";
-
 /// Build script (https://doc.rust-lang.org/cargo/reference/build-scripts.html)
 /// This script is executed as the first step in the compilation process.
 /// Here we export metadata constants to a `constants.rs` file which is then imported and used by the remaining crate.
@@ -30,6 +20,19 @@ const SOURCE_DIR: &str = "./src";
 ///     &format!("{}", now_utc.format("%b %d %Y")),
 /// );
 /// ```
+use chrono::Utc;
+use regex::Regex;
+use std::fs::{File, OpenOptions};
+use std::io::Write;
+use std::path::Path;
+use std::process::Command;
+use std::str;
+
+const BUILD_OUT_FILE: &str = "constants.rs";
+const SOURCE_DIR: &str = "./src";
+
+const TOML: &'static str = include_str!("Cargo.toml");
+
 fn main() {
     let dest_path = Path::new(SOURCE_DIR).join(Path::new(BUILD_OUT_FILE));
     let mut file = OpenOptions::new()
@@ -88,7 +91,12 @@ fn main() {
     }
     write_str_constant_to_file(&mut file, "COMPILER_VERSION", &compiler_version);
 
-    write_str_constant_to_file(&mut file, "LIBPNG_VERSION", "UNKNOWN");
+    let re = Regex::new("image = \"(.*)\"").expect("Failed to compile regex");
+    let image_crate_version = format!(
+        "image-{}",
+        re.captures(TOML).unwrap().get(1).unwrap().as_str()
+    );
+    write_str_constant_to_file(&mut file, "LIBPNG_VERSION", &image_crate_version);
 
     write_vec_constant_to_file(&mut file, "FEATURES", vec!["cpu", "python"]);
 
