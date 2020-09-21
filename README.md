@@ -37,7 +37,7 @@ and then run the release binary with:
 ## Usage
 
 ```console
-pconvert-rust
+$ pconvert-rust
 Usage: pconvert-rust <command> [args...]
 where command can be one of the following: compose, convert, benchmark, version
 ```
