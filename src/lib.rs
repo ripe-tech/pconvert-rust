@@ -583,7 +583,8 @@ fn compose_parallel(
 
     let mut thread_pool = ThreadPool::new(5)?;
 
-    // send png reading tasks to multiple threads
+    // sends the PNG reading tasks to multiple threads
+    // these values are hardcoded by the multiple layer files
     let png_file_names = vec![
         "sole.png".to_owned(),
         "back.png".to_owned(),
@@ -601,7 +602,8 @@ fn compose_parallel(
         result_channels.push(result_channel);
     }
 
-    // blending phase
+    // blending phase, will run the multiple layers operation
+    // as expected by the proper execution
     let mut bot = benchmark.execute(Benchmark::add_read_png_time, || {
         match result_channels[0].recv().unwrap() {
             ResultMessage::ImageResult(result) => result,
@@ -649,7 +651,8 @@ fn compose_parallel(
         blend_images(&bot, &mut composition, &algorithm_fn, &None)
     });
 
-    // write composition png
+    // writes the final composition PNG to the output file,
+    // this is considered to be the most expensive operation
     let file_out = format!(
         "{}result_{}_{}_{:#?}_{:#?}.png",
         dir, algorithm, background, compression, filter
