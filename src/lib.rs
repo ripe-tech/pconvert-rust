@@ -4,8 +4,11 @@ mod constants;
 pub mod errors;
 mod utils;
 
-#[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
+#[cfg(not(target_arch = "wasm32"))]
 mod pymodule;
+
+#[cfg(target_arch = "wasm32")]
+mod wasm;
 
 use benchmark::Benchmark;
 use blending::{
@@ -19,18 +22,6 @@ use std::env;
 use std::str;
 use std::str::FromStr;
 use utils::{read_png, write_png};
-
-use wasm_bindgen::prelude::*;
-
-#[wasm_bindgen]
-extern "C" {
-    pub fn alert(s: &str);
-}
-
-#[wasm_bindgen]
-pub fn greet(name: &str) {
-    alert(&format!("Hello, {}!", name));
-}
 
 pub fn pcompose(args: &mut env::Args) -> Result<(), PConvertError> {
     let dir = match args.next() {

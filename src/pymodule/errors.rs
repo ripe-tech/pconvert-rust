@@ -1,3 +1,4 @@
+use crate::errors::PConvertError;
 use pyo3::exceptions::{AttributeError, Exception, IOError, NotImplementedError};
 use pyo3::PyErr;
 

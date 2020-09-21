@@ -1,3 +1,5 @@
+mod errors;
+
 use super::blending::params::{BlendAlgorithmParams, ParamValue};
 use super::blending::{
     blend_images, get_blending_algorithm, is_algorithm_multiplied, BlendAlgorithm,

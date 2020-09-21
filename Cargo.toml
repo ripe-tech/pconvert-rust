@@ -3,6 +3,7 @@ name = "pconvert_rust"
 version = "0.1.8"
 authors = ["Platforme International"]
 edition = "2018"
+build = "build.rs"
 
 [lib]
 name = "pconvert_rust"
@@ -10,9 +11,11 @@ crate-type = ["rlib", "cdylib"]
 
 [dependencies]
 image = "0.23.9"
-wasm-bindgen = "0.2.68"
 
-[dependencies.pyo3]
+[target.'cfg(target_arch = "wasm32")'.dependencies.wasm-bindgen]
+version = "0.2.68"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies.pyo3]
 version = "0.11.1"
 features = ["extension-module"]
 
