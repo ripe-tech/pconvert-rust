@@ -36,25 +36,25 @@ and then run the release binary with:
 
 ## Usage
 
-```console  
-$ pconvert-rust
+```console
+pconvert-rust
 Usage: pconvert-rust <command> [args...]
 where command can be one of the following: compose, convert, benchmark, version
 ```
 
-```console  
+```console
 $ pconvert-rust compose <dir>
 ```
 
-```console  
+```console
 $ pconvert-rust convert <file_in> <file_out>
 ```
 
-```console  
+```console
 $ pconvert-rust benchmark <dir> [--parallel]
 ```
 
-```console  
+```console
 $ pconvert-rust version
 ```
 
