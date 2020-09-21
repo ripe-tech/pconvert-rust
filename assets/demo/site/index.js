@@ -1,10 +1,8 @@
 const js = import("./node_modules/pconvert_rust/pconvert_rust.js");
-// js.then(js => {
-//   js.blend_images("bot", "top", "target", "multiplicative", false);
-//   js.blend_multiple(["path1", "path2", "path3", "path4"], "out", "alpha", ["alpha", "multiplicative"], true);
-// });
 
+const canvas = document.querySelector("canvas#composition");
 const input = document.querySelector("input#files");
+
 input.addEventListener("change", () => execute())
 
 async function execute() {
@@ -13,7 +11,10 @@ async function execute() {
 
   js.then(js => {
     let composition = js.blend_images(top, bot, "multiplicative", false)
-    console.log(composition)
+    canvas.width = composition.width;
+    canvas.height = composition.height;
+    const context = canvas.getContext("2d");
+    context.putImageData(composition, 0, 0);
   }); 
 }
 
