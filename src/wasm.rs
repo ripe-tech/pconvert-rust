@@ -19,7 +19,7 @@ macro_rules! console_log {
 }
 
 #[wasm_bindgen]
-pub async fn blend_images(
+pub fn blend_images(
     top: ImageData,
     bot: ImageData,
     algorithm: Option<String>,
