@@ -2,6 +2,7 @@ mod benchmark;
 mod blending;
 mod constants;
 pub mod errors;
+mod parallelism;
 mod pymodule;
 mod utils;
 
@@ -13,6 +14,7 @@ use blending::{
 use errors::PConvertError;
 use image::png::{CompressionType, FilterType};
 use image::{ImageFormat, Rgba};
+use parallelism::{ResultMessage, ThreadPool};
 use std::env;
 use std::str;
 use std::str::FromStr;
@@ -415,6 +417,11 @@ pub fn pbenchmark(args: &mut env::Args) -> Result<(), PConvertError> {
         }
     };
 
+    let run_parallel = match args.next() {
+        Some(flag) => flag.eq("--parallel"),
+        _ => false,
+    };
+
     let algorithms = constants::ALGORITHMS;
     let compressions = [
         CompressionType::Default,
@@ -442,14 +449,26 @@ pub fn pbenchmark(args: &mut env::Args) -> Result<(), PConvertError> {
         for compression in compressions.iter() {
             for filter in filters.iter() {
                 let mut benchmark = Benchmark::new();
-                compose(
-                    &dir,
-                    BlendAlgorithm::from_str(&algorithm).unwrap(),
-                    Background::Alpha,
-                    *compression,
-                    *filter,
-                    &mut benchmark,
-                )?;
+                if run_parallel {
+                    compose_parallel(
+                        &dir,
+                        BlendAlgorithm::from_str(&algorithm).unwrap(),
+                        Background::Alpha,
+                        *compression,
+                        *filter,
+                        &mut benchmark,
+                    )?;
+                } else {
+                    compose(
+                        &dir,
+                        BlendAlgorithm::from_str(&algorithm).unwrap(),
+                        Background::Alpha,
+                        *compression,
+                        *filter,
+                        &mut benchmark,
+                    )?;
+                }
+
                 println!(
                     "{:<20}{:<20}{:<20}{:<20}",
                     algorithm,
@@ -540,6 +559,100 @@ fn compose(
         blend_images(&bot, &mut composition, &algorithm_fn, &None)
     });
 
+    let file_out = format!(
+        "{}result_{}_{}_{:#?}_{:#?}.png",
+        dir, algorithm, background, compression, filter
+    );
+    benchmark.execute(Benchmark::add_write_png_time, || {
+        write_png(file_out, &composition, compression, filter)
+    })?;
+
+    Ok(())
+}
+
+fn compose_parallel(
+    dir: &str,
+    algorithm: BlendAlgorithm,
+    background: Background,
+    compression: CompressionType,
+    filter: FilterType,
+    benchmark: &mut Benchmark,
+) -> Result<(), PConvertError> {
+    let demultiply = is_algorithm_multiplied(&algorithm);
+    let algorithm_fn = get_blending_algorithm(&algorithm);
+
+    let mut thread_pool = ThreadPool::new(5)?;
+
+    // sends the PNG reading tasks to multiple threads
+    // these values are hardcoded by the multiple layer files
+    let png_file_names = vec![
+        "sole.png".to_owned(),
+        "back.png".to_owned(),
+        "front.png".to_owned(),
+        "shoelace.png".to_owned(),
+        format!("background_{}.png", background),
+    ];
+
+    let mut result_channels = Vec::with_capacity(png_file_names.len());
+    thread_pool.start();
+    for png_file_name in png_file_names {
+        let path = format!("{}{}", dir, png_file_name);
+        let result_channel =
+            thread_pool.execute(move || ResultMessage::ImageResult(read_png(path, demultiply)));
+        result_channels.push(result_channel);
+    }
+
+    // blending phase, will run the multiple layers operation
+    // as expected by the proper execution
+    let mut bot = benchmark.execute(Benchmark::add_read_png_time, || {
+        match result_channels[0].recv().unwrap() {
+            ResultMessage::ImageResult(result) => result,
+        }
+    })?;
+
+    let top = benchmark.execute(Benchmark::add_read_png_time, || {
+        match result_channels[1].recv().unwrap() {
+            ResultMessage::ImageResult(result) => result,
+        }
+    })?;
+    benchmark.execute(Benchmark::add_blend_time, || {
+        blend_images(&top, &mut bot, &algorithm_fn, &None)
+    });
+
+    let top = benchmark.execute(Benchmark::add_read_png_time, || {
+        match result_channels[2].recv().unwrap() {
+            ResultMessage::ImageResult(result) => result,
+        }
+    })?;
+    benchmark.execute(Benchmark::add_blend_time, || {
+        blend_images(&top, &mut bot, &algorithm_fn, &None)
+    });
+
+    let top = benchmark.execute(Benchmark::add_read_png_time, || {
+        match result_channels[3].recv().unwrap() {
+            ResultMessage::ImageResult(result) => result,
+        }
+    })?;
+    benchmark.execute(Benchmark::add_blend_time, || {
+        blend_images(&top, &mut bot, &algorithm_fn, &None)
+    });
+
+    if demultiply {
+        multiply_image(&mut bot);
+    }
+
+    let mut composition =
+        benchmark.execute(Benchmark::add_read_png_time, || {
+            match result_channels[4].recv().unwrap() {
+                ResultMessage::ImageResult(result) => result,
+            }
+        })?;
+    benchmark.execute(Benchmark::add_blend_time, || {
+        blend_images(&bot, &mut composition, &algorithm_fn, &None)
+    });
+
+    // writes the final composition PNG to the output file,
+    // this is considered to be the most expensive operation
     let file_out = format!(
         "{}result_{}_{}_{:#?}_{:#?}.png",
         dir, algorithm, background, compression, filter
