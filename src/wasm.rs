@@ -2,10 +2,13 @@ use super::blending;
 use super::blending::{get_blending_algorithm, BlendAlgorithm};
 use crate::errors::PConvertError;
 use image::{ImageBuffer, RgbaImage};
+use js_sys::{Function, Promise};
 use std::str::FromStr;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::Clamped;
-use web_sys::ImageData;
+use wasm_bindgen::JsCast;
+use wasm_bindgen_futures::JsFuture;
+use web_sys::{File, HtmlCanvasElement, HtmlImageElement, ImageData, Url};
 
 #[wasm_bindgen]
 extern "C" {
@@ -18,7 +21,18 @@ macro_rules! console_log {
 }
 
 #[wasm_bindgen]
-pub fn blend_images(
+pub async fn blend_images(top: File, bot: File) -> Result<ImageData, JsValue> {
+    let top = JsFuture::from(load_image(top)).await?;
+    let bot = JsFuture::from(load_image(bot)).await?;
+
+    let top = get_image_data(top.into())?;
+    let bot = get_image_data(bot.into())?;
+
+    blend_images_data(top, bot, None, None)
+}
+
+#[wasm_bindgen]
+pub fn blend_images_data(
     top: ImageData,
     bot: ImageData,
     algorithm: Option<String>,
@@ -74,6 +88,41 @@ pub fn blend_multiple(
     console_log!("{:?}", is_inline);
 
     Ok(())
+}
+
+fn load_image(file: File) -> Promise {
+    Promise::new(&mut |resolve, reject| {
+        let img = HtmlImageElement::new().unwrap();
+        let on_load = Function::new_with_args("resolve, img, e", "resolve(img)");
+        let on_load = on_load.bind2(&JsValue::NULL, &resolve, &img);
+        img.set_onload(Some(&on_load));
+
+        let on_err = Function::new_with_args("reject", "reject(\"Failed loading image URL\")");
+        let on_err = on_err.bind1(&JsValue::NULL, &reject);
+        img.set_onerror(Some(&on_err));
+
+        let url = Url::create_object_url_with_blob(&file).unwrap();
+        img.set_src(&url);
+    })
+}
+
+fn get_image_data(img: HtmlImageElement) -> Result<ImageData, JsValue> {
+    let document = web_sys::window().unwrap().document().unwrap();
+    let canvas = document.create_element("canvas").unwrap();
+    let canvas: HtmlCanvasElement = canvas
+        .dyn_into::<web_sys::HtmlCanvasElement>()
+        .map_err(|_| ())
+        .unwrap();
+    canvas.set_width(img.width());
+    canvas.set_height(img.height());
+    let context = canvas
+        .get_context("2d")
+        .unwrap()
+        .unwrap()
+        .dyn_into::<web_sys::CanvasRenderingContext2d>()
+        .unwrap();
+    context.draw_image_with_html_image_element(&img, 0.0, 0.0)?;
+    context.get_image_data(0.0, 0.0, img.width().into(), img.height().into())
 }
 
 impl From<PConvertError> for JsValue {
