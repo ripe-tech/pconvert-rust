@@ -1,8 +1,12 @@
 use super::blending;
+use super::blending::params::{BlendAlgorithmParams, ParamValue};
 use super::blending::{get_blending_algorithm, BlendAlgorithm};
 use crate::errors::PConvertError;
 use image::{ImageBuffer, RgbaImage};
-use js_sys::{Function, Promise};
+use js_sys::{try_iter, Function, Promise};
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use std::collections::HashMap;
 use std::str::FromStr;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::Clamped;
@@ -21,14 +25,19 @@ macro_rules! console_log {
 }
 
 #[wasm_bindgen]
-pub async fn blend_images(top: File, bot: File) -> Result<ImageData, JsValue> {
+pub async fn blend_images(
+    top: File,
+    bot: File,
+    algorithm: Option<String>,
+    is_inline: Option<bool>,
+) -> Result<ImageData, JsValue> {
     let top = JsFuture::from(load_image(top)).await?;
     let bot = JsFuture::from(load_image(bot)).await?;
 
     let top = get_image_data(top.into())?;
     let bot = get_image_data(bot.into())?;
 
-    blend_images_data(top, bot, None, None)
+    blend_images_data(top, bot, algorithm, is_inline)
 }
 
 #[wasm_bindgen]
@@ -39,13 +48,7 @@ pub fn blend_images_data(
     is_inline: Option<bool>,
 ) -> Result<ImageData, JsValue> {
     let algorithm = algorithm.unwrap_or(String::from("multiplicative"));
-    let algorithm = match BlendAlgorithm::from_str(&algorithm) {
-        Ok(algorithm) => Ok(algorithm),
-        Err(algorithm) => Err(PConvertError::ArgumentError(format!(
-            "ArgumentError: invalid algorithm '{}'",
-            algorithm
-        ))),
-    }?;
+    let algorithm = build_algorithm(&algorithm)?;
 
     let _is_inline = is_inline.unwrap_or(false);
 
@@ -67,25 +70,32 @@ pub fn blend_images_data(
 }
 
 #[wasm_bindgen]
-pub fn blend_multiple(
-    img_paths: &JsValue,
-    out_path: String,
+pub fn blend_multiple_data(
+    images_data: &JsValue,
     algorithm: Option<String>,
     algorithms: Option<Box<[JsValue]>>,
     is_inline: Option<bool>,
 ) -> Result<(), JsValue> {
-    console_log!("[blend_multiple]");
+    // let mut images_data = try_iter(images_data).unwrap().unwrap();
+    // while let Some(Ok(img_data)) = images_data.next() {
+    //     console_log!("{:?}", img_data);
+    // }
 
-    console_log!("{:?}", img_paths);
-    // let img_paths = try_iter(img_paths).unwrap().unwrap();
+    let num_images = 4;
+    let algorithms_to_apply: Vec<(BlendAlgorithm, Option<BlendAlgorithmParams>)> =
+        if let Some(algorithms) = algorithms {
+            build_params(algorithms)?
+        } else if let Some(algorithm) = algorithm {
+            let algorithm = build_algorithm(&algorithm)?;
+            vec![(algorithm, None); num_images - 1]
+        } else {
+            vec![(BlendAlgorithm::Multiplicative, None); num_images - 1]
+        };
 
-    console_log!("{}", out_path);
-
-    console_log!("{:?}", algorithm);
-
-    console_log!("{:?}", algorithms);
-
-    console_log!("{:?}", is_inline);
+    
+    for (k,v) in algorithms_to_apply {
+        console_log!("{:?} {:?}", k, v);
+    }
 
     Ok(())
 }
@@ -125,6 +135,51 @@ fn get_image_data(img: HtmlImageElement) -> Result<ImageData, JsValue> {
     context.get_image_data(0.0, 0.0, img.width().into(), img.height().into())
 }
 
+fn build_algorithm(algorithm: &String) -> Result<BlendAlgorithm, PConvertError> {
+    match BlendAlgorithm::from_str(&algorithm) {
+        Ok(algorithm) => Ok(algorithm),
+        Err(algorithm) => Err(PConvertError::ArgumentError(format!(
+            "Invalid algorithm '{}'",
+            algorithm
+        ))),
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+struct JSONParams {
+    algorithm: String,
+    params: HashMap<String, Value>,
+}
+
+fn build_params(
+    algorithms: Box<[JsValue]>,
+) -> Result<Vec<(BlendAlgorithm, Option<BlendAlgorithmParams>)>, PConvertError> {
+    let mut result = Vec::new();
+
+    for i in 0..algorithms.len() {
+        let element = &algorithms[i];
+        if element.is_string() {
+            let algorithm =
+                build_algorithm(&element.as_string().unwrap_or("multiplicative".to_string()))?;
+
+            result.push((algorithm, None));
+        } else if element.is_object() {
+            let params: JSONParams = element.into_serde::<JSONParams>().unwrap();
+            let algorithm = build_algorithm(&params.algorithm)?;
+
+            let mut blending_params = BlendAlgorithmParams::new();
+            for (param_name, param_value) in params.params {
+                let param_value: ParamValue = param_value.into();
+                blending_params.insert(param_name, param_value);
+            }
+
+            result.push((algorithm, Some(blending_params)));
+        }
+    }
+
+    Ok(result)
+}
+
 impl From<PConvertError> for JsValue {
     fn from(err: PConvertError) -> JsValue {
         match err {
@@ -132,6 +187,25 @@ impl From<PConvertError> for JsValue {
             PConvertError::ImageLibError(err) => JsValue::from_str(&err.to_string()),
             PConvertError::UnsupportedImageTypeError => JsValue::from_str(&err.to_string()),
             PConvertError::IOError(err) => JsValue::from_str(&err.to_string()),
+        }
+    }
+}
+
+impl From<Value> for ParamValue {
+    fn from(value: Value) -> ParamValue {
+        match value {
+            Value::Bool(boolean) => ParamValue::Bool(boolean),
+            Value::String(string) => ParamValue::Str(string),
+            Value::Number(number) => {
+                if number.is_f64() {
+                    ParamValue::Float(number.as_f64().unwrap())
+                } else if number.is_i64() {
+                    ParamValue::Long(number.as_i64().unwrap())
+                } else {
+                    ParamValue::Invalid
+                }
+            }
+            _ => ParamValue::Invalid,
         }
     }
 }

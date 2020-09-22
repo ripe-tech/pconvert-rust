@@ -8,7 +8,8 @@ input.addEventListener("change", () => execute());
 
 const API_FUNCTIONS = {
   blend_images_data: "blend_images_data",
-  blend_images: "blend_images"
+  blend_images: "blend_images",
+  blend_multiple_data: "blend_multiple_data"
 };
 
 async function execute() {
@@ -18,15 +19,33 @@ async function execute() {
     case API_FUNCTIONS.blend_images_data: {
       const top = getImageData(await loadImage(input.files[0]));
       const bot = getImageData(await loadImage(input.files[1]));
-      const composition = pconvert.blend_images_data(top, bot, "multiplicative", false)
+      const composition = pconvert.blend_images_data(top, bot)
       drawComposition(composition);
-    }
       break;
+    }
     case API_FUNCTIONS.blend_images: {
       const top = input.files[0];
       const bot = input.files[1];
       const composition = await pconvert.blend_images(top, bot);
       drawComposition(composition);
+      break;
+    }
+    case API_FUNCTIONS.blend_multiple_data: {
+      const d1 = getImageData(await loadImage(input.files[0]));
+      const d2 = getImageData(await loadImage(input.files[1]));
+      const d3 = getImageData(await loadImage(input.files[2]));
+      const d4 = getImageData(await loadImage(input.files[3]));
+      let data = [d1, d2, d3, d4];
+      let algorithms = ["alpha", "multiplicative", {
+        algorithm: "mask_top",
+        params: {
+          factor: 0.8,
+          tobias: true,
+          alberto: "caeiro",
+          integer: 3,
+        }
+      }];
+      pconvert.blend_multiple_data(data, null, algorithms);
       break;
     }
     default:
