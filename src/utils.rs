@@ -1,5 +1,5 @@
-use super::blending::demultiply_image;
-use super::errors::PConvertError;
+use crate::blending::demultiply_image;
+use crate::errors::PConvertError;
 use image::io::Reader;
 use image::png::{CompressionType, FilterType, PngEncoder};
 use image::{ColorType, DynamicImage, ImageBuffer, ImageFormat, Rgba};

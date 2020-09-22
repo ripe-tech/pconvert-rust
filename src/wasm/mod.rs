@@ -1,20 +1,19 @@
-use super::blending;
-use super::blending::params::{BlendAlgorithmParams, ParamValue};
-use super::blending::{
+mod jstypes;
+mod utils;
+
+use crate::blending;
+use crate::blending::params::BlendAlgorithmParams;
+use crate::blending::{
     demultiply_image, get_blending_algorithm, is_algorithm_multiplied, BlendAlgorithm,
 };
 use crate::errors::PConvertError;
 use image::{ImageBuffer, RgbaImage};
-use js_sys::{try_iter, Function, Promise};
-use serde::{Deserialize, Serialize};
-use serde_json::Value;
-use std::collections::HashMap;
-use std::str::FromStr;
+use js_sys::try_iter;
+use utils::{build_algorithm, build_params, get_image_data, load_image};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::Clamped;
-use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{File, HtmlCanvasElement, HtmlImageElement, ImageData, Url};
+use web_sys::{File, ImageData};
 
 #[wasm_bindgen]
 extern "C" {
@@ -147,116 +146,10 @@ pub fn blend_multiple_data(
 
     let composition_bytes = &mut composition.to_vec();
     let clamped_composition_bytes: Clamped<&mut [u8]> = Clamped(composition_bytes);
-    let result = ImageData::new_with_u8_clamped_array_and_sh(clamped_composition_bytes, composition.width(), composition.height())?;
+    let result = ImageData::new_with_u8_clamped_array_and_sh(
+        clamped_composition_bytes,
+        composition.width(),
+        composition.height(),
+    )?;
     Ok(result)
-}
-
-fn load_image(file: File) -> Promise {
-    Promise::new(&mut |resolve, reject| {
-        let img = HtmlImageElement::new().unwrap();
-        let on_load = Function::new_with_args("resolve, img, e", "resolve(img)");
-        let on_load = on_load.bind2(&JsValue::NULL, &resolve, &img);
-        img.set_onload(Some(&on_load));
-
-        let on_err = Function::new_with_args("reject", "reject(\"Failed loading image URL\")");
-        let on_err = on_err.bind1(&JsValue::NULL, &reject);
-        img.set_onerror(Some(&on_err));
-
-        let url = Url::create_object_url_with_blob(&file).unwrap();
-        img.set_src(&url);
-    })
-}
-
-fn get_image_data(img: HtmlImageElement) -> Result<ImageData, JsValue> {
-    let document = web_sys::window().unwrap().document().unwrap();
-    let canvas = document.create_element("canvas").unwrap();
-    let canvas: HtmlCanvasElement = canvas
-        .dyn_into::<web_sys::HtmlCanvasElement>()
-        .map_err(|_| ())
-        .unwrap();
-    canvas.set_width(img.width());
-    canvas.set_height(img.height());
-    let context = canvas
-        .get_context("2d")
-        .unwrap()
-        .unwrap()
-        .dyn_into::<web_sys::CanvasRenderingContext2d>()
-        .unwrap();
-    context.draw_image_with_html_image_element(&img, 0.0, 0.0)?;
-    context.get_image_data(0.0, 0.0, img.width().into(), img.height().into())
-}
-
-fn build_algorithm(algorithm: &String) -> Result<BlendAlgorithm, PConvertError> {
-    match BlendAlgorithm::from_str(&algorithm) {
-        Ok(algorithm) => Ok(algorithm),
-        Err(algorithm) => Err(PConvertError::ArgumentError(format!(
-            "Invalid algorithm '{}'",
-            algorithm
-        ))),
-    }
-}
-
-#[derive(Serialize, Deserialize)]
-struct JSONParams {
-    algorithm: String,
-    params: HashMap<String, Value>,
-}
-
-fn build_params(
-    algorithms: Box<[JsValue]>,
-) -> Result<Vec<(BlendAlgorithm, Option<BlendAlgorithmParams>)>, PConvertError> {
-    let mut result = Vec::new();
-
-    for i in 0..algorithms.len() {
-        let element = &algorithms[i];
-        if element.is_string() {
-            let algorithm =
-                build_algorithm(&element.as_string().unwrap_or("multiplicative".to_string()))?;
-
-            result.push((algorithm, None));
-        } else if element.is_object() {
-            let params: JSONParams = element.into_serde::<JSONParams>().unwrap();
-            let algorithm = build_algorithm(&params.algorithm)?;
-
-            let mut blending_params = BlendAlgorithmParams::new();
-            for (param_name, param_value) in params.params {
-                let param_value: ParamValue = param_value.into();
-                blending_params.insert(param_name, param_value);
-            }
-
-            result.push((algorithm, Some(blending_params)));
-        }
-    }
-
-    Ok(result)
-}
-
-impl From<PConvertError> for JsValue {
-    fn from(err: PConvertError) -> JsValue {
-        match err {
-            PConvertError::ArgumentError(err) => JsValue::from_str(&err),
-            PConvertError::ImageLibError(err) => JsValue::from_str(&err.to_string()),
-            PConvertError::UnsupportedImageTypeError => JsValue::from_str(&err.to_string()),
-            PConvertError::IOError(err) => JsValue::from_str(&err.to_string()),
-        }
-    }
-}
-
-impl From<Value> for ParamValue {
-    fn from(value: Value) -> ParamValue {
-        match value {
-            Value::Bool(boolean) => ParamValue::Bool(boolean),
-            Value::String(string) => ParamValue::Str(string),
-            Value::Number(number) => {
-                if number.is_f64() {
-                    ParamValue::Float(number.as_f64().unwrap())
-                } else if number.is_i64() {
-                    ParamValue::Long(number.as_i64().unwrap())
-                } else {
-                    ParamValue::Invalid
-                }
-            }
-            _ => ParamValue::Invalid,
-        }
-    }
 }
