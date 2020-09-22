@@ -1,6 +1,8 @@
 use super::blending;
 use super::blending::params::{BlendAlgorithmParams, ParamValue};
-use super::blending::{get_blending_algorithm, BlendAlgorithm};
+use super::blending::{
+    demultiply_image, get_blending_algorithm, is_algorithm_multiplied, BlendAlgorithm,
+};
 use crate::errors::PConvertError;
 use image::{ImageBuffer, RgbaImage};
 use js_sys::{try_iter, Function, Promise};
@@ -53,13 +55,19 @@ pub fn blend_images_data(
     let _is_inline = is_inline.unwrap_or(false);
 
     let algorithm_fn = get_blending_algorithm(&algorithm);
+    let demultiply = is_algorithm_multiplied(&algorithm);
 
     let (width, height) = (top.width(), top.height());
-    let top: RgbaImage = ImageBuffer::from_vec(width, height, top.data().to_vec())
+    let mut top: RgbaImage = ImageBuffer::from_vec(width, height, top.data().to_vec())
         .ok_or_else(|| PConvertError::ArgumentError("Could not parse \"top\"".to_string()))?;
 
     let mut bot: RgbaImage = ImageBuffer::from_vec(width, height, bot.data().to_vec())
         .ok_or_else(|| PConvertError::ArgumentError("Could not parse \"bot\"".to_string()))?;
+
+    if demultiply {
+        demultiply_image(&mut top);
+        demultiply_image(&mut bot);
+    }
 
     blending::blend_images(&top, &mut bot, &algorithm_fn, &None);
 
@@ -71,17 +79,42 @@ pub fn blend_images_data(
 
 #[wasm_bindgen]
 pub fn blend_multiple_data(
-    images_data: &JsValue,
+    images: &JsValue,
     algorithm: Option<String>,
     algorithms: Option<Box<[JsValue]>>,
     is_inline: Option<bool>,
-) -> Result<(), JsValue> {
-    // let mut images_data = try_iter(images_data).unwrap().unwrap();
-    // while let Some(Ok(img_data)) = images_data.next() {
-    //     console_log!("{:?}", img_data);
-    // }
+) -> Result<ImageData, JsValue> {
+    let mut image_buffers: Vec<RgbaImage> = Vec::new();
+    let mut images = try_iter(images).unwrap().unwrap();
 
-    let num_images = 4;
+    while let Some(Ok(img_data)) = images.next() {
+        let img_data: ImageData = img_data.into();
+        let img_buffer: RgbaImage = ImageBuffer::from_vec(
+            img_data.width(),
+            img_data.height(),
+            img_data.data().to_vec(),
+        )
+        .ok_or_else(|| PConvertError::ArgumentError("Could not parse \"bot\"".to_string()))?;
+
+        image_buffers.push(img_buffer);
+    }
+
+    let num_images = image_buffers.len();
+    if num_images < 1 {
+        return Err(JsValue::from(PConvertError::ArgumentError(
+            "'images' must contain at least one path".to_string(),
+        )));
+    }
+
+    if algorithms.is_some() && algorithms.as_ref().unwrap().len() != num_images - 1 {
+        return Err(JsValue::from(PConvertError::ArgumentError(format!(
+            "'algorithms' must be of size {} (one per blending operation)",
+            num_images - 1
+        ))));
+    };
+
+    let _is_inline = is_inline.unwrap_or(false);
+
     let algorithms_to_apply: Vec<(BlendAlgorithm, Option<BlendAlgorithmParams>)> =
         if let Some(algorithms) = algorithms {
             build_params(algorithms)?
@@ -92,12 +125,30 @@ pub fn blend_multiple_data(
             vec![(BlendAlgorithm::Multiplicative, None); num_images - 1]
         };
 
-    
-    for (k,v) in algorithms_to_apply {
-        console_log!("{:?} {:?}", k, v);
+    let mut image_buffers_iter = image_buffers.iter();
+    let first_demultiply = is_algorithm_multiplied(&algorithms_to_apply[0].0);
+    let mut composition = image_buffers_iter.next().unwrap().to_owned();
+    if first_demultiply {
+        demultiply_image(&mut composition);
+    }
+    let mut zip_iter = image_buffers_iter.zip(algorithms_to_apply.iter());
+    while let Some(pair) = zip_iter.next() {
+        let mut current_layer = pair.0.to_owned();
+        let (algorithm, params) = pair.1;
+        let demultiply = is_algorithm_multiplied(&algorithm);
+        let algorithm_fn = get_blending_algorithm(&algorithm);
+
+        if demultiply {
+            demultiply_image(&mut current_layer);
+        }
+
+        blending::blend_images(&current_layer, &mut composition, &algorithm_fn, params);
     }
 
-    Ok(())
+    let composition_bytes = &mut composition.to_vec();
+    let clamped_composition_bytes: Clamped<&mut [u8]> = Clamped(composition_bytes);
+    let result = ImageData::new_with_u8_clamped_array_and_sh(clamped_composition_bytes, composition.width(), composition.height())?;
+    Ok(result)
 }
 
 fn load_image(file: File) -> Promise {

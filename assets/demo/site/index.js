@@ -31,11 +31,11 @@ async function execute() {
       break;
     }
     case API_FUNCTIONS.blend_multiple_data: {
-      const d1 = getImageData(await loadImage(input.files[0]));
-      const d2 = getImageData(await loadImage(input.files[1]));
-      const d3 = getImageData(await loadImage(input.files[2]));
-      const d4 = getImageData(await loadImage(input.files[3]));
-      let data = [d1, d2, d3, d4];
+      const data = [];
+      for(file of input.files){
+        const imageData = getImageData(await loadImage(file));
+        data.push(imageData);
+      }
       let algorithms = ["alpha", "multiplicative", {
         algorithm: "mask_top",
         params: {
@@ -45,7 +45,8 @@ async function execute() {
           integer: 3,
         }
       }];
-      pconvert.blend_multiple_data(data, null, algorithms);
+      const composition = pconvert.blend_multiple_data(data, null, algorithms);
+      drawComposition(composition);
       break;
     }
     default:
