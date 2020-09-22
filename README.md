@@ -4,28 +4,58 @@ The [Rust](https://www.rust-lang.org) version of the famous [P(NG)Convert](https
 
 ## Compiling & Executing
 
-Compile with cargo
-
-```bash
-cargo build
-```
-
-and run binary:
-
-```bash
-./target/debug/pconvert-rust
-```
-
-Or build + run with cargo:
+Build and run with:
 
 ```bash
 cargo run
 ```
 
-## Usage
+Alternatively, compile first with:
 
 ```bash
-pconvert-rust convert <file_in> <file_out>
+cargo build
+```
+
+and then run the binary with:
+
+```bash
+./target/debug/pconvert-rust
+```
+
+Additionally, for better code optimization, compile with the `--release` flag:
+
+```bash
+cargo build --release
+```
+
+and then run the release binary with:
+
+```bash
+./target/release/pconvert-rust
+```
+
+## Usage
+
+```console
+$ pconvert-rust
+Usage: pconvert-rust <command> [args...]
+where command can be one of the following: compose, convert, benchmark, version
+```
+
+```console
+$ pconvert-rust compose <dir>
+```
+
+```console
+$ pconvert-rust convert <file_in> <file_out>
+```
+
+```console
+$ pconvert-rust benchmark <dir> [--parallel]
+```
+
+```console
+$ pconvert-rust version
 ```
 
 ## License

@@ -1,7 +1,9 @@
 [package]
-name = "pconvert_rust"
+name = "pconvert-rust"
 version = "0.1.8"
 authors = ["Platforme International"]
+license = "Apache-2.0"
+repository = "https://github.com/ripe-tech/pconvert-rust"
 edition = "2018"
 build = "build.rs"
 

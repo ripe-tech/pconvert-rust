@@ -5,6 +5,8 @@
 Cargo.lock
 constants.rs
 
+/assets/demo/result*
+
 /.vscode/settings.json
 
 /.eggs
