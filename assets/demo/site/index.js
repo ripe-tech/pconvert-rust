@@ -2,14 +2,16 @@ const js = import("./node_modules/pconvert_rust/pconvert_rust.js");
 
 const canvas = document.querySelector("canvas#composition");
 const input = document.querySelector("input#files");
+const button = document.querySelector("button#metadata");
 const apiFunctionSelect = document.querySelector("div#api select");
 
 input.addEventListener("change", () => execute());
+button.addEventListener("click", () => printPConvertMetadata());
 
 const API_FUNCTIONS = {
   blend_images_data: "blend_images_data",
   blend_images: "blend_images",
-  blend_multiple_data: "blend_multiple_data"
+  blend_multiple_data: "blend_multiple_data",
 };
 
 async function execute() {
@@ -23,6 +25,7 @@ async function execute() {
       drawComposition(composition);
       break;
     }
+
     case API_FUNCTIONS.blend_images: {
       const top = input.files[0];
       const bot = input.files[1];
@@ -30,6 +33,7 @@ async function execute() {
       drawComposition(composition);
       break;
     }
+
     case API_FUNCTIONS.blend_multiple_data: {
       const data = [];
       for(file of input.files){
@@ -49,9 +53,16 @@ async function execute() {
       drawComposition(composition);
       break;
     }
+
     default:
       console.log("Invalid API function");
   }
+}
+
+async function printPConvertMetadata() {
+  const pconvert = await js.then(js => js);
+  const constants = pconvert.get_module_constants();
+  console.log(constants);
 }
 
 function loadImage(url) {

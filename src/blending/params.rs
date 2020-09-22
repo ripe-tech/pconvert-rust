@@ -11,7 +11,7 @@ pub enum ParamValue {
 
     #[cfg(not(target_arch = "wasm32"))]
     Int(i32),
-    
+
     #[cfg(target_arch = "wasm32")]
     Invalid,
 }

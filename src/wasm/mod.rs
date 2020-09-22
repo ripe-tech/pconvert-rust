@@ -6,9 +6,11 @@ use crate::blending::params::BlendAlgorithmParams;
 use crate::blending::{
     demultiply_image, get_blending_algorithm, is_algorithm_multiplied, BlendAlgorithm,
 };
+use crate::constants;
 use crate::errors::PConvertError;
 use image::{ImageBuffer, RgbaImage};
 use js_sys::try_iter;
+use serde_json::json;
 use utils::{build_algorithm, build_params, get_image_data, load_image};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::Clamped;
@@ -152,4 +154,20 @@ pub fn blend_multiple_data(
         composition.height(),
     )?;
     Ok(result)
+}
+
+#[wasm_bindgen]
+pub fn get_module_constants() -> JsValue {
+    JsValue::from_serde(&json!({
+        "COMPILATION_DATE": constants::COMPILATION_DATE,
+        "COMPILATION_TIME": constants::COMPILATION_TIME,
+        "VERSION": constants::VERSION,
+        "ALGORITHMS": constants::ALGORITHMS,
+        "COMPILER": constants::COMPILER,
+        "COMPILER_VERSION": constants::COMPILER_VERSION,
+        "LIBPNG_VERSION": constants::LIBPNG_VERSION,
+        "FEATURES": constants::FEATURES,
+        "PLATFORM_CPU_BITS": constants::PLATFORM_CPU_BITS
+    }))
+    .unwrap()
 }
