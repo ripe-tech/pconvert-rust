@@ -1,8 +1,7 @@
 use super::blending;
-use super::blending::{get_blending_algorithm, is_algorithm_multiplied, BlendAlgorithm};
+use super::blending::{get_blending_algorithm, BlendAlgorithm};
 use crate::errors::PConvertError;
-use image::{ImageBuffer, Rgba, RgbaImage};
-use js_sys::Uint8ClampedArray;
+use image::{ImageBuffer, RgbaImage};
 use std::str::FromStr;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::Clamped;
@@ -26,8 +25,6 @@ pub fn blend_images(
     is_inline: Option<bool>,
 ) -> Result<ImageData, JsValue> {
     let algorithm = algorithm.unwrap_or(String::from("multiplicative"));
-    let is_inline = is_inline.unwrap_or(false);
-
     let algorithm = match BlendAlgorithm::from_str(&algorithm) {
         Ok(algorithm) => Ok(algorithm),
         Err(algorithm) => Err(PConvertError::ArgumentError(format!(
@@ -36,21 +33,22 @@ pub fn blend_images(
         ))),
     }?;
 
-    let demultiply = is_algorithm_multiplied(&algorithm);
+    let _is_inline = is_inline.unwrap_or(false);
+
     let algorithm_fn = get_blending_algorithm(&algorithm);
 
     let (width, height) = (top.width(), top.height());
-    let top: RgbaImage = ImageBuffer::from_vec(top.width(), top.height(), top.data().to_vec())
+    let top: RgbaImage = ImageBuffer::from_vec(width, height, top.data().to_vec())
         .ok_or_else(|| PConvertError::ArgumentError("Could not parse \"top\"".to_string()))?;
 
-    let mut bot: RgbaImage = ImageBuffer::from_vec(bot.width(), bot.height(), bot.data().to_vec())
+    let mut bot: RgbaImage = ImageBuffer::from_vec(width, height, bot.data().to_vec())
         .ok_or_else(|| PConvertError::ArgumentError("Could not parse \"bot\"".to_string()))?;
 
     blending::blend_images(&top, &mut bot, &algorithm_fn, &None);
 
-    let y = &mut bot.to_vec();
-    let x: Clamped<&mut [u8]> = Clamped(y);
-    let result = ImageData::new_with_u8_clamped_array_and_sh(x, width, height)?;
+    let bot_bytes = &mut bot.to_vec();
+    let clamped_bot_bytes: Clamped<&mut [u8]> = Clamped(bot_bytes);
+    let result = ImageData::new_with_u8_clamped_array_and_sh(clamped_bot_bytes, width, height)?;
     Ok(result)
 }
 
