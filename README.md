@@ -58,6 +58,25 @@ $ pconvert-rust benchmark <dir> [--parallel]
 $ pconvert-rust version
 ```
 
+## WebAssembly (WASM)
+
+### Compiling
+1. Install [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/)
+
+2. Build the WASM package with:
+    ```bash
+    wasm-pack build --release
+    ```
+    The resultant WASM package is in `pkg/` 
+
+### Using the WASM package
+
+The WASM package can be used by importing:
+
+```js
+const js = import("pconvert_rust.js");
+```
+
 ## License
 
 P(NG)Convert Rust is currently licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/).
