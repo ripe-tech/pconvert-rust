@@ -41,8 +41,8 @@ pub fn write_png(
 pub fn write_png_parallel(
     file_out: String,
     png: &ImageBuffer<Rgba<u8>, Vec<u8>>,
-    _compression: CompressionType,
-    _filter: FilterType,
+    compression: CompressionType,
+    filter: FilterType,
 ) -> Result<(), PConvertError> {
     let writer = File::create(file_out)?;
 
@@ -50,12 +50,11 @@ pub fn write_png_parallel(
     header.set_size(png.width(), png.height())?;
     header.set_color(mtpng::ColorType::TruecolorAlpha, 8)?;
 
-    let options = mtpng::encoder::Options::new();
-    // options.set_compression_level(level: CompressionLevel)
-    // options.set_filter_mode(filter_mode: Mode<Filter>)
+    let mut options = mtpng::encoder::Options::new();
+    options.set_compression_level(mtpng_compression_from(compression))?;
+    options.set_filter_mode(mtpng::Mode::Fixed(mtpng_filter_from(filter)))?;
 
     let mut encoder = mtpng::encoder::Encoder::new(writer, &options);
-
     encoder.write_header(&header)?;
     encoder.write_image_rows(&png)?;
     encoder.finish()?;
@@ -76,5 +75,25 @@ pub fn min<T: PartialOrd>(x: T, y: T) -> T {
         x
     } else {
         y
+    }
+}
+
+fn mtpng_compression_from(compression: CompressionType) -> mtpng::CompressionLevel {
+    match compression {
+        CompressionType::Default => mtpng::CompressionLevel::Default,
+        CompressionType::Best => mtpng::CompressionLevel::High,
+        CompressionType::Fast => mtpng::CompressionLevel::Fast,
+        _ => mtpng::CompressionLevel::Fast,
+    }
+}
+
+fn mtpng_filter_from(filter: FilterType) -> mtpng::Filter {
+    match filter {
+        FilterType::Avg => mtpng::Filter::Average,
+        FilterType::Paeth => mtpng::Filter::Paeth,
+        FilterType::Sub => mtpng::Filter::Sub,
+        FilterType::Up => mtpng::Filter::Up,
+        FilterType::NoFilter => mtpng::Filter::None,
+        _ => mtpng::Filter::None,
     }
 }
