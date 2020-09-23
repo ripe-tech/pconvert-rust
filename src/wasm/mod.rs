@@ -9,7 +9,7 @@ use crate::blending::{
 use crate::constants;
 use crate::errors::PConvertError;
 use image::{ImageBuffer, RgbaImage};
-use js_sys::try_iter;
+use js_sys::{try_iter, Array};
 use serde_json::json;
 use utils::{build_algorithm, build_params, get_image_data, load_image};
 use wasm_bindgen::prelude::*;
@@ -76,6 +76,24 @@ pub fn blend_images_data(
     let clamped_bot_bytes: Clamped<&mut [u8]> = Clamped(bot_bytes);
     let result = ImageData::new_with_u8_clamped_array_and_sh(clamped_bot_bytes, width, height)?;
     Ok(result)
+}
+
+#[wasm_bindgen]
+pub async fn blend_multiple(
+    images: Array,
+    algorithm: Option<String>,
+    algorithms: Option<Box<[JsValue]>>,
+    is_inline: Option<bool>,
+) -> Result<ImageData, JsValue> {
+    let num_files = images.length();
+    let images_data = Array::new_with_length(num_files);
+    for i in 0..num_files {
+        let img: File = images.get(i).into();
+        let img = JsFuture::from(load_image(img)).await?;
+        let img = get_image_data(img.into())?;
+        images_data.set(i, img.into());
+    }
+    blend_multiple_data(&images_data, algorithm, algorithms, is_inline)
 }
 
 #[wasm_bindgen]

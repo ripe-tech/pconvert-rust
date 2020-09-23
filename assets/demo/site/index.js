@@ -3,6 +3,7 @@ const js = import("./node_modules/pconvert_rust/pconvert_rust.js");
 const canvas = document.querySelector("canvas#composition");
 const input = document.querySelector("input#files");
 const button = document.querySelector("button#metadata");
+const textarea = document.querySelector("textarea#metadata");
 const apiFunctionSelect = document.querySelector("div#api select");
 
 input.addEventListener("change", () => execute());
@@ -12,6 +13,7 @@ const API_FUNCTIONS = {
   blend_images_data: "blend_images_data",
   blend_images: "blend_images",
   blend_multiple_data: "blend_multiple_data",
+  blend_multiple: "blend_multiple"
 };
 
 async function execute() {
@@ -40,16 +42,23 @@ async function execute() {
         const imageData = getImageData(await loadImage(file));
         data.push(imageData);
       }
-      let algorithms = ["alpha", "multiplicative", {
-        algorithm: "mask_top",
-        params: {
-          factor: 0.8,
-          tobias: true,
-          alberto: "caeiro",
-          integer: 3,
-        }
-      }];
-      const composition = pconvert.blend_multiple_data(data, null, algorithms);
+      // Example of a possible 'algorithms' and 'params' list
+      // let algorithms = ["alpha", "multiplicative", {
+      //   algorithm: "mask_top",
+      //   params: {
+      //     factor: 0.8,
+      //     tobias: true,
+      //     alberto: "caeiro",
+      //     integer: 3,
+      //   }
+      // }];
+      const composition = pconvert.blend_multiple_data(data);
+      drawComposition(composition);
+      break;
+    }
+
+    case API_FUNCTIONS.blend_multiple: {
+      const composition = await pconvert.blend_multiple([...input.files]);
       drawComposition(composition);
       break;
     }
@@ -62,7 +71,7 @@ async function execute() {
 async function printPConvertMetadata() {
   const pconvert = await js.then(js => js);
   const constants = pconvert.get_module_constants();
-  console.log(constants);
+  textarea.value = JSON.stringify(constants, undefined, 4);
 }
 
 function loadImage(url) {
