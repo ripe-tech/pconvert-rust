@@ -1,23 +1,56 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>hello-wasm example</title>
-  </head>
-  <body>
-    <input type="file" id="files" accept="image/png" multiple>
-    <canvas id="composition"></canvas>
-    <button id="metadata">PConvert crate metadata</button>
-    <textarea id="metadata" cols=50 rows=25></textarea>
-    <div id="api">
-      <label>pconvert.</label>
-      <select>
-        <option value="blend_multiple">blend_multiple(images, algorithm, algorithms, is_inline)</option>
-        <option value="blend_multiple_data">blend_multiple_data(images, algorithm, algorithms, is_inline)</option>
-        <option value="blend_images">blend_images(top, bot, algorithm, is_inline)</option>
-        <option value="blend_images_data">blend_images_data(top, bot, algorithm, is_inline)</option>
-      </select>
+
+<head>
+  <meta charset="utf-8">
+  <title>P(NG)Convert Rust (WASM)</title>
+  <link rel="stylesheet" href="./index.css">
+</head>
+
+<body>
+  <div id="header">
+    <div id="title">P(NG)Convert Rust</div>
+    <div id="subtitle">WASM Sandbox</div>
+  </div>
+  <div id="content">
+    <div class="flex-grid">
+      <div class="col">
+        <div>
+          <label>Algorithm:</label>
+          <input id="algorithm" type="text">
+        </div>
+        <div>
+          <label>Algorithms:</label>
+          <textarea id="algorithms" rows=20 cols=50></textarea>
+        </div>
+        <div>
+          <input type="file" id="files" accept="image/png" multiple>
+        </div>
+        <button id="blend">Blend</button>
+
+        <div id="api">
+          <select>
+            <option value="blend_multiple">blend_multiple(images, algorithm, algorithms)</option>
+            <option value="blend_multiple_data">blend_multiple_data(images, algorithm, algorithms)</option>
+            <option value="blend_images">blend_images(top, bot, algorithm)</option>
+            <option value="blend_images_data">blend_images_data(top, bot, algorithm)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="col">
+        <canvas id="composition" width=750 height=750>
+        </canvas>
+      </div>
+
+      <div class="col">
+        <div id="metadataContainer">
+          <pre id="metadata"></pre>
+        </div>
+      </div>
     </div>
-    <script src="./index.js"></script>
-  </body>
+  </div>
+  <script src="./index.js"></script>
+</body>
+
 </html>
