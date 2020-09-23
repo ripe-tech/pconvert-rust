@@ -80,19 +80,21 @@ pub fn blend_images_data(
 
 #[wasm_bindgen]
 pub async fn blend_multiple(
-    images: Array,
+    image_files: JsValue,
     algorithm: Option<String>,
     algorithms: Option<Box<[JsValue]>>,
     is_inline: Option<bool>,
 ) -> Result<ImageData, JsValue> {
-    let num_files = images.length();
-    let images_data = Array::new_with_length(num_files);
-    for i in 0..num_files {
-        let img: File = images.get(i).into();
-        let img = JsFuture::from(load_image(img)).await?;
+    let images_data = Array::new();
+    let image_files = try_iter(&image_files).unwrap().unwrap();
+    for file in image_files {
+        let file = file?;
+        let img = JsFuture::from(load_image(file.into())).await?;
+
         let img = get_image_data(img.into())?;
-        images_data.set(i, img.into());
+        images_data.push(&img);
     }
+
     blend_multiple_data(&images_data, algorithm, algorithms, is_inline)
 }
 

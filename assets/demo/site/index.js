@@ -58,7 +58,7 @@ async function execute() {
     }
 
     case API_FUNCTIONS.blend_multiple: {
-      const composition = await pconvert.blend_multiple([...input.files]);
+      const composition = await pconvert.blend_multiple(input.files);
       drawComposition(composition);
       break;
     }
