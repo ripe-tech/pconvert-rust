@@ -1,4 +1,4 @@
-use super::params::{BlendAlgorithmParams, ParamValue};
+use crate::blending::params::{BlendAlgorithmParams, ParamValue};
 use crate::utils::{max, min};
 use image::Rgba;
 

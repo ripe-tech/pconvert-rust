@@ -1,7 +1,7 @@
-use super::jstypes::JSONParams;
 use crate::blending::params::{BlendAlgorithmParams, ParamValue};
 use crate::blending::BlendAlgorithm;
 use crate::errors::PConvertError;
+use crate::wasm::jstypes::JSONParams;
 use js_sys::{Function, Promise};
 use std::str::FromStr;
 use wasm_bindgen::prelude::*;
