@@ -23,7 +23,7 @@ wasm-bindgen-futures = "0.4"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies.web-sys]
 version = "0.3"
-features = ["File", "ImageData", "HtmlImageElement", "Url", "Event", "Window", "Document", "CanvasRenderingContext2d", "HtmlCanvasElement"]
+features =  ["CanvasRenderingContext2d", "Document", "File", "HtmlCanvasElement", "HtmlImageElement", "ImageData", "Url", "Window"]
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies.pyo3]
 version = "0.11.1"
