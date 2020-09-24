@@ -3,7 +3,7 @@ mod utils;
 
 use crate::blending::params::{BlendAlgorithmParams, Options};
 use crate::blending::{
-    blend_images, get_blending_algorithm, is_algorithm_multiplied, BlendAlgorithm,
+    blend_images, demultiply_image, get_blending_algorithm, is_algorithm_multiplied, BlendAlgorithm,
 };
 use crate::constants;
 use crate::errors::PConvertError;
@@ -11,6 +11,7 @@ use crate::parallelism::{ResultMessage, ThreadPool};
 use crate::utils::{read_png, write_png, write_png_parallel};
 use pyo3::prelude::*;
 use pyo3::types::PySequence;
+use std::sync::mpsc;
 use utils::{
     build_algorithm, build_params, get_compression_type, get_filter_type, get_num_threads,
 };
@@ -265,21 +266,34 @@ fn blend_multiple_multi_thread(
     let mut thread_pool = ThreadPool::new(num_threads as usize)?;
     thread_pool.start();
 
-    let mut img_paths_iter = img_paths.iter()?;
-    let first_path = img_paths_iter.next().unwrap()?.to_string();
-    let first_demultiply = is_algorithm_multiplied(&algorithms_to_apply[0].0);
+    let mut png_channels: Vec<mpsc::Receiver<ResultMessage>> = Vec::with_capacity(num_images);
+    for path in img_paths.iter()? {
+        let path = path?.to_string();
+        let result_channel = thread_pool.execute(move || -> ResultMessage {
+            ResultMessage::ImageResult(read_png(path, false))
+        });
+        png_channels.push(result_channel);
+    }
 
-    //get paths all in one vec
-    //map to async call get channel vec
-    //iterate algorithms
-    let mut composition = read_png(first_path, first_demultiply)?;
-    let mut zip_iter = img_paths_iter.zip(algorithms_to_apply.iter());
-    while let Some(pair) = zip_iter.next() {
-        let path = pair.0?.extract::<String>()?;
-        let (algorithm, algorithm_params) = pair.1;
+    let first_demultiply = is_algorithm_multiplied(&algorithms_to_apply[0].0);
+    let mut composition = match png_channels[0].recv().unwrap() {
+        ResultMessage::ImageResult(result) => result,
+    }?;
+    if first_demultiply {
+        demultiply_image(&mut composition)
+    }
+
+    for i in 1..png_channels.len() {
+        let (algorithm, algorithm_params) = &algorithms_to_apply[i-1];
         let demultiply = is_algorithm_multiplied(&algorithm);
         let algorithm_fn = get_blending_algorithm(&algorithm);
-        let current_layer = read_png(path, demultiply)?;
+        let mut current_layer = match png_channels[i].recv().unwrap() {
+            ResultMessage::ImageResult(result) => result,
+        }?;
+        if demultiply {
+            demultiply_image(&mut current_layer)
+        }
+
         blend_images(
             &current_layer,
             &mut composition,
@@ -290,7 +304,7 @@ fn blend_multiple_multi_thread(
 
     let compression_type = get_compression_type(&options);
     let filter_type = get_filter_type(&options);
-    write_png(out_path, &composition, compression_type, filter_type)?;
+    write_png_parallel(out_path, &composition, compression_type, filter_type)?;
 
     Ok(())
 }
