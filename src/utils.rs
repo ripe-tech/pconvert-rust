@@ -37,6 +37,7 @@ pub fn write_png(
     Ok(encoder.encode(&png, png.width(), png.height(), ColorType::Rgba8)?)
 }
 
+
 pub fn max<T: PartialOrd>(x: T, y: T) -> T {
     if x > y {
         x
@@ -50,5 +51,27 @@ pub fn min<T: PartialOrd>(x: T, y: T) -> T {
         x
     } else {
         y
+    }
+}
+
+pub fn image_compression_from(compression: String) -> CompressionType {
+    match compression.trim().to_lowercase().as_str() {
+        "best" => CompressionType::Best,
+        "default" => CompressionType::Default,
+        "fast" => CompressionType::Fast,
+        "huffman" => CompressionType::Huffman,
+        "rle" => CompressionType::Rle,
+        _ => CompressionType::Fast,
+    }
+}
+
+pub fn image_filter_from(filter: String) -> FilterType {
+    match filter.trim().to_lowercase().as_str() {
+        "avg" => FilterType::Avg,
+        "nofilter" => FilterType::NoFilter,
+        "paeth" => FilterType::Paeth,
+        "sub" => FilterType::Sub,
+        "up" => FilterType::Up,
+        _ => FilterType::NoFilter,
     }
 }

@@ -1,13 +1,14 @@
 mod conversions;
 mod utils;
 
-use crate::blending::params::{BlendAlgorithmParams, Options};
+use crate::blending::params::{BlendAlgorithmParams, Options, Value};
 use crate::blending::{
     blend_images, get_blending_algorithm, is_algorithm_multiplied, BlendAlgorithm,
 };
 use crate::constants;
 use crate::errors::PConvertError;
-use crate::utils::{read_png, write_png};
+use crate::parallelism::{ResultMessage, ThreadPool};
+use crate::utils::{image_compression_from, image_filter_from, read_png, write_png, write_png_parallel};
 use image::png::{CompressionType, FilterType};
 use pyo3::prelude::*;
 use pyo3::types::PySequence;
@@ -42,26 +43,35 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         is_inline: Option<bool>,
         options: Option<Options>,
     ) -> PyResult<()> {
-        let algorithm = algorithm.unwrap_or(String::from("multiplicative"));
-        let algorithm = build_algorithm(&algorithm)?;
+        let num_threads = options.clone().map_or(0, |options| {
+            options
+                .get("num_threads")
+                .map_or(0, |num_threads| match num_threads {
+                    Value::Int(num_threads) => *num_threads,
+                    _ => 0,
+                })
+        });
 
-        let _is_inline = is_inline.unwrap_or(false);
-
-        let demultiply = is_algorithm_multiplied(&algorithm);
-        let algorithm_fn = get_blending_algorithm(&algorithm);
-
-        let mut bot = read_png(bot_path, demultiply)?;
-        let top = read_png(top_path, demultiply)?;
-        blend_images(&top, &mut bot, &algorithm_fn, &None);
-
-        write_png(
-            target_path,
-            &bot,
-            CompressionType::Fast,
-            FilterType::NoFilter,
-        )?;
-
-        Ok(())
+        if num_threads <= 0 {
+            blend_images_single_thread(
+                bot_path,
+                top_path,
+                target_path,
+                algorithm,
+                is_inline,
+                options,
+            )
+        } else {
+            blend_images_multi_thread(
+                bot_path,
+                top_path,
+                target_path,
+                algorithm,
+                is_inline,
+                options,
+                num_threads,
+            )
+        }
     }
 
     #[pyfn(m, "blend_multiple")]
@@ -127,6 +137,104 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
 
         Ok(())
     }
+
+    Ok(())
+}
+
+fn blend_images_single_thread(
+    bot_path: String,
+    top_path: String,
+    target_path: String,
+    algorithm: Option<String>,
+    is_inline: Option<bool>,
+    options: Option<Options>,
+) -> PyResult<()> {
+    let algorithm = algorithm.unwrap_or(String::from("multiplicative"));
+    let algorithm = build_algorithm(&algorithm)?;
+
+    let _is_inline = is_inline.unwrap_or(false);
+
+    let demultiply = is_algorithm_multiplied(&algorithm);
+    let algorithm_fn = get_blending_algorithm(&algorithm);
+
+    let mut bot = read_png(bot_path, demultiply)?;
+    let top = read_png(top_path, demultiply)?;
+
+    blend_images(&top, &mut bot, &algorithm_fn, &None);
+
+    let compression_type = options.clone().map_or(CompressionType::Fast, |options| {
+        options
+            .get("compression")
+            .map_or(CompressionType::Fast, |compression| match compression {
+                Value::Str(compression) => image_compression_from(compression.to_string()),
+                _ => CompressionType::Fast,
+            })
+    });
+
+    let filter_type = options.clone().map_or(FilterType::NoFilter, |options| {
+        options
+            .get("compression")
+            .map_or(FilterType::NoFilter, |filter| match filter {
+                Value::Str(filter) => image_filter_from(filter.to_string()),
+                _ => FilterType::NoFilter,
+            })
+    });
+
+    write_png(target_path, &bot, compression_type, filter_type)?;
+
+    Ok(())
+}
+
+fn blend_images_multi_thread(
+    bot_path: String,
+    top_path: String,
+    target_path: String,
+    algorithm: Option<String>,
+    is_inline: Option<bool>,
+    options: Option<Options>,
+    num_threads: i32,
+) -> PyResult<()> {
+    let algorithm = algorithm.unwrap_or(String::from("multiplicative"));
+    let algorithm = build_algorithm(&algorithm)?;
+    let _is_inline = is_inline.unwrap_or(false);
+    let demultiply = is_algorithm_multiplied(&algorithm);
+    let algorithm_fn = get_blending_algorithm(&algorithm);
+
+    let mut thread_pool = ThreadPool::new(num_threads as usize)?;
+    thread_pool.start();
+
+    let top_result_channel = thread_pool.execute(move || ResultMessage::ImageResult(read_png(top_path, demultiply)));
+    let bot_result_channel = thread_pool.execute(move || ResultMessage::ImageResult(read_png(bot_path, demultiply)));
+
+    let top = match top_result_channel.recv().unwrap() {
+        ResultMessage::ImageResult(result) => result,
+    }?;
+
+    let mut bot = match bot_result_channel.recv().unwrap() {
+        ResultMessage::ImageResult(result) => result,
+    }?;
+
+    blend_images(&top, &mut bot, &algorithm_fn, &None);
+
+    let compression_type = options.clone().map_or(CompressionType::Fast, |options| {
+        options
+            .get("compression")
+            .map_or(CompressionType::Fast, |compression| match compression {
+                Value::Str(compression) => image_compression_from(compression.to_string()),
+                _ => CompressionType::Fast,
+            })
+    });
+
+    let filter_type = options.clone().map_or(FilterType::NoFilter, |options| {
+        options
+            .get("compression")
+            .map_or(FilterType::NoFilter, |filter| match filter {
+                Value::Str(filter) => image_filter_from(filter.to_string()),
+                _ => FilterType::NoFilter,
+            })
+    });
+
+    write_png_parallel(target_path, &bot, compression_type, filter_type)?;
 
     Ok(())
 }
