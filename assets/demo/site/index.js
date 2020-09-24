@@ -1,12 +1,12 @@
 const js = import("./node_modules/pconvert_rust/pconvert_rust.js");
 
+const apiFunctionSelect = document.querySelector("div#api select");
+const blendButton = document.querySelector("button#blend");
 const canvas = document.querySelector("canvas#composition");
 const inputFiles = document.querySelector("input#files");
 const inputAlgorithm = document.querySelector("input#algorithm");
-const textareaAlgorithms = document.querySelector("textarea#algorithms");
-const apiFunctionSelect = document.querySelector("div#api select");
 const metadata = document.querySelector("pre#metadata");
-const blendButton = document.querySelector("button#blend");
+const textareaAlgorithms = document.querySelector("textarea#algorithms");
 
 blendButton.addEventListener("click", () => blend());
 
@@ -18,7 +18,6 @@ const API_FUNCTIONS = {
 };
 
 async function blend() {
-  console.log(textareaAlgorithms.rows)
   const pconvert = await js.then(js => js);
   const apiFunction = apiFunctionSelect.options[apiFunctionSelect.selectedIndex].value;
 
@@ -80,7 +79,7 @@ async function blend() {
 
   drawComposition(composition);
 
-  console.log(`[${apiFunction}]: ${end_blend - start_blend}ms`);
+  console.log(`[${apiFunction}] ${end_blend - start_blend}ms`);
 }
 
 async function getPConvertMetadata() {
