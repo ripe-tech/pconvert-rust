@@ -72,7 +72,7 @@ pub fn get_compression_type(options: &Option<Options>) -> CompressionType {
 pub fn get_filter_type(options: &Option<Options>) -> FilterType {
     options.clone().map_or(FilterType::NoFilter, |options| {
         options
-            .get("compression")
+            .get("filter")
             .map_or(FilterType::NoFilter, |filter| match filter {
                 Value::Str(filter) => image_filter_from(filter.to_string()),
                 _ => FilterType::NoFilter,
