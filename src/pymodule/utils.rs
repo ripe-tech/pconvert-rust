@@ -1,8 +1,11 @@
+use crate::blending::params::Options;
 use crate::blending::params::{BlendAlgorithmParams, Value};
 use crate::blending::BlendAlgorithm;
 use crate::errors::PConvertError;
+use crate::utils::{image_compression_from, image_filter_from};
+use image::png::{CompressionType, FilterType};
 use pyo3::prelude::*;
-use pyo3::types::{PyBool, PyFloat, PyInt, PyLong, PySequence, PyString};
+use pyo3::types::{PySequence, PyString};
 use std::str::FromStr;
 
 pub fn build_algorithm(algorithm: &String) -> Result<BlendAlgorithm, PyErr> {
@@ -53,4 +56,37 @@ pub fn build_params(
     }
 
     Ok(result)
+}
+
+pub fn get_compression_type(options: &Option<Options>) -> CompressionType {
+    options.clone().map_or(CompressionType::Fast, |options| {
+        options
+            .get("compression")
+            .map_or(CompressionType::Fast, |compression| match compression {
+                Value::Str(compression) => image_compression_from(compression.to_string()),
+                _ => CompressionType::Fast,
+            })
+    })
+}
+
+pub fn get_filter_type(options: &Option<Options>) -> FilterType {
+    options.clone().map_or(FilterType::NoFilter, |options| {
+        options
+            .get("compression")
+            .map_or(FilterType::NoFilter, |filter| match filter {
+                Value::Str(filter) => image_filter_from(filter.to_string()),
+                _ => FilterType::NoFilter,
+            })
+    })
+}
+
+pub fn get_num_threads(options: &Option<Options>) -> i32 {
+    options.clone().map_or(0, |options| {
+        options
+            .get("num_threads")
+            .map_or(0, |num_threads| match num_threads {
+                Value::Int(num_threads) => *num_threads,
+                _ => 0,
+            })
+    })
 }

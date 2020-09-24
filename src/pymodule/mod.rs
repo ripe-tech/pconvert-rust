@@ -1,20 +1,20 @@
 mod conversions;
 mod utils;
 
-use crate::blending::params::{BlendAlgorithmParams, Options, Value};
+use crate::blending::params::{BlendAlgorithmParams, Options};
 use crate::blending::{
     blend_images, get_blending_algorithm, is_algorithm_multiplied, BlendAlgorithm,
 };
 use crate::constants;
 use crate::errors::PConvertError;
 use crate::parallelism::{ResultMessage, ThreadPool};
-use crate::utils::{
-    image_compression_from, image_filter_from, read_png, write_png, write_png_parallel,
-};
+use crate::utils::{read_png, write_png, write_png_parallel};
 use image::png::{CompressionType, FilterType};
 use pyo3::prelude::*;
 use pyo3::types::PySequence;
-use utils::{build_algorithm, build_params};
+use utils::{
+    build_algorithm, build_params, get_compression_type, get_filter_type, get_num_threads,
+};
 
 #[pymodule]
 fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
@@ -45,14 +45,7 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         is_inline: Option<bool>,
         options: Option<Options>,
     ) -> PyResult<()> {
-        let num_threads = options.clone().map_or(0, |options| {
-            options
-                .get("num_threads")
-                .map_or(0, |num_threads| match num_threads {
-                    Value::Int(num_threads) => *num_threads,
-                    _ => 0,
-                })
-        });
+        let num_threads = get_num_threads(&options);
 
         if num_threads <= 0 {
             blend_images_single_thread(
@@ -164,24 +157,8 @@ fn blend_images_single_thread(
 
     blend_images(&top, &mut bot, &algorithm_fn, &None);
 
-    let compression_type = options.clone().map_or(CompressionType::Fast, |options| {
-        options
-            .get("compression")
-            .map_or(CompressionType::Fast, |compression| match compression {
-                Value::Str(compression) => image_compression_from(compression.to_string()),
-                _ => CompressionType::Fast,
-            })
-    });
-
-    let filter_type = options.clone().map_or(FilterType::NoFilter, |options| {
-        options
-            .get("compression")
-            .map_or(FilterType::NoFilter, |filter| match filter {
-                Value::Str(filter) => image_filter_from(filter.to_string()),
-                _ => FilterType::NoFilter,
-            })
-    });
-
+    let compression_type = get_compression_type(&options);
+    let filter_type = get_filter_type(&options);
     write_png(target_path, &bot, compression_type, filter_type)?;
 
     Ok(())
@@ -220,24 +197,8 @@ fn blend_images_multi_thread(
 
     blend_images(&top, &mut bot, &algorithm_fn, &None);
 
-    let compression_type = options.clone().map_or(CompressionType::Fast, |options| {
-        options
-            .get("compression")
-            .map_or(CompressionType::Fast, |compression| match compression {
-                Value::Str(compression) => image_compression_from(compression.to_string()),
-                _ => CompressionType::Fast,
-            })
-    });
-
-    let filter_type = options.clone().map_or(FilterType::NoFilter, |options| {
-        options
-            .get("compression")
-            .map_or(FilterType::NoFilter, |filter| match filter {
-                Value::Str(filter) => image_filter_from(filter.to_string()),
-                _ => FilterType::NoFilter,
-            })
-    });
-
+    let compression_type = get_compression_type(&options);
+    let filter_type = get_filter_type(&options);
     write_png_parallel(target_path, &bot, compression_type, filter_type)?;
 
     Ok(())

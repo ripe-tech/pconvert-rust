@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::str::FromStr;
 
 pub type BlendAlgorithmParams = HashMap<String, Value>;
 pub type Options = HashMap<String, Value>;
