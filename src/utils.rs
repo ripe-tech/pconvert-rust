@@ -3,6 +3,7 @@ use crate::errors::PConvertError;
 use image::io::Reader;
 use image::png::{CompressionType, FilterType, PngEncoder};
 use image::{ColorType, DynamicImage, ImageBuffer, ImageFormat, Rgba};
+use mtpng;
 use std::fs::File;
 use std::io::BufWriter;
 
@@ -37,21 +38,28 @@ pub fn write_png(
     Ok(encoder.encode(&png, png.width(), png.height(), ColorType::Rgba8)?)
 }
 
+pub fn write_png_parallel(
+    file_out: String,
+    png: &ImageBuffer<Rgba<u8>, Vec<u8>>,
+    compression: CompressionType,
+    filter: FilterType,
+) -> Result<(), PConvertError> {
+    let writer = File::create(file_out)?;
 
-pub fn max<T: PartialOrd>(x: T, y: T) -> T {
-    if x > y {
-        x
-    } else {
-        y
-    }
-}
+    let mut header = mtpng::Header::new();
+    header.set_size(png.width(), png.height())?;
+    header.set_color(mtpng::ColorType::TruecolorAlpha, 8)?;
 
-pub fn min<T: PartialOrd>(x: T, y: T) -> T {
-    if x < y {
-        x
-    } else {
-        y
-    }
+    let mut options = mtpng::encoder::Options::new();
+    options.set_compression_level(mtpng_compression_from(compression))?;
+    options.set_filter_mode(mtpng::Mode::Fixed(mtpng_filter_from(filter)))?;
+
+    let mut encoder = mtpng::encoder::Encoder::new(writer, &options);
+    encoder.write_header(&header)?;
+    encoder.write_image_rows(&png)?;
+    encoder.finish()?;
+
+    Ok(())
 }
 
 pub fn image_compression_from(compression: String) -> CompressionType {
@@ -73,5 +81,41 @@ pub fn image_filter_from(filter: String) -> FilterType {
         "sub" => FilterType::Sub,
         "up" => FilterType::Up,
         _ => FilterType::NoFilter,
+    }
+}
+
+fn mtpng_compression_from(compression: CompressionType) -> mtpng::CompressionLevel {
+    match compression {
+        CompressionType::Default => mtpng::CompressionLevel::Default,
+        CompressionType::Best => mtpng::CompressionLevel::High,
+        CompressionType::Fast => mtpng::CompressionLevel::Fast,
+        _ => mtpng::CompressionLevel::Fast,
+    }
+}
+
+fn mtpng_filter_from(filter: FilterType) -> mtpng::Filter {
+    match filter {
+        FilterType::Avg => mtpng::Filter::Average,
+        FilterType::Paeth => mtpng::Filter::Paeth,
+        FilterType::Sub => mtpng::Filter::Sub,
+        FilterType::Up => mtpng::Filter::Up,
+        FilterType::NoFilter => mtpng::Filter::None,
+        _ => mtpng::Filter::None,
+    }
+}
+
+pub fn max<T: PartialOrd>(x: T, y: T) -> T {
+    if x > y {
+        x
+    } else {
+        y
+    }
+}
+
+pub fn min<T: PartialOrd>(x: T, y: T) -> T {
+    if x < y {
+        x
+    } else {
+        y
     }
 }

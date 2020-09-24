@@ -23,7 +23,7 @@ use parallelism::{ResultMessage, ThreadPool};
 use std::env;
 use std::str;
 use std::str::FromStr;
-use utils::{read_png, write_png};
+use utils::{read_png, write_png, write_png_parallel};
 
 pub fn pcompose(args: &mut env::Args) -> Result<(), PConvertError> {
     let dir = match args.next() {
@@ -663,7 +663,7 @@ fn compose_parallel(
         dir, algorithm, background, compression, filter
     );
     benchmark.execute(Benchmark::add_write_png_time, || {
-        write_png(file_out, &composition, compression, filter)
+        write_png_parallel(file_out, &composition, compression, filter)
     })?;
 
     Ok(())

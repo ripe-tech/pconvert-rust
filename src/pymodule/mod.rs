@@ -8,7 +8,9 @@ use crate::blending::{
 use crate::constants;
 use crate::errors::PConvertError;
 use crate::parallelism::{ResultMessage, ThreadPool};
-use crate::utils::{image_compression_from, image_filter_from, read_png, write_png, write_png_parallel};
+use crate::utils::{
+    image_compression_from, image_filter_from, read_png, write_png, write_png_parallel,
+};
 use image::png::{CompressionType, FilterType};
 use pyo3::prelude::*;
 use pyo3::types::PySequence;
@@ -203,8 +205,10 @@ fn blend_images_multi_thread(
     let mut thread_pool = ThreadPool::new(num_threads as usize)?;
     thread_pool.start();
 
-    let top_result_channel = thread_pool.execute(move || ResultMessage::ImageResult(read_png(top_path, demultiply)));
-    let bot_result_channel = thread_pool.execute(move || ResultMessage::ImageResult(read_png(bot_path, demultiply)));
+    let top_result_channel =
+        thread_pool.execute(move || ResultMessage::ImageResult(read_png(top_path, demultiply)));
+    let bot_result_channel =
+        thread_pool.execute(move || ResultMessage::ImageResult(read_png(bot_path, demultiply)));
 
     let top = match top_result_channel.recv().unwrap() {
         ResultMessage::ImageResult(result) => result,
