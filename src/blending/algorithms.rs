@@ -1,4 +1,4 @@
-use crate::blending::params::{BlendAlgorithmParams, ParamValue};
+use crate::blending::params::{BlendAlgorithmParams, Value};
 use crate::utils::{max, min};
 use image::Rgba;
 
@@ -156,7 +156,7 @@ pub fn blend_mask_top(
         .as_ref()
         .and_then(|params| params.get("factor"))
         .and_then(|param| match param {
-            ParamValue::Float(float) => Some(*float),
+            Value::Float(float) => Some(*float),
             _ => None,
         })
         .unwrap_or(1.0) as f32;

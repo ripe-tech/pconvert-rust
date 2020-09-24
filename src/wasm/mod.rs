@@ -1,4 +1,4 @@
-mod jstypes;
+mod conversions;
 mod utils;
 
 use crate::blending;
@@ -145,7 +145,7 @@ pub fn blend_multiple_data(
     let mut zip_iter = image_buffers_iter.zip(algorithms_to_apply.iter());
     while let Some(pair) = zip_iter.next() {
         let mut current_layer = pair.0.to_owned();
-        let (algorithm, params) = pair.1;
+        let (algorithm, algorithm_params) = pair.1;
         let demultiply = is_algorithm_multiplied(&algorithm);
         let algorithm_fn = get_blending_algorithm(&algorithm);
 
@@ -153,7 +153,12 @@ pub fn blend_multiple_data(
             demultiply_image(&mut current_layer);
         }
 
-        blending::blend_images(&current_layer, &mut composition, &algorithm_fn, params);
+        blending::blend_images(
+            &current_layer,
+            &mut composition,
+            &algorithm_fn,
+            algorithm_params,
+        );
     }
 
     let composition_bytes = &mut composition.to_vec();

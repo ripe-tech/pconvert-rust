@@ -1,4 +1,4 @@
-use crate::blending::params::{BlendAlgorithmParams, ParamValue};
+use crate::blending::params::{BlendAlgorithmParams, Value};
 use crate::blending::BlendAlgorithm;
 use crate::errors::PConvertError;
 use pyo3::prelude::*;
@@ -38,27 +38,8 @@ pub fn build_params(
                     {
                         let param_name = property_value.get_item(0)?.extract::<String>()?;
                         let param_value = property_value.get_item(1)?;
-                        if let Ok(boolean) = param_value.cast_as::<PyBool>() {
-                            let boolean = boolean.is_true();
-                            blending_params.insert(param_name, ParamValue::Bool(boolean));
-                        } else if let Ok(float) = param_value.cast_as::<PyFloat>() {
-                            let float = float.value();
-                            blending_params.insert(param_name, ParamValue::Float(float));
-                        } else if let Ok(int) = param_value.cast_as::<PyInt>() {
-                            let int = int.extract::<i32>()?;
-                            blending_params.insert(param_name, ParamValue::Int(int));
-                        } else if let Ok(long) = param_value.cast_as::<PyLong>() {
-                            let long = long.extract::<i64>()?;
-                            blending_params.insert(param_name, ParamValue::Long(long));
-                        } else if let Ok(string) = param_value.cast_as::<PyString>() {
-                            let string = string.to_string()?.into_owned();
-                            blending_params.insert(param_name, ParamValue::Str(string));
-                        } else {
-                            return Err(PyErr::from(PConvertError::ArgumentError(format!(
-                                "Invalid type for parameter {}",
-                                param_name
-                            ))));
-                        }
+                        let param_value = param_value.extract::<Value>()?;
+                        blending_params.insert(param_name, param_value);
                     }
                 }
             } else {

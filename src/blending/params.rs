@@ -1,9 +1,10 @@
 use std::collections::HashMap;
 
-pub type BlendAlgorithmParams = HashMap<String, ParamValue>;
+pub type BlendAlgorithmParams = HashMap<String, Value>;
+pub type Options = HashMap<String, String>;
 
 #[derive(Clone, Debug)]
-pub enum ParamValue {
+pub enum Value {
     Bool(bool),
     Long(i64),
     Float(f64),

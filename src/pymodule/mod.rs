@@ -1,7 +1,7 @@
-mod errors;
+mod conversions;
 mod utils;
 
-use crate::blending::params::BlendAlgorithmParams;
+use crate::blending::params::{BlendAlgorithmParams, Options};
 use crate::blending::{
     blend_images, get_blending_algorithm, is_algorithm_multiplied, BlendAlgorithm,
 };
@@ -40,6 +40,7 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         target_path: String,
         algorithm: Option<String>,
         is_inline: Option<bool>,
+        options: Option<Options>,
     ) -> PyResult<()> {
         let algorithm = algorithm.unwrap_or(String::from("multiplicative"));
         let algorithm = build_algorithm(&algorithm)?;
@@ -105,11 +106,16 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         let mut zip_iter = img_paths_iter.zip(algorithms_to_apply.iter());
         while let Some(pair) = zip_iter.next() {
             let path = pair.0?.extract::<String>()?;
-            let (algorithm, params) = pair.1;
+            let (algorithm, algorithm_params) = pair.1;
             let demultiply = is_algorithm_multiplied(&algorithm);
             let algorithm_fn = get_blending_algorithm(&algorithm);
             let current_layer = read_png(path, demultiply)?;
-            blend_images(&current_layer, &mut composition, &algorithm_fn, params);
+            blend_images(
+                &current_layer,
+                &mut composition,
+                &algorithm_fn,
+                algorithm_params,
+            );
         }
 
         write_png(
