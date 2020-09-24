@@ -1,7 +1,7 @@
-use crate::blending::params::{BlendAlgorithmParams, ParamValue};
+use crate::blending::params::{BlendAlgorithmParams, Value};
 use crate::blending::BlendAlgorithm;
 use crate::errors::PConvertError;
-use crate::wasm::jstypes::JSONParams;
+use crate::wasm::conversions::JSONParams;
 use js_sys::{Function, Promise};
 use std::str::FromStr;
 use wasm_bindgen::prelude::*;
@@ -73,7 +73,7 @@ pub fn build_params(
 
             let mut blending_params = BlendAlgorithmParams::new();
             for (param_name, param_value) in params.params {
-                let param_value: ParamValue = param_value.into();
+                let param_value: Value = param_value.into();
                 blending_params.insert(param_name, param_value);
             }
 

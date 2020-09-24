@@ -1,14 +1,14 @@
-use crate::blending::params::ParamValue;
+use crate::blending::params::Value;
 use crate::errors::PConvertError;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
+use serde_json::Value as JSONValue;
 use std::collections::HashMap;
 use wasm_bindgen::prelude::*;
 
 #[derive(Serialize, Deserialize)]
 pub struct JSONParams {
     pub algorithm: String,
-    pub params: HashMap<String, Value>,
+    pub params: HashMap<String, JSONValue>,
 }
 
 impl From<PConvertError> for JsValue {
@@ -22,21 +22,21 @@ impl From<PConvertError> for JsValue {
     }
 }
 
-impl From<Value> for ParamValue {
-    fn from(value: Value) -> ParamValue {
+impl From<JSONValue> for Value {
+    fn from(value: JSONValue) -> Value {
         match value {
-            Value::Bool(boolean) => ParamValue::Bool(boolean),
-            Value::String(string) => ParamValue::Str(string),
-            Value::Number(number) => {
+            JSONValue::Bool(boolean) => Value::Bool(boolean),
+            JSONValue::String(string) => Value::Str(string),
+            JSONValue::Number(number) => {
                 if number.is_f64() {
-                    ParamValue::Float(number.as_f64().unwrap())
+                    Value::Float(number.as_f64().unwrap())
                 } else if number.is_i64() {
-                    ParamValue::Long(number.as_i64().unwrap())
+                    Value::Long(number.as_i64().unwrap())
                 } else {
-                    ParamValue::Invalid
+                    Value::Invalid
                 }
             }
-            _ => ParamValue::Invalid,
+            _ => Value::Invalid,
         }
     }
 }

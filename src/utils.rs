@@ -3,9 +3,11 @@ use crate::errors::PConvertError;
 use image::io::Reader;
 use image::png::{CompressionType, FilterType, PngEncoder};
 use image::{ColorType, DynamicImage, ImageBuffer, ImageFormat, Rgba};
-use mtpng;
 use std::fs::File;
 use std::io::BufWriter;
+
+#[cfg(not(target_arch = "wasm32"))]
+use mtpng;
 
 pub fn read_png(
     file_in: String,
@@ -38,6 +40,7 @@ pub fn write_png(
     Ok(encoder.encode(&png, png.width(), png.height(), ColorType::Rgba8)?)
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 pub fn write_png_parallel(
     file_out: String,
     png: &ImageBuffer<Rgba<u8>, Vec<u8>>,
@@ -84,6 +87,7 @@ pub fn image_filter_from(filter: String) -> FilterType {
     }
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 fn mtpng_compression_from(compression: CompressionType) -> mtpng::CompressionLevel {
     match compression {
         CompressionType::Default => mtpng::CompressionLevel::Default,
@@ -93,6 +97,7 @@ fn mtpng_compression_from(compression: CompressionType) -> mtpng::CompressionLev
     }
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 fn mtpng_filter_from(filter: FilterType) -> mtpng::Filter {
     match filter {
         FilterType::Avg => mtpng::Filter::Average,

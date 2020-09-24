@@ -23,7 +23,10 @@ use parallelism::{ResultMessage, ThreadPool};
 use std::env;
 use std::str;
 use std::str::FromStr;
-use utils::{read_png, write_png, write_png_parallel};
+use utils::{read_png, write_png};
+
+#[cfg(not(target_arch = "wasm32"))]
+use utils::write_png_parallel;
 
 pub fn pcompose(args: &mut env::Args) -> Result<(), PConvertError> {
     let dir = match args.next() {
@@ -663,7 +666,17 @@ fn compose_parallel(
         dir, algorithm, background, compression, filter
     );
     benchmark.execute(Benchmark::add_write_png_time, || {
-        write_png_parallel(file_out, &composition, compression, filter)
+        #[cfg(target_arch = "wasm32")]
+        {
+            println!("Warning: running on WASM32 target, parallel PNG writing using MTPNG crate is not allowed.");
+            println!("Using single-threaded write_png");
+            write_png(file_out, &composition, compression, filter)
+        }
+
+        #[cfg(not(target_arch = "wasm32"))] 
+        {
+            write_png_parallel(file_out, &composition, compression, filter)
+        }
     })?;
 
     Ok(())

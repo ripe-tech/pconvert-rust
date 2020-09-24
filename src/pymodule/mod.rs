@@ -284,7 +284,7 @@ fn blend_multiple_multi_thread(
     }
 
     for i in 1..png_channels.len() {
-        let (algorithm, algorithm_params) = &algorithms_to_apply[i-1];
+        let (algorithm, algorithm_params) = &algorithms_to_apply[i - 1];
         let demultiply = is_algorithm_multiplied(&algorithm);
         let algorithm_fn = get_blending_algorithm(&algorithm);
         let mut current_layer = match png_channels[i].recv().unwrap() {
