@@ -25,5 +25,8 @@ pconvert.blend_multiple(
         os.path.abspath(f"{PATH_TO_ASSETS}front.png")
     ),
     os.path.abspath("result.destination_over.png"),
-    algorithm = "destination_over"
+    algorithm = "destination_over",
+    options = {
+        "num_threads": 5
+    }
 )
