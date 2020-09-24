@@ -18,15 +18,18 @@ const API_FUNCTIONS = {
 };
 
 async function blend() {
+  console.log(textareaAlgorithms.rows)
   const pconvert = await js.then(js => js);
   const apiFunction = apiFunctionSelect.options[apiFunctionSelect.selectedIndex].value;
+
+  const start_blend = performance.now();
+  let composition;
   switch (apiFunction) {
     case API_FUNCTIONS.blend_images_data: {
       const top = getImageData(await loadImage(inputFiles.files[0]));
       const bot = getImageData(await loadImage(inputFiles.files[1]));
       const algorithm = inputAlgorithm.value;
-      const composition = pconvert.blend_images_data(top, bot, algorithm);
-      drawComposition(composition);
+      composition = pconvert.blend_images_data(top, bot, algorithm == "" ? null : algorithm);
       break;
     }
 
@@ -34,8 +37,7 @@ async function blend() {
       const top = inputFiles.files[0];
       const bot = inputFiles.files[1];
       const algorithm = inputAlgorithm.value;
-      const composition = await pconvert.blend_images(top, bot, algorithm);
-      drawComposition(composition);
+      composition = await pconvert.blend_images(top, bot, algorithm == "" ? null : algorithm);
       break;
     }
 
@@ -46,29 +48,27 @@ async function blend() {
         data.push(imageData);
       }
 
-      const algorithm = inputAlgorithm.value;
-      if (algorithm == "") {
-        const algorithms = JSON.parse(textareaAlgorithms.value)["algorithms"];
-        const composition = pconvert.blend_multiple_data(data, null, algorithms);
-        drawComposition(composition);
+      const algorithms = textareaAlgorithms.value;
+      if (isJSONParsable(algorithms)) {
+        const algorithmsJSON = JSON.parse(algorithms)["algorithms"];
+        composition = await pconvert.blend_multiple_data(data, null, algorithmsJSON);
       }
       else {
-        const composition = pconvert.blend_multiple_data(data, algorithm);
-        drawComposition(composition);
+        const algorithm = inputAlgorithm.value;
+        composition = await pconvert.blend_multiple_data(data, algorithm == "" ? null : algorithm);
       }
       break;
     }
 
     case API_FUNCTIONS.blend_multiple: {
-      const algorithm = inputAlgorithm.value;
-      if (algorithm == "") {
-        const algorithms = JSON.parse(textareaAlgorithms.value)["algorithms"];
-        const composition = await pconvert.blend_multiple(inputFiles.files, null, algorithms);
-        drawComposition(composition);
+      const algorithms = textareaAlgorithms.value;
+      if (isJSONParsable(algorithms)) {
+        const algorithmsJSON = JSON.parse(algorithms)["algorithms"];
+        composition = await pconvert.blend_multiple(inputFiles.files, null, algorithmsJSON);
       }
       else {
-        const composition = await pconvert.blend_multiple(inputFiles.files, algorithm);
-        drawComposition(composition);
+        const algorithm = inputAlgorithm.value;
+        composition = await pconvert.blend_multiple(inputFiles.files, algorithm == "" ? null : algorithm);
       }
       break;
     }
@@ -76,6 +76,11 @@ async function blend() {
     default:
       console.log("Invalid API function");
   }
+  const end_blend = performance.now();
+
+  drawComposition(composition);
+
+  console.log(`[${apiFunction}]: ${end_blend - start_blend}ms`);
 }
 
 async function getPConvertMetadata() {
@@ -109,6 +114,15 @@ function drawComposition(composition) {
   canvas.height = composition.height;
   const context = canvas.getContext("2d");
   context.putImageData(composition, 0, 0);
+}
+
+function isJSONParsable(str) {
+  try {
+    JSON.parse(str);
+  } catch (e) {
+    return false;
+  }
+  return true;
 }
 
 getPConvertMetadata()

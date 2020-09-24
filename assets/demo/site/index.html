@@ -15,27 +15,29 @@
   <div id="content">
     <div class="flex-grid">
       <div class="col">
-        <div>
-          <label>Algorithm:</label>
-          <input id="algorithm" type="text">
-        </div>
-        <div>
-          <label>Algorithms:</label>
-          <textarea id="algorithms" rows=20 cols=50></textarea>
-        </div>
-        <div>
-          <input type="file" id="files" accept="image/png" multiple>
-        </div>
-        <button id="blend">Blend</button>
 
-        <div id="api">
+        <div id="api" class="left-container">
+          <input type="file" id="files" accept="image/png" multiple>
           <select>
             <option value="blend_multiple">blend_multiple(images, algorithm, algorithms)</option>
             <option value="blend_multiple_data">blend_multiple_data(images, algorithm, algorithms)</option>
             <option value="blend_images">blend_images(top, bot, algorithm)</option>
             <option value="blend_images_data">blend_images_data(top, bot, algorithm)</option>
           </select>
+          <button id="blend">Blend</button>
         </div>
+        
+        <div class="left-container">
+          <label>Algorithm</label><br/>
+          <input id="algorithm" type="text">
+        </div>
+
+        <div class="algorithms left-container">
+          <label>Algorithms</label><br/>
+          <textarea id="algorithms" resize></textarea>
+        </div>
+
+        
       </div>
 
       <div class="col">

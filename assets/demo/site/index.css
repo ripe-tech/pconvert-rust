@@ -42,6 +42,12 @@ canvas#composition {
     outline: black 3px solid;
 }
 
+textarea#algorithms {
+    resize: none;
+    width: 100%;
+    height: 100%;
+}
+
 .flex-grid {
     display: flex;
 }
@@ -49,4 +55,16 @@ canvas#composition {
 .col {
     flex: 1;
     padding: 1em;
+}
+
+.left-container {
+    margin-bottom: 10%;
+}
+
+.left-container.algorithms {
+    height: 71%;
+}
+
+input#algorithm {
+    width: 100%;
 }
