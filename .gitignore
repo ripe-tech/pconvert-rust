@@ -5,7 +5,7 @@
 Cargo.lock
 constants.rs
 
-/assets/demo/result*
+result*
 
 /.vscode/settings.json
 

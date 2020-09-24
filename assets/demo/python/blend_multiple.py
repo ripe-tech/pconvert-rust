@@ -6,6 +6,9 @@ import pconvert_rust as pconvert
 
 PATH_TO_ASSETS = "../"
 
+print(f"VERSION: {pconvert.VERSION}")
+print(f"COMPILED ON: {pconvert.COMPILATION_DATE}, {pconvert.COMPILATION_TIME}")
+
 pconvert.blend_multiple(
     (
         os.path.abspath(f"{PATH_TO_ASSETS}sole.png"),
