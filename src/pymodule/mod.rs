@@ -9,7 +9,6 @@ use crate::constants;
 use crate::errors::PConvertError;
 use crate::parallelism::{ResultMessage, ThreadPool};
 use crate::utils::{read_png, write_png, write_png_parallel};
-use image::png::{CompressionType, FilterType};
 use pyo3::prelude::*;
 use pyo3::types::PySequence;
 use utils::{
@@ -46,7 +45,6 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         options: Option<Options>,
     ) -> PyResult<()> {
         let num_threads = get_num_threads(&options);
-
         if num_threads <= 0 {
             blend_images_single_thread(
                 bot_path,
@@ -76,61 +74,24 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         algorithm: Option<String>,
         algorithms: Option<&PySequence>,
         is_inline: Option<bool>,
+        options: Option<Options>,
     ) -> PyResult<()> {
-        let num_images = img_paths.len()? as usize;
-
-        if num_images < 1 {
-            return Err(PyErr::from(PConvertError::ArgumentError(
-                "ArgumentError: 'img_paths' must contain at least one path".to_string(),
-            )));
+        let num_threads = get_num_threads(&options);
+        if num_threads <= 0 {
+            blend_multiple_single_thread(
+                img_paths, out_path, algorithm, algorithms, is_inline, options,
+            )
+        } else {
+            blend_multiple_multi_thread(
+                img_paths,
+                out_path,
+                algorithm,
+                algorithms,
+                is_inline,
+                options,
+                num_threads,
+            )
         }
-
-        if algorithms.is_some() && algorithms.unwrap().len()? != num_images as isize - 1 {
-            return Err(PyErr::from(PConvertError::ArgumentError(format!(
-                "ArgumentError: 'algorithms' must be of size {} (one per blending operation)",
-                num_images - 1
-            ))));
-        };
-
-        let _is_inline = is_inline.unwrap_or(false);
-
-        let algorithms_to_apply: Vec<(BlendAlgorithm, Option<BlendAlgorithmParams>)> =
-            if let Some(algorithms) = algorithms {
-                build_params(algorithms)?
-            } else if let Some(algorithm) = algorithm {
-                let algorithm = build_algorithm(&algorithm)?;
-                vec![(algorithm, None); num_images - 1]
-            } else {
-                vec![(BlendAlgorithm::Multiplicative, None); num_images - 1]
-            };
-
-        let mut img_paths_iter = img_paths.iter()?;
-        let first_path = img_paths_iter.next().unwrap()?.to_string();
-        let first_demultiply = is_algorithm_multiplied(&algorithms_to_apply[0].0);
-        let mut composition = read_png(first_path, first_demultiply)?;
-        let mut zip_iter = img_paths_iter.zip(algorithms_to_apply.iter());
-        while let Some(pair) = zip_iter.next() {
-            let path = pair.0?.extract::<String>()?;
-            let (algorithm, algorithm_params) = pair.1;
-            let demultiply = is_algorithm_multiplied(&algorithm);
-            let algorithm_fn = get_blending_algorithm(&algorithm);
-            let current_layer = read_png(path, demultiply)?;
-            blend_images(
-                &current_layer,
-                &mut composition,
-                &algorithm_fn,
-                algorithm_params,
-            );
-        }
-
-        write_png(
-            out_path,
-            &composition,
-            CompressionType::Fast,
-            FilterType::NoFilter,
-        )?;
-
-        Ok(())
     }
 
     Ok(())
@@ -200,6 +161,136 @@ fn blend_images_multi_thread(
     let compression_type = get_compression_type(&options);
     let filter_type = get_filter_type(&options);
     write_png_parallel(target_path, &bot, compression_type, filter_type)?;
+
+    Ok(())
+}
+
+fn blend_multiple_single_thread(
+    img_paths: &PySequence,
+    out_path: String,
+    algorithm: Option<String>,
+    algorithms: Option<&PySequence>,
+    is_inline: Option<bool>,
+    options: Option<Options>,
+) -> PyResult<()> {
+    let num_images = img_paths.len()? as usize;
+
+    if num_images < 1 {
+        return Err(PyErr::from(PConvertError::ArgumentError(
+            "ArgumentError: 'img_paths' must contain at least one path".to_string(),
+        )));
+    }
+
+    if algorithms.is_some() && algorithms.unwrap().len()? != num_images as isize - 1 {
+        return Err(PyErr::from(PConvertError::ArgumentError(format!(
+            "ArgumentError: 'algorithms' must be of size {} (one per blending operation)",
+            num_images - 1
+        ))));
+    };
+
+    let _is_inline = is_inline.unwrap_or(false);
+
+    let algorithms_to_apply: Vec<(BlendAlgorithm, Option<BlendAlgorithmParams>)> =
+        if let Some(algorithms) = algorithms {
+            build_params(algorithms)?
+        } else if let Some(algorithm) = algorithm {
+            let algorithm = build_algorithm(&algorithm)?;
+            vec![(algorithm, None); num_images - 1]
+        } else {
+            vec![(BlendAlgorithm::Multiplicative, None); num_images - 1]
+        };
+
+    let mut img_paths_iter = img_paths.iter()?;
+    let first_path = img_paths_iter.next().unwrap()?.to_string();
+    let first_demultiply = is_algorithm_multiplied(&algorithms_to_apply[0].0);
+    let mut composition = read_png(first_path, first_demultiply)?;
+    let mut zip_iter = img_paths_iter.zip(algorithms_to_apply.iter());
+    while let Some(pair) = zip_iter.next() {
+        let path = pair.0?.extract::<String>()?;
+        let (algorithm, algorithm_params) = pair.1;
+        let demultiply = is_algorithm_multiplied(&algorithm);
+        let algorithm_fn = get_blending_algorithm(&algorithm);
+        let current_layer = read_png(path, demultiply)?;
+        blend_images(
+            &current_layer,
+            &mut composition,
+            &algorithm_fn,
+            algorithm_params,
+        );
+    }
+
+    let compression_type = get_compression_type(&options);
+    let filter_type = get_filter_type(&options);
+    write_png(out_path, &composition, compression_type, filter_type)?;
+
+    Ok(())
+}
+
+fn blend_multiple_multi_thread(
+    img_paths: &PySequence,
+    out_path: String,
+    algorithm: Option<String>,
+    algorithms: Option<&PySequence>,
+    is_inline: Option<bool>,
+    options: Option<Options>,
+    num_threads: i32,
+) -> PyResult<()> {
+    let num_images = img_paths.len()? as usize;
+
+    if num_images < 1 {
+        return Err(PyErr::from(PConvertError::ArgumentError(
+            "ArgumentError: 'img_paths' must contain at least one path".to_string(),
+        )));
+    }
+
+    if algorithms.is_some() && algorithms.unwrap().len()? != num_images as isize - 1 {
+        return Err(PyErr::from(PConvertError::ArgumentError(format!(
+            "ArgumentError: 'algorithms' must be of size {} (one per blending operation)",
+            num_images - 1
+        ))));
+    };
+
+    let _is_inline = is_inline.unwrap_or(false);
+
+    let algorithms_to_apply: Vec<(BlendAlgorithm, Option<BlendAlgorithmParams>)> =
+        if let Some(algorithms) = algorithms {
+            build_params(algorithms)?
+        } else if let Some(algorithm) = algorithm {
+            let algorithm = build_algorithm(&algorithm)?;
+            vec![(algorithm, None); num_images - 1]
+        } else {
+            vec![(BlendAlgorithm::Multiplicative, None); num_images - 1]
+        };
+
+    let mut thread_pool = ThreadPool::new(num_threads as usize)?;
+    thread_pool.start();
+
+    let mut img_paths_iter = img_paths.iter()?;
+    let first_path = img_paths_iter.next().unwrap()?.to_string();
+    let first_demultiply = is_algorithm_multiplied(&algorithms_to_apply[0].0);
+
+    //get paths all in one vec
+    //map to async call get channel vec
+    //iterate algorithms
+    let mut composition = read_png(first_path, first_demultiply)?;
+    let mut zip_iter = img_paths_iter.zip(algorithms_to_apply.iter());
+    while let Some(pair) = zip_iter.next() {
+        let path = pair.0?.extract::<String>()?;
+        let (algorithm, algorithm_params) = pair.1;
+        let demultiply = is_algorithm_multiplied(&algorithm);
+        let algorithm_fn = get_blending_algorithm(&algorithm);
+        let current_layer = read_png(path, demultiply)?;
+        blend_images(
+            &current_layer,
+            &mut composition,
+            &algorithm_fn,
+            algorithm_params,
+        );
+    }
+
+    let compression_type = get_compression_type(&options);
+    let filter_type = get_filter_type(&options);
+    write_png(out_path, &composition, compression_type, filter_type)?;
 
     Ok(())
 }
