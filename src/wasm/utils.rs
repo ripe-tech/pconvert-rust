@@ -7,9 +7,18 @@ use std::str::FromStr;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{
-    window, Blob, CanvasRenderingContext2d, File, HtmlCanvasElement, HtmlImageElement, ImageData,
-    Url,
+    window, CanvasRenderingContext2d, File, HtmlCanvasElement, HtmlImageElement, ImageData, Url,
 };
+
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = console)]
+    pub fn log(s: &str);
+}
+
+macro_rules! console_log {
+    ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
+}
 
 pub fn load_image(file: File) -> Promise {
     Promise::new(&mut |resolve, reject| {
@@ -46,7 +55,7 @@ pub fn get_image_data(img: HtmlImageElement) -> Result<ImageData, JsValue> {
     context.get_image_data(0.0, 0.0, img.width().into(), img.height().into())
 }
 
-pub fn image_data_to_blob(image_data: ImageData) -> Promise {
+pub fn image_data_to_blob(image_data: ImageData) -> Result<Promise, JsValue> {
     let width = image_data.width();
     let height = image_data.height();
 
@@ -67,12 +76,12 @@ pub fn image_data_to_blob(image_data: ImageData) -> Promise {
         .dyn_into::<CanvasRenderingContext2d>()
         .unwrap();
 
-    context.put_image_data(&image_data, 0.0, 0.0);
+    context.put_image_data(&image_data, 0.0, 0.0)?;
 
-    Promise::new(&mut |resolve, reject| {
+    Ok(Promise::new(&mut |resolve, _reject| {
         // implied 'image/png' format
-        canvas.to_blob(&resolve);
-    })
+        canvas.to_blob(&resolve).unwrap();
+    }))
 }
 
 pub fn build_algorithm(algorithm: &String) -> Result<BlendAlgorithm, PConvertError> {
@@ -112,4 +121,20 @@ pub fn build_params(
     }
 
     Ok(result)
+}
+
+pub fn log_benchmark(algorithm: String, blend_time: f64, read_time: f64, write_time: f64) {
+    console_log!(
+        "{:<20}{:<20}{:<20}{:<20}",
+        algorithm,
+        format!("{:#?}", "compression"),
+        format!("{:#?}", "filter"),
+        format!(
+            "{}ms (blend {}ms, read {}ms, write {}ms)",
+            read_time + blend_time + write_time,
+            blend_time,
+            read_time,
+            write_time
+        )
+    );
 }

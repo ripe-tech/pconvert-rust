@@ -85,10 +85,11 @@ async function blend() {
 
 async function benchmark() {
   const pconvert = await js.then(js => js);
-  const top = inputFiles.files[0];
-  const bot = inputFiles.files[1];
-  const algorithm = inputAlgorithm.value;
-  composition = await pconvert.blend_images_benchmark(top, bot, algorithm == "" ? null : algorithm);  
+  // const top = inputFiles.files[0];
+  // const bot = inputFiles.files[1];
+  // const algorithm = inputAlgorithm.value;
+  const file = await pconvert.blend_multiple_benchmark(inputFiles.files);
+  const composition = getImageData(await loadImage(file));
   drawComposition(composition);
 }
 

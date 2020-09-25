@@ -1,6 +1,8 @@
+#[macro_use]
+mod utils;
+
 mod benchmark;
 mod conversions;
-mod utils;
 
 use crate::blending;
 use crate::blending::params::BlendAlgorithmParams;
@@ -16,18 +18,7 @@ use utils::{build_algorithm, build_params, get_image_data, image_data_to_blob, l
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::Clamped;
 use wasm_bindgen_futures::JsFuture;
-use web_sys::Blob;
 use web_sys::{File, ImageData};
-
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = console)]
-    fn log(s: &str);
-}
-
-macro_rules! console_log {
-    ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
-}
 
 #[wasm_bindgen]
 pub async fn blend_images(
@@ -44,7 +35,9 @@ pub async fn blend_images(
 
     let image_data = blend_images_data(top, bot, algorithm, is_inline)?;
 
-    let image_blob = JsFuture::from(image_data_to_blob(image_data)).await?.into();
+    let image_blob = JsFuture::from(image_data_to_blob(image_data)?)
+        .await?
+        .into();
     File::new_with_blob_sequence(&Array::of1(&image_blob), "result")
 }
 
@@ -102,7 +95,9 @@ pub async fn blend_multiple(
 
     let image_data = blend_multiple_data(&images_data, algorithm, algorithms, is_inline)?;
 
-    let image_blob = JsFuture::from(image_data_to_blob(image_data)).await?.into();
+    let image_blob = JsFuture::from(image_data_to_blob(image_data)?)
+        .await?
+        .into();
     File::new_with_blob_sequence(&Array::of1(&image_blob), "result")
 }
 
