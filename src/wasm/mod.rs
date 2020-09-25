@@ -20,8 +20,8 @@ use wasm_bindgen::Clamped;
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{File, ImageData};
 
-#[wasm_bindgen]
-pub async fn blend_images(
+#[wasm_bindgen(js_name = blendImages)]
+pub async fn blend_images_js(
     top: File,
     bot: File,
     algorithm: Option<String>,
@@ -41,8 +41,8 @@ pub async fn blend_images(
     File::new_with_blob_sequence(&Array::of1(&image_blob), "result")
 }
 
-#[wasm_bindgen]
-pub fn blend_images_data(
+#[wasm_bindgen(js_name = blendImagesData)]
+pub fn blend_images_data_js(
     top: ImageData,
     bot: ImageData,
     algorithm: Option<String>,
@@ -76,8 +76,8 @@ pub fn blend_images_data(
     Ok(result)
 }
 
-#[wasm_bindgen]
-pub async fn blend_multiple(
+#[wasm_bindgen(js_name = blendMultiple)]
+pub async fn blend_multiple_js(
     image_files: JsValue,
     algorithm: Option<String>,
     algorithms: Option<Box<[JsValue]>>,
@@ -101,8 +101,8 @@ pub async fn blend_multiple(
     File::new_with_blob_sequence(&Array::of1(&image_blob), "result")
 }
 
-#[wasm_bindgen]
-pub fn blend_multiple_data(
+#[wasm_bindgen(js_name = blendMultipleData)]
+pub fn blend_multiple_data_js(
     images: &JsValue,
     algorithm: Option<String>,
     algorithms: Option<Box<[JsValue]>>,
@@ -184,8 +184,8 @@ pub fn blend_multiple_data(
     Ok(result)
 }
 
-#[wasm_bindgen]
-pub fn get_module_constants() -> JsValue {
+#[wasm_bindgen(js_name = getModuleConstants)]
+pub fn get_module_constants_js() -> JsValue {
     JsValue::from_serde(&json!({
         "COMPILATION_DATE": constants::COMPILATION_DATE,
         "COMPILATION_TIME": constants::COMPILATION_TIME,

@@ -13,10 +13,10 @@ blendButton.addEventListener("click", () => blend());
 benchmarkButton.addEventListener("click", () => benchmark());
 
 const API_FUNCTIONS = {
-  blend_images_data: "blend_images_data",
-  blend_images: "blend_images",
-  blend_multiple_data: "blend_multiple_data",
-  blend_multiple: "blend_multiple"
+  blendImagesData: "blendImagesData",
+  blendImages: "blendImages",
+  blendMultipleData: "blendMultipleData",
+  blendMultiple: "blendMultiple"
 };
 
 async function blend() {
@@ -25,24 +25,24 @@ async function blend() {
 
   let composition;
   switch (apiFunction) {
-    case API_FUNCTIONS.blend_images_data: {
+    case API_FUNCTIONS.blendImagesData: {
       const top = getImageData(await loadImage(inputFiles.files[0]));
       const bot = getImageData(await loadImage(inputFiles.files[1]));
       const algorithm = inputAlgorithm.value;
-      composition = pconvert.blend_images_data(top, bot, algorithm == "" ? null : algorithm);
+      composition = pconvert.blendImagesData(top, bot, algorithm == "" ? null : algorithm);
       break;
     }
 
-    case API_FUNCTIONS.blend_images: {
+    case API_FUNCTIONS.blendImages: {
       const top = inputFiles.files[0];
       const bot = inputFiles.files[1];
       const algorithm = inputAlgorithm.value;
-      const file = await pconvert.blend_images(top, bot, algorithm == "" ? null : algorithm);
+      const file = await pconvert.blendImages(top, bot, algorithm == "" ? null : algorithm);
       composition = getImageData(await loadImage(file));
       break;
     }
 
-    case API_FUNCTIONS.blend_multiple_data: {
+    case API_FUNCTIONS.blendMultipleData: {
       const data = [];
       for (file of inputFiles.files) {
         const imageData = getImageData(await loadImage(file));
@@ -52,25 +52,25 @@ async function blend() {
       const algorithms = textareaAlgorithms.value;
       if (isJSONParsable(algorithms)) {
         const algorithmsJSON = JSON.parse(algorithms)["algorithms"];
-        composition = await pconvert.blend_multiple_data(data, null, algorithmsJSON);
+        composition = await pconvert.blendMultipleData(data, null, algorithmsJSON);
       }
       else {
         const algorithm = inputAlgorithm.value;
-        composition = await pconvert.blend_multiple_data(data, algorithm == "" ? null : algorithm);
+        composition = await pconvert.blendMultipleData(data, algorithm == "" ? null : algorithm);
       }
       break;
     }
 
-    case API_FUNCTIONS.blend_multiple: {
+    case API_FUNCTIONS.blendMultiple: {
       const algorithms = textareaAlgorithms.value;
       if (isJSONParsable(algorithms)) {
         const algorithmsJSON = JSON.parse(algorithms)["algorithms"];
-        const file = await pconvert.blend_multiple(inputFiles.files, null, algorithmsJSON);
+        const file = await pconvert.blendMultiple(inputFiles.files, null, algorithmsJSON);
         composition = getImageData(await loadImage(file));
       }
       else {
         const algorithm = inputAlgorithm.value;
-        const file = await pconvert.blend_multiple(inputFiles.files, algorithm == "" ? null : algorithm);
+        const file = await pconvert.blendMultiple(inputFiles.files, algorithm == "" ? null : algorithm);
         composition = getImageData(await loadImage(file));
       }
       break;
@@ -89,29 +89,29 @@ async function benchmark() {
 
   let composition;
   switch (apiFunction) {
-    case API_FUNCTIONS.blend_images_data:
-    case API_FUNCTIONS.blend_images:
+    case API_FUNCTIONS.blendImagesData:
+    case API_FUNCTIONS.blendImages:
       {
         const top = inputFiles.files[0];
         const bot = inputFiles.files[1];
         const algorithm = inputAlgorithm.value;
-        const file = await pconvert.blend_images_benchmark(top, bot, algorithm == "" ? null : algorithm);
+        const file = await pconvert.blendImagesBenchmark(top, bot, algorithm == "" ? null : algorithm);
         composition = getImageData(await loadImage(file));
         break;
       }
 
-    case API_FUNCTIONS.blend_multiple_data:
-    case API_FUNCTIONS.blend_multiple:
+    case API_FUNCTIONS.blendMultipleData:
+    case API_FUNCTIONS.blendMultiple:
       {
         const algorithms = textareaAlgorithms.value;
         if (isJSONParsable(algorithms)) {
           const algorithmsJSON = JSON.parse(algorithms)["algorithms"];
-          const file = await pconvert.blend_multiple_benchmark(inputFiles.files, null, algorithmsJSON);
+          const file = await pconvert.blendMultipleBenchmark(inputFiles.files, null, algorithmsJSON);
           composition = getImageData(await loadImage(file));
         }
         else {
           const algorithm = inputAlgorithm.value;
-          const file = await pconvert.blend_multiple_benchmark(inputFiles.files, algorithm == "" ? null : algorithm);
+          const file = await pconvert.blendMultipleBenchmark(inputFiles.files, algorithm == "" ? null : algorithm);
           composition = getImageData(await loadImage(file));
         }
         break;
@@ -125,7 +125,7 @@ async function benchmark() {
 
 async function getPConvertMetadata() {
   const pconvert = await js.then(js => js);
-  const constants = pconvert.get_module_constants();
+  const constants = pconvert.getModuleConstants();
   metadata.innerHTML = JSON.stringify(constants, undefined, 2);
 }
 

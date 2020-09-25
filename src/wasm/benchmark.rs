@@ -5,8 +5,8 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
 use web_sys::File;
 
-#[wasm_bindgen]
-pub async fn blend_images_benchmark(
+#[wasm_bindgen(js_name = blendImagesBenchmark)]
+pub async fn blend_images_benchmark_js(
     top: File,
     bot: File,
     algorithm: Option<String>,
@@ -47,8 +47,8 @@ pub async fn blend_images_benchmark(
     Ok(composition_blob)
 }
 
-#[wasm_bindgen]
-pub async fn blend_multiple_benchmark(
+#[wasm_bindgen(js_name = blendMultipleBenchmark)]
+pub async fn blend_multiple_benchmark_js(
     image_files: JsValue,
     algorithm: Option<String>,
     algorithms: Option<Box<[JsValue]>>,
