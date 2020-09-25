@@ -37,7 +37,7 @@ async function blend() {
       const top = inputFiles.files[0];
       const bot = inputFiles.files[1];
       const algorithm = inputAlgorithm.value;
-      const file = await pconvert.blendImages(top, bot, algorithm == "" ? null : algorithm);
+      const file = await pconvert.blendImages(top, bot, "result", algorithm == "" ? null : algorithm);
       composition = getImageData(await loadImage(file));
       break;
     }
@@ -65,12 +65,12 @@ async function blend() {
       const algorithms = textareaAlgorithms.value;
       if (isJSONParsable(algorithms)) {
         const algorithmsJSON = JSON.parse(algorithms)["algorithms"];
-        const file = await pconvert.blendMultiple(inputFiles.files, null, algorithmsJSON);
+        const file = await pconvert.blendMultiple(inputFiles.files, "result", null, algorithmsJSON);
         composition = getImageData(await loadImage(file));
       }
       else {
         const algorithm = inputAlgorithm.value;
-        const file = await pconvert.blendMultiple(inputFiles.files, algorithm == "" ? null : algorithm);
+        const file = await pconvert.blendMultiple(inputFiles.files, "result", algorithm == "" ? null : algorithm);
         composition = getImageData(await loadImage(file));
       }
       break;
@@ -95,7 +95,7 @@ async function benchmark() {
         const top = inputFiles.files[0];
         const bot = inputFiles.files[1];
         const algorithm = inputAlgorithm.value;
-        const file = await pconvert.blendImagesBenchmark(top, bot, algorithm == "" ? null : algorithm);
+        const file = await pconvert.blendImagesBenchmark(top, bot, "result", algorithm == "" ? null : algorithm);
         composition = getImageData(await loadImage(file));
         break;
       }
@@ -106,12 +106,12 @@ async function benchmark() {
         const algorithms = textareaAlgorithms.value;
         if (isJSONParsable(algorithms)) {
           const algorithmsJSON = JSON.parse(algorithms)["algorithms"];
-          const file = await pconvert.blendMultipleBenchmark(inputFiles.files, null, algorithmsJSON);
+          const file = await pconvert.blendMultipleBenchmark(inputFiles.files, "result", null, algorithmsJSON);
           composition = getImageData(await loadImage(file));
         }
         else {
           const algorithm = inputAlgorithm.value;
-          const file = await pconvert.blendMultipleBenchmark(inputFiles.files, algorithm == "" ? null : algorithm);
+          const file = await pconvert.blendMultipleBenchmark(inputFiles.files, "result", algorithm == "" ? null : algorithm);
           composition = getImageData(await loadImage(file));
         }
         break;

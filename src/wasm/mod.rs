@@ -23,6 +23,7 @@ use web_sys::{File, ImageData};
 pub async fn blend_images_js(
     top: File,
     bot: File,
+    target_file_name: String,
     algorithm: Option<String>,
     is_inline: Option<bool>,
 ) -> Result<File, JsValue> {
@@ -37,7 +38,7 @@ pub async fn blend_images_js(
     let image_blob = JsFuture::from(image_data_to_blob(image_data)?)
         .await?
         .into();
-    File::new_with_blob_sequence(&Array::of1(&image_blob), "result")
+    File::new_with_blob_sequence(&Array::of1(&image_blob), &target_file_name)
 }
 
 #[wasm_bindgen(js_name = blendImagesData)]
@@ -78,6 +79,7 @@ pub fn blend_images_data_js(
 #[wasm_bindgen(js_name = blendMultiple)]
 pub async fn blend_multiple_js(
     image_files: JsValue,
+    target_file_name: String,
     algorithm: Option<String>,
     algorithms: Option<Box<[JsValue]>>,
     is_inline: Option<bool>,
@@ -97,7 +99,7 @@ pub async fn blend_multiple_js(
     let image_blob = JsFuture::from(image_data_to_blob(image_data)?)
         .await?
         .into();
-    File::new_with_blob_sequence(&Array::of1(&image_blob), "result")
+    File::new_with_blob_sequence(&Array::of1(&image_blob), &target_file_name)
 }
 
 #[wasm_bindgen(js_name = blendMultipleData)]

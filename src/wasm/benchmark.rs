@@ -9,6 +9,7 @@ use web_sys::File;
 pub async fn blend_images_benchmark_js(
     top: File,
     bot: File,
+    target_file_name: String,
     algorithm: Option<String>,
     is_inline: Option<bool>,
 ) -> Result<File, JsValue> {
@@ -29,7 +30,7 @@ pub async fn blend_images_benchmark_js(
     let composition_blob = JsFuture::from(image_data_to_blob(composition_data)?)
         .await?
         .into();
-    let composition_blob = File::new_with_blob_sequence(&Array::of1(&composition_blob), "result")?;
+    let composition_blob = File::new_with_blob_sequence(&Array::of1(&composition_blob), &target_file_name)?;
 
     let end = js_sys::Date::now();
 
@@ -50,6 +51,7 @@ pub async fn blend_images_benchmark_js(
 #[wasm_bindgen(js_name = blendMultipleBenchmark)]
 pub async fn blend_multiple_benchmark_js(
     image_files: JsValue,
+    target_file_name: String,
     algorithm: Option<String>,
     algorithms: Option<Box<[JsValue]>>,
     is_inline: Option<bool>,
@@ -77,7 +79,7 @@ pub async fn blend_multiple_benchmark_js(
         .await?
         .into();
 
-    let composition_blob = File::new_with_blob_sequence(&Array::of1(&composition_blob), "result")?;
+    let composition_blob = File::new_with_blob_sequence(&Array::of1(&composition_blob), &target_file_name)?;
 
     let end = js_sys::Date::now();
 
