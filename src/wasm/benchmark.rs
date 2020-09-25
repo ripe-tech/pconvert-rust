@@ -1,5 +1,5 @@
 use crate::wasm::utils::{get_image_data, image_data_to_blob, load_image, log_benchmark};
-use crate::wasm::{blend_images_data, blend_multiple_data};
+use crate::wasm::{blend_images_data_js, blend_multiple_data_js};
 use js_sys::{try_iter, Array};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
@@ -22,7 +22,7 @@ pub async fn blend_images_benchmark_js(
 
     let start_blend = js_sys::Date::now();
 
-    let composition_data = blend_images_data(top, bot, algorithm.clone(), is_inline)?;
+    let composition_data = blend_images_data_js(top, bot, algorithm.clone(), is_inline)?;
 
     let start_write = js_sys::Date::now();
 
@@ -69,7 +69,7 @@ pub async fn blend_multiple_benchmark_js(
     let start_blend = js_sys::Date::now();
 
     let composition_data =
-        blend_multiple_data(&images_data, algorithm.clone(), algorithms, is_inline)?;
+        blend_multiple_data_js(&images_data, algorithm.clone(), algorithms, is_inline)?;
 
     let start_write = js_sys::Date::now();
 

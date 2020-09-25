@@ -4,10 +4,9 @@ mod utils;
 mod benchmark;
 mod conversions;
 
-use crate::blending;
-use crate::blending::params::BlendAlgorithmParams;
+use crate::blending::params::{BlendAlgorithmParams, Options};
 use crate::blending::{
-    demultiply_image, get_blending_algorithm, is_algorithm_multiplied, BlendAlgorithm,
+    blend_images, demultiply_image, get_blending_algorithm, is_algorithm_multiplied, BlendAlgorithm,
 };
 use crate::constants;
 use crate::errors::PConvertError;
@@ -33,7 +32,7 @@ pub async fn blend_images_js(
     let top = get_image_data(top.into())?;
     let bot = get_image_data(bot.into())?;
 
-    let image_data = blend_images_data(top, bot, algorithm, is_inline)?;
+    let image_data = blend_images_data_js(top, bot, algorithm, is_inline)?;
 
     let image_blob = JsFuture::from(image_data_to_blob(image_data)?)
         .await?
@@ -68,7 +67,7 @@ pub fn blend_images_data_js(
         demultiply_image(&mut bot);
     }
 
-    blending::blend_images(&top, &mut bot, &algorithm_fn, &None);
+    blend_images(&top, &mut bot, &algorithm_fn, &None);
 
     let bot_bytes = &mut bot.to_vec();
     let clamped_bot_bytes: Clamped<&mut [u8]> = Clamped(bot_bytes);
@@ -93,7 +92,7 @@ pub async fn blend_multiple_js(
         images_data.push(&img);
     }
 
-    let image_data = blend_multiple_data(&images_data, algorithm, algorithms, is_inline)?;
+    let image_data = blend_multiple_data_js(&images_data, algorithm, algorithms, is_inline)?;
 
     let image_blob = JsFuture::from(image_data_to_blob(image_data)?)
         .await?
@@ -166,7 +165,7 @@ pub fn blend_multiple_data_js(
             demultiply_image(&mut current_layer);
         }
 
-        blending::blend_images(
+        blend_images(
             &current_layer,
             &mut composition,
             &algorithm_fn,
