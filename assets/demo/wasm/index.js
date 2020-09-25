@@ -85,11 +85,41 @@ async function blend() {
 
 async function benchmark() {
   const pconvert = await js.then(js => js);
-  // const top = inputFiles.files[0];
-  // const bot = inputFiles.files[1];
-  // const algorithm = inputAlgorithm.value;
-  const file = await pconvert.blend_multiple_benchmark(inputFiles.files);
-  const composition = getImageData(await loadImage(file));
+  const apiFunction = apiFunctionSelect.options[apiFunctionSelect.selectedIndex].value;
+
+  let composition;
+  switch (apiFunction) {
+    case API_FUNCTIONS.blend_images_data:
+    case API_FUNCTIONS.blend_images:
+      {
+        const top = inputFiles.files[0];
+        const bot = inputFiles.files[1];
+        const algorithm = inputAlgorithm.value;
+        const file = await pconvert.blend_images_benchmark(top, bot, algorithm == "" ? null : algorithm);
+        composition = getImageData(await loadImage(file));
+        break;
+      }
+
+    case API_FUNCTIONS.blend_multiple_data:
+    case API_FUNCTIONS.blend_multiple:
+      {
+        const algorithms = textareaAlgorithms.value;
+        if (isJSONParsable(algorithms)) {
+          const algorithmsJSON = JSON.parse(algorithms)["algorithms"];
+          const file = await pconvert.blend_multiple_benchmark(inputFiles.files, null, algorithmsJSON);
+          composition = getImageData(await loadImage(file));
+        }
+        else {
+          const algorithm = inputAlgorithm.value;
+          const file = await pconvert.blend_multiple_benchmark(inputFiles.files, algorithm == "" ? null : algorithm);
+          composition = getImageData(await loadImage(file));
+        }
+        break;
+      }
+
+    default:
+      console.log("Invalid API function");
+  }
   drawComposition(composition);
 }
 
