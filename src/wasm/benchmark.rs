@@ -6,16 +6,6 @@ use wasm_bindgen_futures::JsFuture;
 use web_sys::File;
 
 #[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = console)]
-    pub fn log(s: &str);
-}
-
-macro_rules! console_log {
-    ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
-}
-
-#[wasm_bindgen]
 pub async fn blend_images_benchmark(
     top: File,
     bot: File,
