@@ -1,3 +1,4 @@
+mod benchmark;
 mod conversions;
 mod utils;
 
@@ -11,11 +12,22 @@ use crate::errors::PConvertError;
 use image::{ImageBuffer, RgbaImage};
 use js_sys::{try_iter, Array};
 use serde_json::json;
-use utils::{build_algorithm, build_params, get_image_data, load_image};
+use utils::{build_algorithm, build_params, get_image_data, image_data_to_blob, load_image};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::Clamped;
 use wasm_bindgen_futures::JsFuture;
+use web_sys::Blob;
 use web_sys::{File, ImageData};
+
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &str);
+}
+
+macro_rules! console_log {
+    ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
+}
 
 #[wasm_bindgen]
 pub async fn blend_images(
@@ -23,14 +35,17 @@ pub async fn blend_images(
     bot: File,
     algorithm: Option<String>,
     is_inline: Option<bool>,
-) -> Result<ImageData, JsValue> {
+) -> Result<File, JsValue> {
     let top = JsFuture::from(load_image(top)).await?;
     let bot = JsFuture::from(load_image(bot)).await?;
 
     let top = get_image_data(top.into())?;
     let bot = get_image_data(bot.into())?;
 
-    blend_images_data(top, bot, algorithm, is_inline)
+    let image_data = blend_images_data(top, bot, algorithm, is_inline)?;
+
+    let image_blob = JsFuture::from(image_data_to_blob(image_data)).await?.into();
+    File::new_with_blob_sequence(&Array::of1(&image_blob), "result")
 }
 
 #[wasm_bindgen]
@@ -74,7 +89,7 @@ pub async fn blend_multiple(
     algorithm: Option<String>,
     algorithms: Option<Box<[JsValue]>>,
     is_inline: Option<bool>,
-) -> Result<ImageData, JsValue> {
+) -> Result<File, JsValue> {
     let images_data = Array::new();
     let image_files = try_iter(&image_files).unwrap().unwrap();
     for file in image_files {
@@ -85,7 +100,10 @@ pub async fn blend_multiple(
         images_data.push(&img);
     }
 
-    blend_multiple_data(&images_data, algorithm, algorithms, is_inline)
+    let image_data = blend_multiple_data(&images_data, algorithm, algorithms, is_inline)?;
+
+    let image_blob = JsFuture::from(image_data_to_blob(image_data)).await?.into();
+    File::new_with_blob_sequence(&Array::of1(&image_blob), "result")
 }
 
 #[wasm_bindgen]

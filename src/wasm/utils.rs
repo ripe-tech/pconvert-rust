@@ -7,7 +7,8 @@ use std::str::FromStr;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{
-    window, CanvasRenderingContext2d, File, HtmlCanvasElement, HtmlImageElement, ImageData, Url,
+    window, Blob, CanvasRenderingContext2d, File, HtmlCanvasElement, HtmlImageElement, ImageData,
+    Url,
 };
 
 pub fn load_image(file: File) -> Promise {
@@ -43,6 +44,35 @@ pub fn get_image_data(img: HtmlImageElement) -> Result<ImageData, JsValue> {
         .unwrap();
     context.draw_image_with_html_image_element(&img, 0.0, 0.0)?;
     context.get_image_data(0.0, 0.0, img.width().into(), img.height().into())
+}
+
+pub fn image_data_to_blob(image_data: ImageData) -> Promise {
+    let width = image_data.width();
+    let height = image_data.height();
+
+    let document = window().unwrap().document().unwrap();
+    let canvas = document.create_element("canvas").unwrap();
+    let canvas: HtmlCanvasElement = canvas
+        .dyn_into::<HtmlCanvasElement>()
+        .map_err(|_| ())
+        .unwrap();
+
+    canvas.set_width(width);
+    canvas.set_height(height);
+
+    let context = canvas
+        .get_context("2d")
+        .unwrap()
+        .unwrap()
+        .dyn_into::<CanvasRenderingContext2d>()
+        .unwrap();
+
+    context.put_image_data(&image_data, 0.0, 0.0);
+
+    Promise::new(&mut |resolve, reject| {
+        // implied 'image/png' format
+        canvas.to_blob(&resolve);
+    })
 }
 
 pub fn build_algorithm(algorithm: &String) -> Result<BlendAlgorithm, PConvertError> {

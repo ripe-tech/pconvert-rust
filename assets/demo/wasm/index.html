@@ -20,11 +20,12 @@
           <input type="file" id="files" accept="image/png" multiple>
           <select>
             <option value="blend_multiple">blend_multiple(images, algorithm, algorithms)</option>
-            <option value="blend_multiple_data">blend_multiple_data(images, algorithm, algorithms)</option>
             <option value="blend_images">blend_images(top, bot, algorithm)</option>
+            <option value="blend_multiple_data">blend_multiple_data(images, algorithm, algorithms)</option>
             <option value="blend_images_data">blend_images_data(top, bot, algorithm)</option>
           </select>
           <button id="blend">Blend</button>
+          <button id="benchmark">Benchmark</button>
         </div>
         
         <div class="left-container">
@@ -34,7 +35,7 @@
 
         <div class="algorithms left-container">
           <label>Algorithms</label><br/>
-          <textarea id="algorithms" resize></textarea>
+          <textarea id="algorithms"></textarea>
         </div>
 
         
