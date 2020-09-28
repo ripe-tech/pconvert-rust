@@ -65,6 +65,6 @@ textarea#algorithms {
     height: 71%;
 }
 
-input#algorithm {
+select#algorithm {
     width: 100%;
 }
