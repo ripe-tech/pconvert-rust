@@ -1,9 +1,45 @@
+use crate::constants::ALGORITHMS;
 use crate::wasm::utils::{get_image_data, image_data_to_blob, load_image, log_benchmark};
 use crate::wasm::{blend_images_data, blend_multiple_data};
 use js_sys::{try_iter, Array};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
 use web_sys::File;
+
+#[wasm_bindgen]
+pub async fn blend_images_benchmark_all(
+    top: File,
+    bot: File,
+    is_inline: Option<bool>,
+) -> Result<(), JsValue> {
+    for algorithm in ALGORITHMS.iter() {
+        blend_images_benchmark(
+            top.clone(),
+            bot.clone(),
+            Some(algorithm.to_string()),
+            is_inline,
+        )
+        .await?;
+    }
+    Ok(())
+}
+
+#[wasm_bindgen]
+pub async fn blend_multiple_benchmark_all(
+    image_files: JsValue,
+    is_inline: Option<bool>,
+) -> Result<(), JsValue> {
+    for algorithm in ALGORITHMS.iter() {
+        blend_multiple_benchmark(
+            image_files.clone(),
+            Some(algorithm.to_string()),
+            None,
+            is_inline,
+        )
+        .await?;
+    }
+    Ok(())
+}
 
 #[wasm_bindgen]
 pub async fn blend_images_benchmark(

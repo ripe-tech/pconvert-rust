@@ -91,17 +91,13 @@ async function blend() {
 async function benchmark() {
   const pconvert = await js.then(js => js);
   const apiFunction = apiFunctionSelect.options[apiFunctionSelect.selectedIndex].value;
-
-  let composition;
   switch (apiFunction) {
     case API_FUNCTIONS.blend_images_data:
     case API_FUNCTIONS.blend_images:
       {
         const top = inputFiles.files[0];
         const bot = inputFiles.files[1];
-        const algorithm = selectAlgorithm.value;
-        const file = await pconvert.blend_images_benchmark(top, bot, algorithm == "" ? null : algorithm);
-        composition = getImageData(await loadImage(file));
+        await pconvert.blend_images_benchmark_all(top, bot);
         break;
       }
 
@@ -111,13 +107,10 @@ async function benchmark() {
         const algorithms = textareaAlgorithms.value;
         if (isJSONParsable(algorithms)) {
           const algorithmsJSON = JSON.parse(algorithms)["algorithms"];
-          const file = await pconvert.blend_multiple_benchmark(inputFiles.files, null, algorithmsJSON);
-          composition = getImageData(await loadImage(file));
+          await pconvert.blend_multiple_benchmark(inputFiles.files, null, algorithmsJSON);
         }
         else {
-          const algorithm = selectAlgorithm.value;
-          const file = await pconvert.blend_multiple_benchmark(inputFiles.files, algorithm == "" ? null : algorithm);
-          composition = getImageData(await loadImage(file));
+          await pconvert.blend_multiple_benchmark_all(inputFiles.files);
         }
         break;
       }
@@ -125,7 +118,6 @@ async function benchmark() {
     default:
       console.log("Invalid API function");
   }
-  drawComposition(composition);
 }
 
 async function setPConvertMetadata() {
