@@ -4,7 +4,7 @@ mod utils;
 mod benchmark;
 mod conversions;
 
-use crate::blending::params::{BlendAlgorithmParams, Options};
+use crate::blending::params::BlendAlgorithmParams;
 use crate::blending::{
     blend_images, demultiply_image, get_blending_algorithm, is_algorithm_multiplied, BlendAlgorithm,
 };

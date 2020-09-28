@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 
 pub type BlendAlgorithmParams = HashMap<String, Value>;
+
+#[cfg(not(target_arch = "wasm32"))]
 pub type Options = HashMap<String, Value>;
 
 #[derive(Clone, Debug)]

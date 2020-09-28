@@ -65,6 +65,7 @@ pub fn write_png_parallel(
     Ok(())
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 pub fn image_compression_from(compression: String) -> CompressionType {
     match compression.trim().to_lowercase().as_str() {
         "best" => CompressionType::Best,
@@ -76,6 +77,7 @@ pub fn image_compression_from(compression: String) -> CompressionType {
     }
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 pub fn image_filter_from(filter: String) -> FilterType {
     match filter.trim().to_lowercase().as_str() {
         "avg" => FilterType::Avg,
