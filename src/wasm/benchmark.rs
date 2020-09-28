@@ -30,7 +30,8 @@ pub async fn blend_images_benchmark_js(
     let composition_blob = JsFuture::from(image_data_to_blob(composition_data)?)
         .await?
         .into();
-    let composition_blob = File::new_with_blob_sequence(&Array::of1(&composition_blob), &target_file_name)?;
+    let composition_blob =
+        File::new_with_blob_sequence(&Array::of1(&composition_blob), &target_file_name)?;
 
     let end = js_sys::Date::now();
 
@@ -79,7 +80,8 @@ pub async fn blend_multiple_benchmark_js(
         .await?
         .into();
 
-    let composition_blob = File::new_with_blob_sequence(&Array::of1(&composition_blob), &target_file_name)?;
+    let composition_blob =
+        File::new_with_blob_sequence(&Array::of1(&composition_blob), &target_file_name)?;
 
     let end = js_sys::Date::now();
 
