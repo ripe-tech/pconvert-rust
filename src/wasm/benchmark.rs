@@ -1,5 +1,5 @@
 use crate::constants::ALGORITHMS;
-use crate::wasm::utils::{get_image_data, image_data_to_blob, load_image, log_benchmark};
+use crate::wasm::utils::{log_benchmark};
 use crate::wasm::{blend_images_data, blend_multiple_data};
 use js_sys::{try_iter, Array};
 use wasm_bindgen::prelude::*;

@@ -1,7 +1,7 @@
 #[macro_use]
 mod utils;
 
-mod benchmark;
+// mod benchmark;
 mod conversions;
 
 use crate::blending;
@@ -11,16 +11,11 @@ use crate::blending::{
 };
 use crate::constants;
 use crate::errors::PConvertError;
-use crate::utils::encode_png;
 use image::{ImageBuffer, Rgba, RgbaImage};
-use js_sys::{try_iter, Array, Uint8Array};
+use js_sys::try_iter;
 use serde_json::json;
-use utils::{
-    build_algorithm, build_params, get_image_data, image_data_to_blob, load_image, load_png,
-};
+use utils::{build_algorithm, build_params, encode_file, encode_image_data, load_png};
 use wasm_bindgen::prelude::*;
-use wasm_bindgen::Clamped;
-use wasm_bindgen_futures::JsFuture;
 use web_sys::{File, ImageData};
 
 #[wasm_bindgen]
@@ -45,18 +40,7 @@ pub async fn blend_images(
 
     blend_image_buffers(&mut top, &mut bot, algorithm, is_inline)?;
 
-    let mut encoded_data = Vec::<u8>::with_capacity(bot.to_vec().capacity());
-    encode_png(
-        &mut encoded_data,
-        &bot,
-        image::png::CompressionType::Default,
-        image::png::FilterType::NoFilter,
-    )?;
-
-    unsafe {
-        let array_buffer = Uint8Array::view(&encoded_data);
-        File::new_with_u8_array_sequence(&Array::of1(&array_buffer), "result.png")
-    }
+    encode_file(bot)
 }
 
 #[wasm_bindgen]
@@ -67,19 +51,16 @@ pub fn blend_images_data(
     is_inline: Option<bool>,
 ) -> Result<ImageData, JsValue> {
     let (width, height) = (top.width(), top.height());
-    let mut top: RgbaImage = ImageBuffer::from_vec(width, height, top.data().to_vec())
-        .ok_or_else(|| PConvertError::ArgumentError("Could not parse \"top\"".to_string()))?;
-
-    let mut bot: RgbaImage = ImageBuffer::from_vec(width, height, bot.data().to_vec())
-        .ok_or_else(|| PConvertError::ArgumentError("Could not parse \"bot\"".to_string()))?;
-
+    let mut top = ImageBuffer::from_vec(width, height, top.data().to_vec()).ok_or(
+        PConvertError::ArgumentError("Could not parse \"top\"".to_string()),
+    )?;
+    let mut bot = ImageBuffer::from_vec(width, height, bot.data().to_vec()).ok_or(
+        PConvertError::ArgumentError("Could not parse \"bot\"".to_string()),
+    )?;
 
     blend_image_buffers(&mut top, &mut bot, algorithm, is_inline)?;
 
-    let bot_bytes = &mut bot.to_vec();
-    let clamped_bot_bytes: Clamped<&mut [u8]> = Clamped(bot_bytes);
-    let result = ImageData::new_with_u8_clamped_array_and_sh(clamped_bot_bytes, width, height)?;
-    Ok(result)
+    encode_image_data(bot)
 }
 
 fn blend_image_buffers(
@@ -110,22 +91,18 @@ pub async fn blend_multiple(
     algorithms: Option<Box<[JsValue]>>,
     is_inline: Option<bool>,
 ) -> Result<File, JsValue> {
-    let images_data = Array::new();
+    let mut image_buffers = Vec::new();
     let image_files = try_iter(&image_files).unwrap().unwrap();
     for file in image_files {
         let file = file?;
-        let img = JsFuture::from(load_image(file.into())).await?;
+        let img = load_png(file.into(), false).await?;
 
-        let img = get_image_data(img.into())?;
-        images_data.push(&img);
+        image_buffers.push(img);
     }
 
-    let image_data = blend_multiple_data(&images_data, algorithm, algorithms, is_inline)?;
+    let composition = blend_multiple_buffers(image_buffers, algorithm, algorithms, is_inline)?;
 
-    let image_blob = JsFuture::from(image_data_to_blob(image_data)?)
-        .await?
-        .into();
-    File::new_with_blob_sequence(&Array::of1(&image_blob), "result")
+    encode_file(composition)
 }
 
 #[wasm_bindgen]
@@ -137,7 +114,6 @@ pub fn blend_multiple_data(
 ) -> Result<ImageData, JsValue> {
     let mut image_buffers: Vec<RgbaImage> = Vec::new();
     let mut images = try_iter(images).unwrap().unwrap();
-
     while let Some(Ok(img_data)) = images.next() {
         let img_data: ImageData = img_data.into();
         let img_buffer: RgbaImage = ImageBuffer::from_vec(
@@ -145,23 +121,36 @@ pub fn blend_multiple_data(
             img_data.height(),
             img_data.data().to_vec(),
         )
-        .ok_or_else(|| PConvertError::ArgumentError("Could not parse \"bot\"".to_string()))?;
+        .ok_or(PConvertError::ArgumentError(
+            "Could not parse \"bot\"".to_string(),
+        ))?;
 
         image_buffers.push(img_buffer);
     }
 
+    let composition = blend_multiple_buffers(image_buffers, algorithm, algorithms, is_inline)?;
+
+    encode_image_data(composition)
+}
+
+fn blend_multiple_buffers(
+    image_buffers: Vec<ImageBuffer<Rgba<u8>, Vec<u8>>>,
+    algorithm: Option<String>,
+    algorithms: Option<Box<[JsValue]>>,
+    is_inline: Option<bool>,
+) -> Result<ImageBuffer<Rgba<u8>, Vec<u8>>, PConvertError> {
     let num_images = image_buffers.len();
     if num_images < 1 {
-        return Err(JsValue::from(PConvertError::ArgumentError(
+        return Err(PConvertError::ArgumentError(
             "'images' must contain at least one path".to_string(),
-        )));
+        ));
     }
 
     if algorithms.is_some() && algorithms.as_ref().unwrap().len() != num_images - 1 {
-        return Err(JsValue::from(PConvertError::ArgumentError(format!(
+        return Err(PConvertError::ArgumentError(format!(
             "'algorithms' must be of size {} (one per blending operation)",
             num_images - 1
-        ))));
+        )));
     };
 
     let _is_inline = is_inline.unwrap_or(false);
@@ -201,14 +190,7 @@ pub fn blend_multiple_data(
         );
     }
 
-    let composition_bytes = &mut composition.to_vec();
-    let clamped_composition_bytes: Clamped<&mut [u8]> = Clamped(composition_bytes);
-    let result = ImageData::new_with_u8_clamped_array_and_sh(
-        clamped_composition_bytes,
-        composition.width(),
-        composition.height(),
-    )?;
-    Ok(result)
+    Ok(composition)
 }
 
 #[wasm_bindgen]

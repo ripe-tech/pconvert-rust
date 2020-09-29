@@ -1,17 +1,15 @@
 use crate::blending::params::{BlendAlgorithmParams, Value};
 use crate::blending::BlendAlgorithm;
 use crate::errors::PConvertError;
-use crate::utils::decode_png;
+use crate::utils::{decode_png, encode_png};
 use crate::wasm::conversions::JSONParams;
 use image::{ImageBuffer, Rgba};
-use js_sys::{Function, Promise, Uint8Array};
+use js_sys::{Array, Uint8Array};
 use std::str::FromStr;
 use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
+use wasm_bindgen::Clamped;
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{
-    window, CanvasRenderingContext2d, File, HtmlCanvasElement, HtmlImageElement, ImageData, Url,
-};
+use web_sys::{File, ImageData};
 
 #[wasm_bindgen]
 extern "C" {
@@ -33,68 +31,38 @@ pub async fn load_png(
     Ok(png)
 }
 
-pub fn load_image(file: File) -> Promise {
-    Promise::new(&mut |resolve, reject| {
-        let img = HtmlImageElement::new().unwrap();
-        let on_load = Function::new_with_args("resolve, img, e", "resolve(img)");
-        let on_load = on_load.bind2(&JsValue::NULL, &resolve, &img);
-        img.set_onload(Some(&on_load));
+pub fn encode_file(image_buffer: ImageBuffer<Rgba<u8>, Vec<u8>>) -> Result<File, JsValue> {
+    let mut encoded_data = Vec::<u8>::with_capacity(image_buffer.to_vec().capacity());
+    encode_png(
+        &mut encoded_data,
+        &image_buffer,
+        image::png::CompressionType::Default,
+        image::png::FilterType::NoFilter,
+    )?;
 
-        let on_err = Function::new_with_args("reject", "reject(\"Failed loading image URL\")");
-        let on_err = on_err.bind1(&JsValue::NULL, &reject);
-        img.set_onerror(Some(&on_err));
-
-        let url = Url::create_object_url_with_blob(&file).unwrap();
-        img.set_src(&url);
-    })
+    unsafe {
+        let array_buffer = Uint8Array::view(&encoded_data);
+        File::new_with_u8_array_sequence(&Array::of1(&array_buffer), "result.png")
+    }
 }
 
-pub fn get_image_data(img: HtmlImageElement) -> Result<ImageData, JsValue> {
-    let document = window().unwrap().document().unwrap();
-    let canvas = document.create_element("canvas").unwrap();
-    let canvas: HtmlCanvasElement = canvas
-        .dyn_into::<HtmlCanvasElement>()
-        .map_err(|_| ())
-        .unwrap();
-    canvas.set_width(img.width());
-    canvas.set_height(img.height());
-    let context = canvas
-        .get_context("2d")
-        .unwrap()
-        .unwrap()
-        .dyn_into::<CanvasRenderingContext2d>()
-        .unwrap();
-    context.draw_image_with_html_image_element(&img, 0.0, 0.0)?;
-    context.get_image_data(0.0, 0.0, img.width().into(), img.height().into())
-}
+pub fn encode_image_data(
+    image_buffer: ImageBuffer<Rgba<u8>, Vec<u8>>,
+) -> Result<ImageData, JsValue> {
+    let (width, height) = image_buffer.dimensions();
 
-pub fn image_data_to_blob(image_data: ImageData) -> Result<Promise, JsValue> {
-    let width = image_data.width();
-    let height = image_data.height();
+    let mut encoded_data = Vec::<u8>::with_capacity(image_buffer.to_vec().capacity());
+    encode_png(
+        &mut encoded_data,
+        &image_buffer,
+        image::png::CompressionType::Default,
+        image::png::FilterType::NoFilter,
+    )?;
 
-    let document = window().unwrap().document().unwrap();
-    let canvas = document.create_element("canvas").unwrap();
-    let canvas: HtmlCanvasElement = canvas
-        .dyn_into::<HtmlCanvasElement>()
-        .map_err(|_| ())
-        .unwrap();
+    let bytes = &mut image_buffer.to_vec();
+    let clamped_bytes: Clamped<&mut [u8]> = Clamped(bytes);
 
-    canvas.set_width(width);
-    canvas.set_height(height);
-
-    let context = canvas
-        .get_context("2d")
-        .unwrap()
-        .unwrap()
-        .dyn_into::<CanvasRenderingContext2d>()
-        .unwrap();
-
-    context.put_image_data(&image_data, 0.0, 0.0)?;
-
-    Ok(Promise::new(&mut |resolve, _reject| {
-        // implied 'image/png' format
-        canvas.to_blob(&resolve).unwrap();
-    }))
+    ImageData::new_with_u8_clamped_array_and_sh(clamped_bytes, width, height)
 }
 
 pub fn build_algorithm(algorithm: &String) -> Result<BlendAlgorithm, PConvertError> {
