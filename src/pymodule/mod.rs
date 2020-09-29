@@ -8,7 +8,7 @@ use crate::blending::{
 use crate::constants;
 use crate::errors::PConvertError;
 use crate::parallelism::{ResultMessage, ThreadPool};
-use crate::utils::{read_png, write_png, write_png_parallel};
+use crate::utils::{read_png_from_file, write_png_parallel, write_png_to_file};
 use pyo3::prelude::*;
 use pyo3::types::PySequence;
 use std::sync::mpsc;
@@ -114,14 +114,14 @@ fn blend_images_single_thread(
     let demultiply = is_algorithm_multiplied(&algorithm);
     let algorithm_fn = get_blending_algorithm(&algorithm);
 
-    let mut bot = read_png(bot_path, demultiply)?;
-    let top = read_png(top_path, demultiply)?;
+    let mut bot = read_png_from_file(bot_path, demultiply)?;
+    let top = read_png_from_file(top_path, demultiply)?;
 
     blend_images(&top, &mut bot, &algorithm_fn, &None);
 
     let compression_type = get_compression_type(&options);
     let filter_type = get_filter_type(&options);
-    write_png(target_path, &bot, compression_type, filter_type)?;
+    write_png_to_file(target_path, &bot, compression_type, filter_type)?;
 
     Ok(())
 }
@@ -144,10 +144,10 @@ fn blend_images_multi_thread(
     let mut thread_pool = ThreadPool::new(num_threads as usize)?;
     thread_pool.start();
 
-    let top_result_channel =
-        thread_pool.execute(move || ResultMessage::ImageResult(read_png(top_path, demultiply)));
-    let bot_result_channel =
-        thread_pool.execute(move || ResultMessage::ImageResult(read_png(bot_path, demultiply)));
+    let top_result_channel = thread_pool
+        .execute(move || ResultMessage::ImageResult(read_png_from_file(top_path, demultiply)));
+    let bot_result_channel = thread_pool
+        .execute(move || ResultMessage::ImageResult(read_png_from_file(bot_path, demultiply)));
 
     let top = match top_result_channel.recv().unwrap() {
         ResultMessage::ImageResult(result) => result,
@@ -204,14 +204,14 @@ fn blend_multiple_single_thread(
     let mut img_paths_iter = img_paths.iter()?;
     let first_path = img_paths_iter.next().unwrap()?.to_string();
     let first_demultiply = is_algorithm_multiplied(&algorithms_to_apply[0].0);
-    let mut composition = read_png(first_path, first_demultiply)?;
+    let mut composition = read_png_from_file(first_path, first_demultiply)?;
     let mut zip_iter = img_paths_iter.zip(algorithms_to_apply.iter());
     while let Some(pair) = zip_iter.next() {
         let path = pair.0?.extract::<String>()?;
         let (algorithm, algorithm_params) = pair.1;
         let demultiply = is_algorithm_multiplied(&algorithm);
         let algorithm_fn = get_blending_algorithm(&algorithm);
-        let current_layer = read_png(path, demultiply)?;
+        let current_layer = read_png_from_file(path, demultiply)?;
         blend_images(
             &current_layer,
             &mut composition,
@@ -222,7 +222,7 @@ fn blend_multiple_single_thread(
 
     let compression_type = get_compression_type(&options);
     let filter_type = get_filter_type(&options);
-    write_png(out_path, &composition, compression_type, filter_type)?;
+    write_png_to_file(out_path, &composition, compression_type, filter_type)?;
 
     Ok(())
 }
@@ -270,7 +270,7 @@ fn blend_multiple_multi_thread(
     for path in img_paths.iter()? {
         let path = path?.to_string();
         let result_channel = thread_pool.execute(move || -> ResultMessage {
-            ResultMessage::ImageResult(read_png(path, false))
+            ResultMessage::ImageResult(read_png_from_file(path, false))
         });
         png_channels.push(result_channel);
     }

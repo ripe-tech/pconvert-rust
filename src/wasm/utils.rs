@@ -1,11 +1,14 @@
 use crate::blending::params::{BlendAlgorithmParams, Value};
 use crate::blending::BlendAlgorithm;
 use crate::errors::PConvertError;
+use crate::utils::decode_png;
 use crate::wasm::conversions::JSONParams;
-use js_sys::{Function, Promise};
+use image::{ImageBuffer, Rgba};
+use js_sys::{Function, Promise, Uint8Array};
 use std::str::FromStr;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
+use wasm_bindgen_futures::JsFuture;
 use web_sys::{
     window, CanvasRenderingContext2d, File, HtmlCanvasElement, HtmlImageElement, ImageData, Url,
 };
@@ -18,6 +21,16 @@ extern "C" {
 
 macro_rules! console_log {
     ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
+}
+
+pub async fn load_png(
+    file: File,
+    demultiply: bool,
+) -> Result<ImageBuffer<Rgba<u8>, Vec<u8>>, JsValue> {
+    let array_buffer = JsFuture::from(file.array_buffer()).await?;
+    let uint8_array = Uint8Array::new(&array_buffer);
+    let png = decode_png(&uint8_array.to_vec()[..], demultiply)?;
+    Ok(png)
 }
 
 pub fn load_image(file: File) -> Promise {

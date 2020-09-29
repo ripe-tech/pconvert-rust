@@ -144,14 +144,20 @@ async function setAlgorithmSelectOptions() {
   }
 }
 
-function loadImage(url) {
+function test(file) {
+  const mediaStream = new MediaStream();
+  const video = document.createElement('canvas');
+  video.srcObject = mediaStream;
+}
+
+function loadImage(file) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.addEventListener('load', e => resolve(img));
-    img.addEventListener('error', () => {
-      reject(new Error(`Failed to load image's URL: ${url}`));
+    img.addEventListener('error', (e) => {
+      reject(e);
     });
-    img.src = URL.createObjectURL(url);
+    img.src = URL.createObjectURL(file);
   });
 }
 

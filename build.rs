@@ -94,7 +94,7 @@ fn main() {
         .as_str();
     write_str_constant_to_file(&mut file, "COMPILER_VERSION", &compiler_version);
 
-    let re = Regex::new("image = \"(.*)\"").unwrap();
+    let re = Regex::new("image.*version = \"(.*)\",").unwrap();
     let libpng_version = format!(
         "image-{}",
         re.captures(TOML).unwrap().get(1).unwrap().as_str()
