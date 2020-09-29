@@ -1,9 +1,8 @@
 use crate::constants::ALGORITHMS;
-use crate::wasm::utils::{get_image_data, image_data_to_blob, load_image, log_benchmark};
-use crate::wasm::{blend_images_data_js, blend_multiple_data_js};
-use js_sys::{try_iter, Array};
+use crate::wasm::utils::{encode_file, load_png, log_benchmark};
+use crate::wasm::{blend_image_buffers, blend_multiple_buffers};
+use js_sys::try_iter;
 use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::JsFuture;
 use web_sys::File;
 
 #[wasm_bindgen(js_name = blendImagesBenchmarkAll)]
@@ -53,23 +52,16 @@ pub async fn blend_images_benchmark_js(
 ) -> Result<File, JsValue> {
     let start_read = js_sys::Date::now();
 
-    let top = JsFuture::from(load_image(top)).await?;
-    let bot = JsFuture::from(load_image(bot)).await?;
-
-    let top = get_image_data(top.into())?;
-    let bot = get_image_data(bot.into())?;
+    let mut top = load_png(top, false).await?;
+    let mut bot = load_png(bot, false).await?;
 
     let start_blend = js_sys::Date::now();
 
-    let composition_data = blend_images_data_js(top, bot, algorithm.clone(), is_inline)?;
+    blend_image_buffers(&mut top, &mut bot, algorithm.clone(), is_inline)?;
 
     let start_write = js_sys::Date::now();
 
-    let composition_blob = JsFuture::from(image_data_to_blob(composition_data)?)
-        .await?
-        .into();
-    let composition_blob =
-        File::new_with_blob_sequence(&Array::of1(&composition_blob), &target_file_name)?;
+    let file = encode_file(bot)?;
 
     let end = js_sys::Date::now();
 
@@ -84,7 +76,7 @@ pub async fn blend_images_benchmark_js(
         write_time,
     );
 
-    Ok(composition_blob)
+    Ok(file)
 }
 
 #[wasm_bindgen(js_name = blendMultipleBenchmark)]
@@ -97,29 +89,23 @@ pub async fn blend_multiple_benchmark_js(
 ) -> Result<File, JsValue> {
     let start_read = js_sys::Date::now();
 
-    let images_data = Array::new();
+    let mut image_buffers = Vec::new();
     let image_files = try_iter(&image_files).unwrap().unwrap();
     for file in image_files {
         let file = file?;
-        let img = JsFuture::from(load_image(file.into())).await?;
+        let img = load_png(file.into(), false).await?;
 
-        let img = get_image_data(img.into())?;
-        images_data.push(&img);
+        image_buffers.push(img);
     }
 
     let start_blend = js_sys::Date::now();
 
-    let composition_data =
-        blend_multiple_data_js(&images_data, algorithm.clone(), algorithms, is_inline)?;
+    let composition =
+        blend_multiple_buffers(image_buffers, algorithm.clone(), algorithms, is_inline)?;
 
     let start_write = js_sys::Date::now();
 
-    let composition_blob = JsFuture::from(image_data_to_blob(composition_data)?)
-        .await?
-        .into();
-
-    let composition_blob =
-        File::new_with_blob_sequence(&Array::of1(&composition_blob), &target_file_name)?;
+    let file = encode_file(composition)?;
 
     let end = js_sys::Date::now();
 
@@ -134,5 +120,5 @@ pub async fn blend_multiple_benchmark_js(
         write_time,
     );
 
-    Ok(composition_blob)
+    Ok(file)
 }

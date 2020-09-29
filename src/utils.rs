@@ -1,25 +1,27 @@
 use crate::blending::demultiply_image;
 use crate::errors::PConvertError;
-use image::io::Reader;
-use image::png::{CompressionType, FilterType, PngEncoder};
-use image::{ColorType, DynamicImage, ImageBuffer, ImageFormat, Rgba};
+use image::png::{CompressionType, FilterType, PngDecoder, PngEncoder};
+use image::ImageDecoder;
+use image::{ColorType, ImageBuffer, Rgba};
 use std::fs::File;
-use std::io::BufWriter;
+use std::io::{BufWriter, Read, Write};
 
 #[cfg(not(target_arch = "wasm32"))]
 use mtpng;
 
-pub fn read_png(
-    file_in: String,
+pub fn decode_png(
+    readable_stream: impl Read,
     demultiply: bool,
 ) -> Result<ImageBuffer<Rgba<u8>, Vec<u8>>, PConvertError> {
-    let reader = Reader::open(file_in)?;
-    let reader = Reader::with_format(reader.into_inner(), ImageFormat::Png);
+    let decoder = PngDecoder::new(readable_stream)?;
+    let (width, height) = decoder.dimensions();
 
-    let mut img = match reader.decode() {
-        Ok(DynamicImage::ImageRgba8(img)) => img,
-        _ => return Err(PConvertError::UnsupportedImageTypeError),
-    };
+    let mut reader = decoder.into_reader()?;
+
+    let mut bytes = Vec::<u8>::new();
+    reader.read_to_end(&mut bytes)?;
+
+    let mut img = ImageBuffer::from_vec(width, height, bytes).unwrap();
 
     if demultiply {
         demultiply_image(&mut img)
@@ -28,16 +30,33 @@ pub fn read_png(
     Ok(img)
 }
 
-pub fn write_png(
+pub fn read_png_from_file(
+    file_in: String,
+    demultiply: bool,
+) -> Result<ImageBuffer<Rgba<u8>, Vec<u8>>, PConvertError> {
+    let file = File::open(file_in)?;
+    decode_png(file, demultiply)
+}
+
+pub fn encode_png(
+    writable_buff: impl Write,
+    png: &ImageBuffer<Rgba<u8>, Vec<u8>>,
+    compression: CompressionType,
+    filter: FilterType,
+) -> Result<(), PConvertError> {
+    let buff = BufWriter::new(writable_buff);
+    let encoder = PngEncoder::new_with_quality(buff, compression, filter);
+    Ok(encoder.encode(&png, png.width(), png.height(), ColorType::Rgba8)?)
+}
+
+pub fn write_png_to_file(
     file_out: String,
     png: &ImageBuffer<Rgba<u8>, Vec<u8>>,
     compression: CompressionType,
     filter: FilterType,
 ) -> Result<(), PConvertError> {
     let file = File::create(&file_out)?;
-    let buff = BufWriter::new(file);
-    let encoder = PngEncoder::new_with_quality(buff, compression, filter);
-    Ok(encoder.encode(&png, png.width(), png.height(), ColorType::Rgba8)?)
+    encode_png(file, png, compression, filter)
 }
 
 #[cfg(not(target_arch = "wasm32"))]

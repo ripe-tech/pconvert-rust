@@ -97,7 +97,7 @@ async function benchmark() {
       {
         const top = inputFiles.files[0];
         const bot = inputFiles.files[1];
-        await pconvert.blend_images_benchmark_all(top, bot);
+        await pconvert.blendImagesBenchmarkAll(top, bot);
         break;
       }
 
@@ -107,10 +107,10 @@ async function benchmark() {
         const algorithms = textareaAlgorithms.value;
         if (isJSONParsable(algorithms)) {
           const algorithmsJSON = JSON.parse(algorithms)["algorithms"];
-          await pconvert.blend_multiple_benchmark(inputFiles.files, null, algorithmsJSON);
+          await pconvert.blendMultipleBenchmark(inputFiles.files, null, algorithmsJSON);
         }
         else {
-          await pconvert.blend_multiple_benchmark_all(inputFiles.files);
+          await pconvert.blendMultipleBenchmarkAll(inputFiles.files);
         }
         break;
       }
@@ -134,7 +134,7 @@ async function setAlgorithmsPlaceholder() {
 
 async function setAlgorithmSelectOptions() {
   const pconvert = await js.then(js => js);
-  const options = pconvert.get_module_constants().ALGORITHMS;
+  const options = pconvert.getModuleConstants().ALGORITHMS;
 
   for(option of options) {
     const optionEl = document.createElement("option");
@@ -144,14 +144,14 @@ async function setAlgorithmSelectOptions() {
   }
 }
 
-function loadImage(url) {
+function loadImage(file) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.addEventListener('load', e => resolve(img));
-    img.addEventListener('error', () => {
-      reject(new Error(`Failed to load image's URL: ${url}`));
+    img.addEventListener('error', (e) => {
+      reject(e);
     });
-    img.src = URL.createObjectURL(url);
+    img.src = URL.createObjectURL(file);
   });
 }
 
