@@ -1,7 +1,7 @@
 #[macro_use]
 mod utils;
 
-// mod benchmark;
+mod benchmark;
 mod conversions;
 
 use crate::blending;
@@ -17,16 +17,6 @@ use serde_json::json;
 use utils::{build_algorithm, build_params, encode_file, encode_image_data, load_png};
 use wasm_bindgen::prelude::*;
 use web_sys::{File, ImageData};
-
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = console)]
-    pub fn log(s: &str);
-}
-
-macro_rules! console_log {
-    ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
-}
 
 #[wasm_bindgen]
 pub async fn blend_images(
@@ -63,7 +53,7 @@ pub fn blend_images_data(
     encode_image_data(bot)
 }
 
-fn blend_image_buffers(
+pub fn blend_image_buffers(
     top: &mut ImageBuffer<Rgba<u8>, Vec<u8>>,
     bot: &mut ImageBuffer<Rgba<u8>, Vec<u8>>,
     algorithm: Option<String>,
