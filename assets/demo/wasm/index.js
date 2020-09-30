@@ -90,6 +90,7 @@ async function blend() {
 
 async function benchmark() {
   const pconvert = await js.then(js => js);
+  
   const apiFunction = apiFunctionSelect.options[apiFunctionSelect.selectedIndex].value;
   switch (apiFunction) {
     case API_FUNCTIONS.blendImagesData:
@@ -104,14 +105,7 @@ async function benchmark() {
     case API_FUNCTIONS.blendMultipleData:
     case API_FUNCTIONS.blendMultiple:
       {
-        const algorithms = textareaAlgorithms.value;
-        if (isJSONParsable(algorithms)) {
-          const algorithmsJSON = JSON.parse(algorithms)["algorithms"];
-          await pconvert.blendMultipleBenchmark(inputFiles.files, null, algorithmsJSON);
-        }
-        else {
-          await pconvert.blendMultipleBenchmarkAll(inputFiles.files);
-        }
+        await pconvert.blendMultipleBenchmarkAll(inputFiles.files);
         break;
       }
 
