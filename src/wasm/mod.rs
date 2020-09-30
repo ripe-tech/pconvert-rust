@@ -13,10 +13,14 @@ use crate::errors::PConvertError;
 use image::{ImageBuffer, Rgba, RgbaImage};
 use js_sys::try_iter;
 use serde_json::json;
-use utils::{build_algorithm, build_params, encode_file, encode_image_data, load_png};
+use serde_json::Value as JSONValue;
+use std::collections::HashMap;
+use utils::{
+    build_algorithm, build_params, encode_file, encode_image_data, get_compression_type,
+    get_filter_type, load_png,
+};
 use wasm_bindgen::prelude::*;
 use web_sys::{File, ImageData};
-use image::png::{CompressionType, FilterType};
 
 #[wasm_bindgen(js_name = blendImages)]
 pub async fn blend_images_js(
@@ -25,13 +29,24 @@ pub async fn blend_images_js(
     target_file_name: String,
     algorithm: Option<String>,
     is_inline: Option<bool>,
+    options: JsValue,
 ) -> Result<File, JsValue> {
+    let options = match options.is_object() {
+        true => options.into_serde::<HashMap<String, JSONValue>>().ok(),
+        false => None,
+    };
+
     let mut top = load_png(top, false).await?;
     let mut bot = load_png(bot, false).await?;
 
     blend_image_buffers(&mut top, &mut bot, algorithm, is_inline)?;
 
-    encode_file(bot, CompressionType::Default, FilterType::NoFilter, target_file_name)
+    encode_file(
+        bot,
+        get_compression_type(&options),
+        get_filter_type(&options),
+        target_file_name,
+    )
 }
 
 #[wasm_bindgen(js_name = blendImagesData)]
@@ -40,7 +55,13 @@ pub fn blend_images_data_js(
     bot: ImageData,
     algorithm: Option<String>,
     is_inline: Option<bool>,
+    options: JsValue,
 ) -> Result<ImageData, JsValue> {
+    let options = match options.is_object() {
+        true => options.into_serde::<HashMap<String, JSONValue>>().ok(),
+        false => None,
+    };
+
     let (width, height) = (top.width(), top.height());
     let mut top = ImageBuffer::from_vec(width, height, top.data().to_vec()).ok_or(
         PConvertError::ArgumentError("Could not parse \"top\"".to_string()),
@@ -51,7 +72,11 @@ pub fn blend_images_data_js(
 
     blend_image_buffers(&mut top, &mut bot, algorithm, is_inline)?;
 
-    encode_image_data(bot, CompressionType::Default, FilterType::NoFilter)
+    encode_image_data(
+        bot,
+        get_compression_type(&options),
+        get_filter_type(&options),
+    )
 }
 
 pub fn blend_image_buffers(
@@ -82,7 +107,13 @@ pub async fn blend_multiple_js(
     algorithm: Option<String>,
     algorithms: Option<Box<[JsValue]>>,
     is_inline: Option<bool>,
+    options: JsValue,
 ) -> Result<File, JsValue> {
+    let options = match options.is_object() {
+        true => options.into_serde::<HashMap<String, JSONValue>>().ok(),
+        false => None,
+    };
+
     let mut image_buffers = Vec::new();
     let image_files = try_iter(&image_files).unwrap().unwrap();
     for file in image_files {
@@ -94,7 +125,12 @@ pub async fn blend_multiple_js(
 
     let composition = blend_multiple_buffers(image_buffers, algorithm, algorithms, is_inline)?;
 
-    encode_file(composition, CompressionType::Default, FilterType::NoFilter, target_file_name)
+    encode_file(
+        composition,
+        get_compression_type(&options),
+        get_filter_type(&options),
+        target_file_name,
+    )
 }
 
 #[wasm_bindgen(js_name = blendMultipleData)]
@@ -103,7 +139,13 @@ pub fn blend_multiple_data_js(
     algorithm: Option<String>,
     algorithms: Option<Box<[JsValue]>>,
     is_inline: Option<bool>,
+    options: JsValue,
 ) -> Result<ImageData, JsValue> {
+    let options = match options.is_object() {
+        true => options.into_serde::<HashMap<String, JSONValue>>().ok(),
+        false => None,
+    };
+
     let mut image_buffers: Vec<RgbaImage> = Vec::new();
     let mut images = try_iter(images).unwrap().unwrap();
     while let Some(Ok(img_data)) = images.next() {
@@ -122,7 +164,11 @@ pub fn blend_multiple_data_js(
 
     let composition = blend_multiple_buffers(image_buffers, algorithm, algorithms, is_inline)?;
 
-    encode_image_data(composition, CompressionType::Default, FilterType::NoFilter)
+    encode_image_data(
+        composition,
+        get_compression_type(&options),
+        get_filter_type(&options),
+    )
 }
 
 fn blend_multiple_buffers(

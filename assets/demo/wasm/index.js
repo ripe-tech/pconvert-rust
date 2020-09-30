@@ -34,7 +34,7 @@ async function blend() {
       const top = getImageData(await loadImage(inputFiles.files[0]));
       const bot = getImageData(await loadImage(inputFiles.files[1]));
       const algorithm = selectAlgorithm.value;
-      composition = pconvert.blendImagesData(top, bot, algorithm == "" ? null : algorithm);
+      composition = pconvert.blendImagesData(top, bot, algorithm == "" ? undefined : algorithm);
       break;
     }
 
@@ -42,7 +42,18 @@ async function blend() {
       const top = inputFiles.files[0];
       const bot = inputFiles.files[1];
       const algorithm = selectAlgorithm.value;
-      const file = await pconvert.blendImages(top, bot, "result", algorithm == "" ? null : algorithm);
+      const file = await pconvert.blendImages(top, bot, 
+        "result",
+        algorithm == "" ? undefined : algorithm,
+        undefined,
+        {
+          int: 3,
+          dec: 2.5,
+          bool: true,
+          str: "Ois",
+          compression: "best",
+          filter: "sub"
+        });
       composition = getImageData(await loadImage(file));
       break;
     }
@@ -57,11 +68,11 @@ async function blend() {
       const algorithms = textareaAlgorithms.value;
       if (isJSONParsable(algorithms)) {
         const algorithmsJSON = JSON.parse(algorithms)["algorithms"];
-        composition = await pconvert.blendMultipleData(data, null, algorithmsJSON);
+        composition = await pconvert.blendMultipleData(data, undefined, algorithmsJSON);
       }
       else {
         const algorithm = selectAlgorithm.value;
-        composition = await pconvert.blendMultipleData(data, algorithm == "" ? null : algorithm);
+        composition = await pconvert.blendMultipleData(data, algorithm == "" ? undefined : algorithm);
       }
       break;
     }
@@ -70,12 +81,12 @@ async function blend() {
       const algorithms = textareaAlgorithms.value;
       if (isJSONParsable(algorithms)) {
         const algorithmsJSON = JSON.parse(algorithms)["algorithms"];
-        const file = await pconvert.blendMultiple(inputFiles.files, "result", null, algorithmsJSON);
+        const file = await pconvert.blendMultiple(inputFiles.files, "result", undefined, algorithmsJSON);
         composition = getImageData(await loadImage(file));
       }
       else {
         const algorithm = selectAlgorithm.value;
-        const file = await pconvert.blendMultiple(inputFiles.files, "result", algorithm == "" ? null : algorithm);
+        const file = await pconvert.blendMultiple(inputFiles.files, "result", algorithm == "" ? undefined : algorithm);
         composition = getImageData(await loadImage(file));
       }
       break;
@@ -90,7 +101,7 @@ async function blend() {
 
 async function benchmark() {
   const pconvert = await js.then(js => js);
-  
+
   const apiFunction = apiFunctionSelect.options[apiFunctionSelect.selectedIndex].value;
   switch (apiFunction) {
     case API_FUNCTIONS.blendImagesData:
@@ -130,7 +141,7 @@ async function setAlgorithmSelectOptions() {
   const pconvert = await js.then(js => js);
   const options = pconvert.getModuleConstants().ALGORITHMS;
 
-  for(option of options) {
+  for (option of options) {
     const optionEl = document.createElement("option");
     optionEl.text = option;
     optionEl.value = option;
