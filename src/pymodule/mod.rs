@@ -16,8 +16,14 @@ use utils::{
     build_algorithm, build_params, get_compression_type, get_filter_type, get_num_threads,
 };
 
+static mut THREAD_POOL: Option<ThreadPool> = None;
+
 #[pymodule]
 fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
+    unsafe {
+        THREAD_POOL = Some(ThreadPool::new(5).unwrap());
+    }
+
     m.add("COMPILATION_DATE", constants::COMPILATION_DATE)?;
 
     m.add("COMPILATION_TIME", constants::COMPILATION_TIME)?;
@@ -70,15 +76,17 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
                 options,
             )
         } else {
-            blend_images_multi_thread(
-                bot_path,
-                top_path,
-                target_path,
-                algorithm,
-                is_inline,
-                options,
-                num_threads,
-            )
+            unsafe {
+                blend_images_multi_thread(
+                    bot_path,
+                    top_path,
+                    target_path,
+                    algorithm,
+                    is_inline,
+                    options,
+                    num_threads,
+                )
+            }
         }
     }
 
@@ -140,7 +148,7 @@ fn blend_images_single_thread(
     Ok(())
 }
 
-fn blend_images_multi_thread(
+unsafe fn blend_images_multi_thread(
     bot_path: String,
     top_path: String,
     target_path: String,
@@ -155,8 +163,19 @@ fn blend_images_multi_thread(
     let demultiply = is_algorithm_multiplied(&algorithm);
     let algorithm_fn = get_blending_algorithm(&algorithm);
 
-    let mut thread_pool = ThreadPool::new(num_threads as usize)?;
+    let thread_pool = match &mut THREAD_POOL {
+        Some(thread_pool) => thread_pool,
+        None => panic!("Unable to access global pconvert thread pool")
+    };
     thread_pool.start();
+
+    for i in 0..10 {
+        thread_pool.execute(move || {
+            println!("Hello from thread {}", i);
+            std::thread::sleep(std::time::Duration::from_secs(3));
+            ResultMessage::ImageResult(Err(PConvertError::UnsupportedImageTypeError))
+        });
+    }
 
     let top_result_channel = thread_pool
         .execute(move || ResultMessage::ImageResult(read_png_from_file(top_path, demultiply)));
