@@ -3,6 +3,7 @@ use crate::blending::BlendAlgorithm;
 use crate::errors::PConvertError;
 use crate::utils::{decode_png, encode_png};
 use crate::wasm::conversions::JSONParams;
+use image::png::{CompressionType, FilterType};
 use image::{ImageBuffer, Rgba};
 use js_sys::{Array, Uint8Array};
 use std::str::FromStr;
@@ -31,23 +32,25 @@ pub async fn load_png(
     Ok(png)
 }
 
-pub fn encode_file(image_buffer: ImageBuffer<Rgba<u8>, Vec<u8>>) -> Result<File, JsValue> {
+pub fn encode_file(
+    image_buffer: ImageBuffer<Rgba<u8>, Vec<u8>>,
+    compression: CompressionType,
+    filter: FilterType,
+    target_file_name: String,
+) -> Result<File, JsValue> {
     let mut encoded_data = Vec::<u8>::with_capacity(image_buffer.to_vec().capacity());
-    encode_png(
-        &mut encoded_data,
-        &image_buffer,
-        image::png::CompressionType::Default,
-        image::png::FilterType::NoFilter,
-    )?;
+    encode_png(&mut encoded_data, &image_buffer, compression, filter)?;
 
     unsafe {
         let array_buffer = Uint8Array::view(&encoded_data);
-        File::new_with_u8_array_sequence(&Array::of1(&array_buffer), "result.png")
+        File::new_with_u8_array_sequence(&Array::of1(&array_buffer), &target_file_name)
     }
 }
 
 pub fn encode_image_data(
     image_buffer: ImageBuffer<Rgba<u8>, Vec<u8>>,
+    compression: CompressionType,
+    filter: FilterType,
 ) -> Result<ImageData, JsValue> {
     let (width, height) = image_buffer.dimensions();
 
@@ -55,8 +58,8 @@ pub fn encode_image_data(
     encode_png(
         &mut encoded_data,
         &image_buffer,
-        image::png::CompressionType::Default,
-        image::png::FilterType::NoFilter,
+        compression,
+        filter,
     )?;
 
     let bytes = &mut image_buffer.to_vec();

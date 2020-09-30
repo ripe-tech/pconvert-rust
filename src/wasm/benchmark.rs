@@ -4,6 +4,7 @@ use crate::wasm::{blend_image_buffers, blend_multiple_buffers};
 use js_sys::try_iter;
 use wasm_bindgen::prelude::*;
 use web_sys::File;
+use image::png::{CompressionType, FilterType};
 
 #[wasm_bindgen(js_name = blendImagesBenchmarkAll)]
 pub async fn blend_images_benchmark_all_js(
@@ -61,7 +62,7 @@ pub async fn blend_images_benchmark_js(
 
     let start_write = js_sys::Date::now();
 
-    let file = encode_file(bot)?;
+    let file = encode_file(bot, CompressionType::Default, FilterType::NoFilter, target_file_name)?;
 
     let end = js_sys::Date::now();
 
@@ -105,7 +106,7 @@ pub async fn blend_multiple_benchmark_js(
 
     let start_write = js_sys::Date::now();
 
-    let file = encode_file(composition)?;
+    let file = encode_file(composition, CompressionType::Default, FilterType::NoFilter, target_file_name)?;
 
     let end = js_sys::Date::now();
 

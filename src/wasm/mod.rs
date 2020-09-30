@@ -16,6 +16,7 @@ use serde_json::json;
 use utils::{build_algorithm, build_params, encode_file, encode_image_data, load_png};
 use wasm_bindgen::prelude::*;
 use web_sys::{File, ImageData};
+use image::png::{CompressionType, FilterType};
 
 #[wasm_bindgen(js_name = blendImages)]
 pub async fn blend_images_js(
@@ -30,7 +31,7 @@ pub async fn blend_images_js(
 
     blend_image_buffers(&mut top, &mut bot, algorithm, is_inline)?;
 
-    encode_file(bot)
+    encode_file(bot, CompressionType::Default, FilterType::NoFilter, target_file_name)
 }
 
 #[wasm_bindgen(js_name = blendImagesData)]
@@ -50,7 +51,7 @@ pub fn blend_images_data_js(
 
     blend_image_buffers(&mut top, &mut bot, algorithm, is_inline)?;
 
-    encode_image_data(bot)
+    encode_image_data(bot, CompressionType::Default, FilterType::NoFilter)
 }
 
 pub fn blend_image_buffers(
@@ -93,7 +94,7 @@ pub async fn blend_multiple_js(
 
     let composition = blend_multiple_buffers(image_buffers, algorithm, algorithms, is_inline)?;
 
-    encode_file(composition)
+    encode_file(composition, CompressionType::Default, FilterType::NoFilter, target_file_name)
 }
 
 #[wasm_bindgen(js_name = blendMultipleData)]
@@ -121,7 +122,7 @@ pub fn blend_multiple_data_js(
 
     let composition = blend_multiple_buffers(image_buffers, algorithm, algorithms, is_inline)?;
 
-    encode_image_data(composition)
+    encode_image_data(composition, CompressionType::Default, FilterType::NoFilter)
 }
 
 fn blend_multiple_buffers(
