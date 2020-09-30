@@ -21,7 +21,9 @@ static mut THREAD_POOL: Option<ThreadPool> = None;
 #[pymodule]
 fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
     unsafe {
-        THREAD_POOL = Some(ThreadPool::new(5).unwrap());
+        let mut thread_pool = ThreadPool::new(5).unwrap();
+        thread_pool.start();
+        THREAD_POOL = Some(thread_pool);
     }
 
     m.add("COMPILATION_DATE", constants::COMPILATION_DATE)?;
@@ -105,15 +107,17 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
                 img_paths, out_path, algorithm, algorithms, is_inline, options,
             )
         } else {
-            blend_multiple_multi_thread(
-                img_paths,
-                out_path,
-                algorithm,
-                algorithms,
-                is_inline,
-                options,
-                num_threads,
-            )
+            unsafe {
+                blend_multiple_multi_thread(
+                    img_paths,
+                    out_path,
+                    algorithm,
+                    algorithms,
+                    is_inline,
+                    options,
+                    num_threads,
+                )
+            }
         }
     }
 
@@ -155,7 +159,7 @@ unsafe fn blend_images_multi_thread(
     algorithm: Option<String>,
     is_inline: Option<bool>,
     options: Option<Options>,
-    num_threads: i32,
+    _num_threads: i32,
 ) -> PyResult<()> {
     let algorithm = algorithm.unwrap_or(String::from("multiplicative"));
     let algorithm = build_algorithm(&algorithm)?;
@@ -165,17 +169,8 @@ unsafe fn blend_images_multi_thread(
 
     let thread_pool = match &mut THREAD_POOL {
         Some(thread_pool) => thread_pool,
-        None => panic!("Unable to access global pconvert thread pool")
+        None => panic!("Unable to access global pconvert thread pool"),
     };
-    thread_pool.start();
-
-    for i in 0..10 {
-        thread_pool.execute(move || {
-            println!("Hello from thread {}", i);
-            std::thread::sleep(std::time::Duration::from_secs(3));
-            ResultMessage::ImageResult(Err(PConvertError::UnsupportedImageTypeError))
-        });
-    }
 
     let top_result_channel = thread_pool
         .execute(move || ResultMessage::ImageResult(read_png_from_file(top_path, demultiply)));
@@ -260,14 +255,14 @@ fn blend_multiple_single_thread(
     Ok(())
 }
 
-fn blend_multiple_multi_thread(
+unsafe fn blend_multiple_multi_thread(
     img_paths: &PySequence,
     out_path: String,
     algorithm: Option<String>,
     algorithms: Option<&PySequence>,
     is_inline: Option<bool>,
     options: Option<Options>,
-    num_threads: i32,
+    _num_threads: i32,
 ) -> PyResult<()> {
     let num_images = img_paths.len()? as usize;
 
@@ -296,8 +291,10 @@ fn blend_multiple_multi_thread(
             vec![(BlendAlgorithm::Multiplicative, None); num_images - 1]
         };
 
-    let mut thread_pool = ThreadPool::new(num_threads as usize)?;
-    thread_pool.start();
+    let thread_pool = match &mut THREAD_POOL {
+        Some(thread_pool) => thread_pool,
+        None => panic!("Unable to access global pconvert thread pool"),
+    };
 
     let mut png_channels: Vec<mpsc::Receiver<ResultMessage>> = Vec::with_capacity(num_images);
     for path in img_paths.iter()? {
