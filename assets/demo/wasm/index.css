@@ -27,7 +27,7 @@ div#subtitle {
 }
 
 pre#metadata {
-    font-size: 150%;
+    font-size: 120%;
     margin: auto;
     display: inline-block;
     text-align: left;
@@ -35,7 +35,8 @@ pre#metadata {
 
 div#metadataContainer {
     text-align: center;
-    margin-top: 15%;
+    position: absolute;
+    top: 15%;
 }
 
 canvas#composition {
@@ -62,9 +63,10 @@ textarea#algorithms {
 }
 
 .left-container.algorithms {
-    height: 71%;
+    height: 55%;
 }
 
-select#algorithm {
+select#algorithm, select#compression, select#filter {
     width: 100%;
+    margin-bottom: 1em;
 }

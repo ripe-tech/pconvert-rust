@@ -17,7 +17,7 @@ use serde_json::Value as JSONValue;
 use std::collections::HashMap;
 use utils::{
     build_algorithm, build_params, encode_file, encode_image_data, get_compression_type,
-    get_filter_type, load_png,
+    get_filter_type, load_png, log,
 };
 use wasm_bindgen::prelude::*;
 use web_sys::{File, ImageData};
@@ -124,7 +124,6 @@ pub async fn blend_multiple_js(
     }
 
     let composition = blend_multiple_buffers(image_buffers, algorithm, algorithms, is_inline)?;
-
     encode_file(
         composition,
         get_compression_type(&options),
@@ -163,7 +162,6 @@ pub fn blend_multiple_data_js(
     }
 
     let composition = blend_multiple_buffers(image_buffers, algorithm, algorithms, is_inline)?;
-
     encode_image_data(
         composition,
         get_compression_type(&options),
@@ -233,6 +231,18 @@ fn blend_multiple_buffers(
 
 #[wasm_bindgen(js_name = getModuleConstants)]
 pub fn get_module_constants_js() -> JsValue {
+    let filters: Vec<String> = constants::FILTER_TYPES
+        .to_vec()
+        .iter()
+        .map(|x| format!("{:?}", x))
+        .collect();
+
+    let compressions: Vec<String> = constants::COMPRESSION_TYPES
+        .to_vec()
+        .iter()
+        .map(|x| format!("{:?}", x))
+        .collect();
+
     JsValue::from_serde(&json!({
         "COMPILATION_DATE": constants::COMPILATION_DATE,
         "COMPILATION_TIME": constants::COMPILATION_TIME,
@@ -242,7 +252,9 @@ pub fn get_module_constants_js() -> JsValue {
         "COMPILER_VERSION": constants::COMPILER_VERSION,
         "LIBPNG_VERSION": constants::LIBPNG_VERSION,
         "FEATURES": constants::FEATURES,
-        "PLATFORM_CPU_BITS": constants::PLATFORM_CPU_BITS
+        "PLATFORM_CPU_BITS": constants::PLATFORM_CPU_BITS,
+        "FILTER_TYPES": filters,
+        "COMPRESSION_TYPES": compressions
     }))
     .unwrap()
 }

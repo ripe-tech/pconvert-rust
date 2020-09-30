@@ -30,6 +30,7 @@ mtpng = "0.3.4"
 [build-dependencies]
 chrono = "0.4.13"
 regex = "1"
+image = { version = "0.23.9", default-features = false, features = ["png"] }
 
 [profile.dev]
 opt-level = 3

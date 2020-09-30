@@ -7,6 +7,8 @@ const benchmarkButton = document.querySelector("button#benchmark");
 const canvas = document.querySelector("canvas#composition");
 const inputFiles = document.querySelector("input#files");
 const selectAlgorithm = document.querySelector("select#algorithm");
+const selectCompression = document.querySelector("select#compression");
+const selectFilter = document.querySelector("select#filter");
 const metadata = document.querySelector("pre#metadata");
 const textareaAlgorithms = document.querySelector("textarea#algorithms");
 
@@ -16,6 +18,8 @@ benchmarkButton.addEventListener("click", () => benchmark());
 setPConvertMetadata()
 setAlgorithmsPlaceholder()
 setAlgorithmSelectOptions()
+setCompressionSelectOptions()
+setFilterSelectOptions()
 
 const API_FUNCTIONS = {
   blendImagesData: "blendImagesData",
@@ -34,7 +38,13 @@ async function blend() {
       const top = getImageData(await loadImage(inputFiles.files[0]));
       const bot = getImageData(await loadImage(inputFiles.files[1]));
       const algorithm = selectAlgorithm.value;
-      composition = pconvert.blendImagesData(top, bot, algorithm == "" ? undefined : algorithm);
+      const compression = selectCompression.value;
+      const filter = selectFilter.value;
+
+      composition = pconvert.blendImagesData(top, bot, algorithm == "" ? undefined : algorithm, undefined, {
+        compression: compression,
+        filter: filter
+      });
       break;
     }
 
@@ -42,18 +52,18 @@ async function blend() {
       const top = inputFiles.files[0];
       const bot = inputFiles.files[1];
       const algorithm = selectAlgorithm.value;
-      const file = await pconvert.blendImages(top, bot, 
+      const compression = selectCompression.value;
+      const filter = selectFilter.value;
+
+      const file = await pconvert.blendImages(top, bot,
         "result",
         algorithm == "" ? undefined : algorithm,
         undefined,
         {
-          int: 3,
-          dec: 2.5,
-          bool: true,
-          str: "Ois",
-          compression: "best",
-          filter: "sub"
-        });
+          compression: compression,
+          filter: filter
+        }
+      );
       composition = getImageData(await loadImage(file));
       break;
     }
@@ -66,27 +76,43 @@ async function blend() {
       }
 
       const algorithms = textareaAlgorithms.value;
+      const compression = selectCompression.value;
+      const filter = selectFilter.value;
       if (isJSONParsable(algorithms)) {
         const algorithmsJSON = JSON.parse(algorithms)["algorithms"];
-        composition = await pconvert.blendMultipleData(data, undefined, algorithmsJSON);
+        composition = await pconvert.blendMultipleData(data, undefined, algorithmsJSON, undefined, {
+          compression: compression,
+          filter: filter
+        });
       }
       else {
         const algorithm = selectAlgorithm.value;
-        composition = await pconvert.blendMultipleData(data, algorithm == "" ? undefined : algorithm);
+        composition = await pconvert.blendMultipleData(data, algorithm == "" ? undefined : algorithm, undefined, undefined, {
+          compression: compression,
+          filter: filter
+        });
       }
       break;
     }
 
     case API_FUNCTIONS.blendMultiple: {
       const algorithms = textareaAlgorithms.value;
+      const compression = selectCompression.value;
+      const filter = selectFilter.value;
       if (isJSONParsable(algorithms)) {
         const algorithmsJSON = JSON.parse(algorithms)["algorithms"];
-        const file = await pconvert.blendMultiple(inputFiles.files, "result", undefined, algorithmsJSON);
+        const file = await pconvert.blendMultiple(inputFiles.files, "result", undefined, algorithmsJSON, undefined, {
+          compression: compression,
+          filter: filter
+        });
         composition = getImageData(await loadImage(file));
       }
       else {
         const algorithm = selectAlgorithm.value;
-        const file = await pconvert.blendMultiple(inputFiles.files, "result", algorithm == "" ? undefined : algorithm);
+        const file = await pconvert.blendMultiple(inputFiles.files, "result", algorithm == "" ? undefined : algorithm, undefined, undefined, {
+          compression: compression,
+          filter: filter
+        });
         composition = getImageData(await loadImage(file));
       }
       break;
@@ -146,6 +172,30 @@ async function setAlgorithmSelectOptions() {
     optionEl.text = option;
     optionEl.value = option;
     selectAlgorithm.appendChild(optionEl);
+  }
+}
+
+async function setCompressionSelectOptions() {
+  const pconvert = await js.then(js => js);
+  const options = pconvert.getModuleConstants().COMPRESSION_TYPES;
+
+  for (option of options) {
+    const optionEl = document.createElement("option");
+    optionEl.text = option;
+    optionEl.value = option;
+    selectCompression.appendChild(optionEl);
+  }
+}
+
+async function setFilterSelectOptions() {
+  const pconvert = await js.then(js => js);
+  const options = pconvert.getModuleConstants().FILTER_TYPES;
+
+  for (option of options) {
+    const optionEl = document.createElement("option");
+    optionEl.text = option;
+    optionEl.value = option;
+    selectFilter.appendChild(optionEl);
   }
 }
 

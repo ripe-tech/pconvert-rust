@@ -36,6 +36,20 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
 
     m.add("PLATFORM_CPU_BITS", constants::PLATFORM_CPU_BITS)?;
 
+    let filters: Vec<String> = constants::FILTER_TYPES
+        .to_vec()
+        .iter()
+        .map(|x| format!("{:?}", x))
+        .collect();
+    m.add("FILTER_TYPES", filters)?;
+
+    let compressions: Vec<String> = constants::COMPRESSION_TYPES
+        .to_vec()
+        .iter()
+        .map(|x| format!("{:?}", x))
+        .collect();
+    m.add("COMPRESSION_TYPES", compressions)?;
+
     #[pyfn(m, "blend_images")]
     fn blend_images_py(
         bot_path: String,

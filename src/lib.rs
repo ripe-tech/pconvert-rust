@@ -430,22 +430,6 @@ pub fn pbenchmark(args: &mut env::Args) -> Result<(), PConvertError> {
         _ => false,
     };
 
-    let algorithms = constants::ALGORITHMS;
-    let compressions = [
-        CompressionType::Default,
-        CompressionType::Best,
-        CompressionType::Fast,
-        CompressionType::Huffman,
-        CompressionType::Rle,
-    ];
-    let filters = [
-        FilterType::NoFilter,
-        FilterType::Avg,
-        FilterType::Paeth,
-        FilterType::Sub,
-        FilterType::Up,
-    ];
-
     println!(
         "{:<20}{:<20}{:<20}{:<20}",
         "Algorithm", "Compression", "Filter", "Times"
@@ -453,9 +437,9 @@ pub fn pbenchmark(args: &mut env::Args) -> Result<(), PConvertError> {
     println!("{}", str::from_utf8(&vec![b'-'; 100]).unwrap());
 
     let mut total_benchmark = Benchmark::new();
-    for algorithm in algorithms.iter() {
-        for compression in compressions.iter() {
-            for filter in filters.iter() {
+    for algorithm in constants::ALGORITHMS.iter() {
+        for compression in constants::COMPRESSION_TYPES.iter() {
+            for filter in constants::FILTER_TYPES.iter() {
                 let mut benchmark = Benchmark::new();
                 if run_parallel {
                     compose_parallel(
