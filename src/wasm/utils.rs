@@ -127,10 +127,29 @@ pub fn get_filter_type(options: &Option<HashMap<String, JSONValue>>) -> FilterTy
     })
 }
 
-pub fn log_benchmark(algorithm: String, blend_time: f64, read_time: f64, write_time: f64) {
+pub fn log_benchmark_header() {
     console_log!(
-        "{:<20}{:<20}",
+        "{:<20}{:<20}{:<20}{:<20}",
+        "Algorithm",
+        "Compression",
+        "Filter",
+        "Times"
+    );
+}
+
+pub fn log_benchmark(
+    algorithm: String,
+    compression: CompressionType,
+    filter: FilterType,
+    blend_time: f64,
+    read_time: f64,
+    write_time: f64,
+) {
+    console_log!(
+        "{:<20}{:<20}{:<20}{:<20}",
         algorithm,
+        format!("{:#?}", compression),
+        format!("{:#?}", filter),
         format!(
             "{}ms (blend {}ms, read {}ms, write {}ms)",
             read_time + blend_time + write_time,

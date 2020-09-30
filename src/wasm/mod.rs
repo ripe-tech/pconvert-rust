@@ -17,7 +17,7 @@ use serde_json::Value as JSONValue;
 use std::collections::HashMap;
 use utils::{
     build_algorithm, build_params, encode_file, encode_image_data, get_compression_type,
-    get_filter_type, load_png, log,
+    get_filter_type, load_png,
 };
 use wasm_bindgen::prelude::*;
 use web_sys::{File, ImageData};
