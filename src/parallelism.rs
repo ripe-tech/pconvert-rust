@@ -75,6 +75,10 @@ impl ThreadPool {
     //     }
     // }
 
+    pub fn get_status(&self) -> ThreadPoolStatus {
+        (*self.status).clone()
+    }
+
     fn spawn_worker(&mut self) {
         self.workers.push(Worker::new(
             self.status.clone(),
@@ -99,6 +103,7 @@ impl Worker {
         receiver: Arc<Mutex<mpsc::Receiver<WorkMessage>>>,
     ) -> Worker {
         let thread = spawn(move || loop {
+            std::thread::sleep_ms(3000);
             let message = receiver.lock().unwrap().recv().unwrap();
             match message {
                 WorkMessage::NewTask(task, result_channel_sender) => {
@@ -133,7 +138,7 @@ pub enum ResultMessage {
     ImageResult(Result<ImageBuffer<Rgba<u8>, Vec<u8>>, PConvertError>),
 }
 
-struct ThreadPoolStatus {
+pub struct ThreadPoolStatus {
     size: AtomicUsize,
     queued_count: AtomicUsize,
     active_count: AtomicUsize,
@@ -148,17 +153,17 @@ impl ThreadPoolStatus {
         }
     }
 
-    // pub fn size(&self) -> usize {
-    //     self.size.load(Ordering::Relaxed)
-    // }
+    pub fn size(&self) -> usize {
+        self.size.load(Ordering::Relaxed)
+    }
 
-    // pub fn queued(&self) -> usize {
-    //     self.queued_count.load(Ordering::Relaxed)
-    // }
+    pub fn queued(&self) -> usize {
+        self.queued_count.load(Ordering::Relaxed)
+    }
 
-    // pub fn active(&self) -> usize {
-    //     self.active_count.load(Ordering::Relaxed)
-    // }
+    pub fn active(&self) -> usize {
+        self.active_count.load(Ordering::Relaxed)
+    }
 
     pub fn inc_queued_count(&self) {
         self.queued_count.fetch_add(1, Ordering::Relaxed);
@@ -182,5 +187,15 @@ impl ThreadPoolStatus {
 
     pub fn dec_size(&self) {
         self.size.fetch_sub(1, Ordering::Relaxed);
+    }
+}
+
+impl Clone for ThreadPoolStatus {
+    fn clone(&self) -> Self {
+        ThreadPoolStatus {
+            size: AtomicUsize::new(self.size()),
+            queued_count: AtomicUsize::new(self.queued()),
+            active_count: AtomicUsize::new(self.active()),
+        }
     }
 }

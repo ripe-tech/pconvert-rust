@@ -1,5 +1,4 @@
-use crate::blending::params::Options;
-use crate::blending::params::{BlendAlgorithmParams, Value};
+use crate::blending::params::{BlendAlgorithmParams, Options, Value};
 use crate::blending::BlendAlgorithm;
 use crate::errors::PConvertError;
 use crate::utils::{image_compression_from, image_filter_from};
@@ -27,7 +26,7 @@ pub fn build_params(
         let element = algorithms.get_item(i)?;
 
         if let Ok(string) = element.cast_as::<PyString>() {
-            let algorithm = build_algorithm(&string.to_string()?.into_owned())?;
+            let algorithm = build_algorithm(&string.to_string())?;
             result.push((algorithm, None));
         } else if let Ok(sequence) = element.cast_as::<PySequence>() {
             let algorithm = sequence.get_item(0)?.extract::<String>()?;

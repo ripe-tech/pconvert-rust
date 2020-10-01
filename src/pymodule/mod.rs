@@ -9,9 +9,12 @@ use crate::constants;
 use crate::errors::PConvertError;
 use crate::parallelism::{ResultMessage, ThreadPool};
 use crate::utils::{read_png_from_file, write_png_parallel, write_png_to_file};
+use pyo3::exceptions::PyException;
 use pyo3::prelude::*;
-use pyo3::types::PySequence;
+use pyo3::types::{IntoPyDict, PyDict, PyList, PySequence};
+use pyo3::{Py, PyTypeInfo};
 use std::sync::mpsc;
+use std::sync::Arc;
 use utils::{
     build_algorithm, build_params, get_compression_type, get_filter_type, get_num_threads,
 };
@@ -60,6 +63,7 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
 
     #[pyfn(m, "blend_images")]
     fn blend_images_py(
+        py: Python,
         bot_path: String,
         top_path: String,
         target_path: String,
@@ -67,29 +71,31 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         is_inline: Option<bool>,
         options: Option<Options>,
     ) -> PyResult<()> {
-        let num_threads = get_num_threads(&options);
-        if num_threads <= 0 {
-            blend_images_single_thread(
-                bot_path,
-                top_path,
-                target_path,
-                algorithm,
-                is_inline,
-                options,
-            )
-        } else {
-            unsafe {
-                blend_images_multi_thread(
+        py.allow_threads(|| -> PyResult<()> {
+            let num_threads = get_num_threads(&options);
+            if num_threads <= 0 {
+                blend_images_single_thread(
                     bot_path,
                     top_path,
                     target_path,
                     algorithm,
                     is_inline,
                     options,
-                    num_threads,
                 )
+            } else {
+                unsafe {
+                    blend_images_multi_thread(
+                        bot_path,
+                        top_path,
+                        target_path,
+                        algorithm,
+                        is_inline,
+                        options,
+                        num_threads,
+                    )
+                }
             }
-        }
+        })
     }
 
     #[pyfn(m, "blend_multiple")]
@@ -117,6 +123,21 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
                     options,
                     num_threads,
                 )
+            }
+        }
+    }
+
+    #[pyfn(m, "get_thread_pool_status")]
+    fn get_thread_pool_status(py: Python) -> PyResult<&PyDict> {
+        unsafe {
+            match &mut THREAD_POOL {
+                Some(thread_pool) => {
+                    let status_dict = thread_pool.get_status().into_py_dict(py);
+                    Ok(status_dict)
+                }
+                None => Err(PyException::new_err(
+                    "Acessing global thread pool".to_string(),
+                )),
             }
         }
     }
