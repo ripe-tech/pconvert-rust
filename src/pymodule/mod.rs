@@ -24,7 +24,7 @@ static mut THREAD_POOL: Option<ThreadPool> = None;
 #[pymodule]
 fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
     unsafe {
-        let mut thread_pool = ThreadPool::new(5).unwrap();
+        let mut thread_pool = ThreadPool::new(constants::DEFAULT_THREAD_POOL_SIZE).unwrap();
         thread_pool.start();
         THREAD_POOL = Some(thread_pool);
     }
@@ -180,7 +180,7 @@ unsafe fn blend_images_multi_thread(
     algorithm: Option<String>,
     is_inline: Option<bool>,
     options: Option<Options>,
-    _num_threads: i32,
+    num_threads: i32,
 ) -> PyResult<()> {
     let algorithm = algorithm.unwrap_or(String::from("multiplicative"));
     let algorithm = build_algorithm(&algorithm)?;
@@ -192,6 +192,8 @@ unsafe fn blend_images_multi_thread(
         Some(thread_pool) => thread_pool,
         None => panic!("Unable to access global pconvert thread pool"),
     };
+
+    thread_pool.expand_to(num_threads as usize);
 
     let top_result_channel = thread_pool
         .execute(move || ResultMessage::ImageResult(read_png_from_file(top_path, demultiply)));
@@ -283,7 +285,7 @@ unsafe fn blend_multiple_multi_thread(
     algorithms: Option<&PySequence>,
     is_inline: Option<bool>,
     options: Option<Options>,
-    _num_threads: i32,
+    num_threads: i32,
 ) -> PyResult<()> {
     let num_images = img_paths.len()? as usize;
 
@@ -316,6 +318,7 @@ unsafe fn blend_multiple_multi_thread(
         Some(thread_pool) => thread_pool,
         None => panic!("Unable to access global pconvert thread pool"),
     };
+    thread_pool.expand_to(num_threads as usize);
 
     let mut png_channels: Vec<mpsc::Receiver<ResultMessage>> = Vec::with_capacity(num_images);
     for path in img_paths.iter()? {

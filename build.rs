@@ -127,6 +127,28 @@ fn main() {
         CompressionType::Rle,
     ];
     write_enum_variants_to_file(&mut file, "COMPRESSION_TYPES", libpng_compression_types);
+
+    write_constant_to_file(&mut file, "DEFAULT_THREAD_POOL_SIZE", 5 as usize);
+
+    write_constant_to_file(&mut file, "MAX_THREAD_POOL_SIZE", 20 as usize);
+}
+
+fn write_constant_to_file<T>(file: &mut File, key: &str, val: T)
+where
+    T: std::fmt::Display,
+{
+    // pub const DEFAULT_THREAD_POOL_SIZE: usize = 3;
+    writeln!(
+        file,
+        "pub const {}: {} = {};",
+        key,
+        std::any::type_name::<T>(),
+        val
+    )
+    .expect(&format!(
+        "Failed to write '{}' to 'build_constants.rs'",
+        key
+    ));
 }
 
 fn write_str_constant_to_file(file: &mut File, key: &str, val: &str) {

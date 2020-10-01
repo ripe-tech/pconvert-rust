@@ -1,4 +1,6 @@
+use crate::constants;
 use crate::errors::PConvertError;
+use crate::utils::min;
 use image::{ImageBuffer, Rgba};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{mpsc, Arc, Mutex};
@@ -67,13 +69,14 @@ impl ThreadPool {
         result_channel_receiver
     }
 
-    // pub fn expand_to(&mut self, num_threads: usize) {
-    //     let to_spawn = num_threads - self.status.size();
-    //     for _ in 0..to_spawn {
-    //         self.spawn_worker();
-    //         self.status.inc_size();
-    //     }
-    // }
+    pub fn expand_to(&mut self, num_threads: usize) {
+        let to_spawn = num_threads - self.status.size();
+        let to_spawn = min(to_spawn, constants::MAX_THREAD_POOL_SIZE);
+        for _ in 0..to_spawn {
+            self.spawn_worker();
+            self.status.inc_size();
+        }
+    }
 
     pub fn get_status(&self) -> ThreadPoolStatus {
         (*self.status).clone()
@@ -181,9 +184,9 @@ impl ThreadPoolStatus {
         self.active_count.fetch_sub(1, Ordering::Relaxed);
     }
 
-    // pub fn inc_size(&self) {
-    //     self.size.fetch_add(1, Ordering::Relaxed);
-    // }
+    pub fn inc_size(&self) {
+        self.size.fetch_add(1, Ordering::Relaxed);
+    }
 
     pub fn dec_size(&self) {
         self.size.fetch_sub(1, Ordering::Relaxed);
