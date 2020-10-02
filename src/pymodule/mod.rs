@@ -98,6 +98,7 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
 
     #[pyfn(m, "blend_multiple")]
     fn blend_multiple_py(
+        py: Python,
         img_paths: &PySequence,
         out_path: String,
         algorithm: Option<String>,
@@ -105,24 +106,42 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         is_inline: Option<bool>,
         options: Option<Options>,
     ) -> PyResult<()> {
-        let num_threads = get_num_threads(&options);
-        if num_threads <= 0 {
-            blend_multiple_single_thread(
-                &img_paths, out_path, algorithm, algorithms, is_inline, options,
-            )
-        } else {
-            unsafe {
-                blend_multiple_multi_thread(
+        let img_paths: Vec<String> = img_paths.extract()?;
+        let num_images = img_paths.len();
+
+        let algorithms_to_apply: Vec<(BlendAlgorithm, Option<BlendAlgorithmParams>)> =
+            if let Some(algorithms) = algorithms {
+                build_params(algorithms)?
+            } else if let Some(algorithm) = algorithm {
+                let algorithm = build_algorithm(&algorithm)?;
+                vec![(algorithm, None); num_images - 1]
+            } else {
+                vec![(BlendAlgorithm::Multiplicative, None); num_images - 1]
+            };
+
+        py.allow_threads(|| -> PyResult<()> {
+            let num_threads = get_num_threads(&options);
+            if num_threads <= 0 {
+                blend_multiple_single_thread(
                     img_paths,
                     out_path,
-                    algorithm,
-                    algorithms,
+                    algorithms_to_apply,
                     is_inline,
                     options,
-                    num_threads,
                 )
+            } else {
+                unsafe {
+                    blend_multiple_multi_thread(
+                        img_paths,
+                        out_path,
+                        algorithms_to_apply,
+                        is_inline,
+                        options,
+                        num_threads,
+                    )
+                }
             }
-        }
+        })
     }
 
     #[pyfn(m, "get_thread_pool_status")]
@@ -216,14 +235,13 @@ unsafe fn blend_images_multi_thread(
 }
 
 fn blend_multiple_single_thread(
-    img_paths: &PySequence,
+    img_paths: Vec<String>,
     out_path: String,
-    algorithm: Option<String>,
-    algorithms: Option<&PySequence>,
+    algorithms: Vec<(BlendAlgorithm, Option<BlendAlgorithmParams>)>,
     is_inline: Option<bool>,
     options: Option<Options>,
 ) -> PyResult<()> {
-    let num_images = img_paths.len()? as usize;
+    let num_images = img_paths.len();
 
     if num_images < 1 {
         return Err(PyErr::from(PConvertError::ArgumentError(
@@ -231,7 +249,7 @@ fn blend_multiple_single_thread(
         )));
     }
 
-    if algorithms.is_some() && algorithms.unwrap().len()? != num_images as isize - 1 {
+    if algorithms.len() != num_images - 1 {
         return Err(PyErr::from(PConvertError::ArgumentError(format!(
             "ArgumentError: 'algorithms' must be of size {} (one per blending operation)",
             num_images - 1
@@ -240,23 +258,13 @@ fn blend_multiple_single_thread(
 
     let _is_inline = is_inline.unwrap_or(false);
 
-    let algorithms_to_apply: Vec<(BlendAlgorithm, Option<BlendAlgorithmParams>)> =
-        if let Some(algorithms) = algorithms {
-            build_params(algorithms)?
-        } else if let Some(algorithm) = algorithm {
-            let algorithm = build_algorithm(&algorithm)?;
-            vec![(algorithm, None); num_images - 1]
-        } else {
-            vec![(BlendAlgorithm::Multiplicative, None); num_images - 1]
-        };
-
-    let mut img_paths_iter = img_paths.iter()?;
-    let first_path = img_paths_iter.next().unwrap()?.to_string();
-    let first_demultiply = is_algorithm_multiplied(&algorithms_to_apply[0].0);
+    let mut img_paths_iter = img_paths.iter();
+    let first_path = img_paths_iter.next().unwrap().to_string();
+    let first_demultiply = is_algorithm_multiplied(&algorithms[0].0);
     let mut composition = read_png_from_file(first_path, first_demultiply)?;
-    let mut zip_iter = img_paths_iter.zip(algorithms_to_apply.iter());
+    let mut zip_iter = img_paths_iter.zip(algorithms.iter());
     while let Some(pair) = zip_iter.next() {
-        let path = pair.0?.extract::<String>()?;
+        let path = pair.0.to_string();
         let (algorithm, algorithm_params) = pair.1;
         let demultiply = is_algorithm_multiplied(&algorithm);
         let algorithm_fn = get_blending_algorithm(&algorithm);
@@ -277,15 +285,14 @@ fn blend_multiple_single_thread(
 }
 
 unsafe fn blend_multiple_multi_thread(
-    img_paths: &PySequence,
+    img_paths: Vec<String>,
     out_path: String,
-    algorithm: Option<String>,
-    algorithms: Option<&PySequence>,
+    algorithms: Vec<(BlendAlgorithm, Option<BlendAlgorithmParams>)>,
     is_inline: Option<bool>,
     options: Option<Options>,
     num_threads: i32,
 ) -> PyResult<()> {
-    let num_images = img_paths.len()? as usize;
+    let num_images = img_paths.len();
 
     if num_images < 1 {
         return Err(PyErr::from(PConvertError::ArgumentError(
@@ -293,7 +300,7 @@ unsafe fn blend_multiple_multi_thread(
         )));
     }
 
-    if algorithms.is_some() && algorithms.unwrap().len()? != num_images as isize - 1 {
+    if algorithms.len() != num_images - 1 {
         return Err(PyErr::from(PConvertError::ArgumentError(format!(
             "ArgumentError: 'algorithms' must be of size {} (one per blending operation)",
             num_images - 1
@@ -302,16 +309,6 @@ unsafe fn blend_multiple_multi_thread(
 
     let _is_inline = is_inline.unwrap_or(false);
 
-    let algorithms_to_apply: Vec<(BlendAlgorithm, Option<BlendAlgorithmParams>)> =
-        if let Some(algorithms) = algorithms {
-            build_params(algorithms)?
-        } else if let Some(algorithm) = algorithm {
-            let algorithm = build_algorithm(&algorithm)?;
-            vec![(algorithm, None); num_images - 1]
-        } else {
-            vec![(BlendAlgorithm::Multiplicative, None); num_images - 1]
-        };
-
     let thread_pool = match &mut THREAD_POOL {
         Some(thread_pool) => thread_pool,
         None => panic!("Unable to access global pconvert thread pool"),
@@ -319,15 +316,14 @@ unsafe fn blend_multiple_multi_thread(
     thread_pool.expand_to(num_threads as usize);
 
     let mut png_channels: Vec<mpsc::Receiver<ResultMessage>> = Vec::with_capacity(num_images);
-    for path in img_paths.iter()? {
-        let path = path?.to_string();
+    for path in img_paths.into_iter() {
         let result_channel = thread_pool.execute(move || -> ResultMessage {
             ResultMessage::ImageResult(read_png_from_file(path, false))
         });
         png_channels.push(result_channel);
     }
 
-    let first_demultiply = is_algorithm_multiplied(&algorithms_to_apply[0].0);
+    let first_demultiply = is_algorithm_multiplied(&algorithms[0].0);
     let mut composition = match png_channels[0].recv().unwrap() {
         ResultMessage::ImageResult(result) => result,
     }?;
@@ -336,7 +332,7 @@ unsafe fn blend_multiple_multi_thread(
     }
 
     for i in 1..png_channels.len() {
-        let (algorithm, algorithm_params) = &algorithms_to_apply[i - 1];
+        let (algorithm, algorithm_params) = &algorithms[i - 1];
         let demultiply = is_algorithm_multiplied(&algorithm);
         let algorithm_fn = get_blending_algorithm(&algorithm);
         let mut current_layer = match png_channels[i].recv().unwrap() {

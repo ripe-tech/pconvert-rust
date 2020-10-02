@@ -36,10 +36,11 @@ pool_status_thread = threading.Thread(target=print_pool_status)
 pool_status_thread.daemon = True
 pool_status_thread.start()
 
-blending_threads = [threading.Thread(target=blend, args=(x,)) for x in range(5)]
+blending_threads = [threading.Thread(target=blend, args=(x,)) for x in range(10)]
 
 for blending_thread in blending_threads:
     blending_thread.start()
+    time.sleep(0.2)
 
 for blending_thread in blending_threads:
     blending_thread.join()

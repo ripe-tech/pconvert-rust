@@ -70,8 +70,11 @@ impl ThreadPool {
     }
 
     pub fn expand_to(&mut self, num_threads: usize) {
-        let to_spawn = num_threads - self.status.size();
-        let to_spawn = min(to_spawn, constants::MAX_THREAD_POOL_SIZE);
+        let num_threads = min(
+            num_threads as isize,
+            constants::MAX_THREAD_POOL_SIZE as isize,
+        );
+        let to_spawn = num_threads - self.status.size() as isize;
         for _ in 0..to_spawn {
             self.spawn_worker();
             self.status.inc_size();
@@ -157,7 +160,7 @@ impl ThreadPoolStatus {
     }
 
     pub fn size(&self) -> usize {
-        self.size.load(Ordering::Relaxed)
+        self.size.load(Ordering::Acquire)
     }
 
     pub fn queued(&self) -> usize {
