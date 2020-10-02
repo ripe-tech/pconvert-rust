@@ -11,10 +11,8 @@ use crate::parallelism::{ResultMessage, ThreadPool};
 use crate::utils::{read_png_from_file, write_png_parallel, write_png_to_file};
 use pyo3::exceptions::PyException;
 use pyo3::prelude::*;
-use pyo3::types::{IntoPyDict, PyDict, PyList, PySequence};
-use pyo3::{Py, PyTypeInfo};
+use pyo3::types::{IntoPyDict, PyDict, PySequence};
 use std::sync::mpsc;
-use std::sync::Arc;
 use utils::{
     build_algorithm, build_params, get_compression_type, get_filter_type, get_num_threads,
 };
@@ -110,7 +108,7 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         let num_threads = get_num_threads(&options);
         if num_threads <= 0 {
             blend_multiple_single_thread(
-                img_paths, out_path, algorithm, algorithms, is_inline, options,
+                &img_paths, out_path, algorithm, algorithms, is_inline, options,
             )
         } else {
             unsafe {

@@ -106,7 +106,6 @@ impl Worker {
         receiver: Arc<Mutex<mpsc::Receiver<WorkMessage>>>,
     ) -> Worker {
         let thread = spawn(move || loop {
-            std::thread::sleep_ms(3000);
             let message = receiver.lock().unwrap().recv().unwrap();
             match message {
                 WorkMessage::NewTask(task, result_channel_sender) => {
@@ -114,6 +113,7 @@ impl Worker {
                     thread_pool_status.inc_active_count();
 
                     let result = task();
+                    std::thread::sleep_ms(2000);
                     result_channel_sender.send(result).unwrap_or_default();
 
                     thread_pool_status.dec_active_count();

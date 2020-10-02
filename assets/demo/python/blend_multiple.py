@@ -17,16 +17,3 @@ pconvert.blend_multiple(
     ),
     os.path.abspath("result.basic.png")
 )
-
-pconvert.blend_multiple(
-    (
-        os.path.abspath(f"{PATH_TO_ASSETS}sole.png"),
-        os.path.abspath(f"{PATH_TO_ASSETS}back.png"),
-        os.path.abspath(f"{PATH_TO_ASSETS}front.png")
-    ),
-    os.path.abspath("result.destination_over.png"),
-    algorithm = "destination_over",
-    options = {
-        "num_threads": 5
-    }
-)

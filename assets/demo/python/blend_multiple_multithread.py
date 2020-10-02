@@ -18,9 +18,14 @@ def print_pool_status():
         time.sleep(0.1)
 
 def blend(i):
-    pconvert.blend_images(
-        os.path.abspath(f"{PATH_TO_ASSETS}sole.png"),
-        os.path.abspath(f"{PATH_TO_ASSETS}back.png"),
+    pconvert.blend_multiple(
+        (
+            os.path.abspath(f"{PATH_TO_ASSETS}sole.png"),
+            os.path.abspath(f"{PATH_TO_ASSETS}back.png"),
+            os.path.abspath(f"{PATH_TO_ASSETS}front.png"),
+            os.path.abspath(f"{PATH_TO_ASSETS}shoelace.png"),
+            os.path.abspath(f"{PATH_TO_ASSETS}background_alpha.png"),
+        ),
         os.path.abspath(f"result{i}.png"),
         options = {
             "num_threads": 5
