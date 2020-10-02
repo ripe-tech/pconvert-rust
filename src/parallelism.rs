@@ -116,7 +116,6 @@ impl Worker {
                     thread_pool_status.inc_active_count();
 
                     let result = task();
-                    std::thread::sleep_ms(2000); //Temporary to demonstrate py.allow_threads effect
                     result_channel_sender.send(result).unwrap_or_default();
 
                     thread_pool_status.dec_active_count();
