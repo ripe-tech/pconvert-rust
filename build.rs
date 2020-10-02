@@ -22,13 +22,13 @@
 /// ```
 use chrono::Utc;
 use image::png::{CompressionType, FilterType};
+use num_cpus;
 use regex::Regex;
 use std::fs::{File, OpenOptions};
 use std::io::Write;
 use std::path::Path;
 use std::process::Command;
 use std::str;
-use num_cpus;
 
 const BUILD_OUT_FILE: &str = "constants.rs";
 const SOURCE_DIR: &str = "./src";
@@ -137,7 +137,6 @@ fn write_constant_to_file<T>(file: &mut File, key: &str, val: T)
 where
     T: std::fmt::Display,
 {
-    // pub const DEFAULT_THREAD_POOL_SIZE: usize = 3;
     writeln!(
         file,
         "pub const {}: {} = {};",
