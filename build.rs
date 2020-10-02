@@ -28,10 +28,10 @@ use std::io::Write;
 use std::path::Path;
 use std::process::Command;
 use std::str;
+use num_cpus;
 
 const BUILD_OUT_FILE: &str = "constants.rs";
 const SOURCE_DIR: &str = "./src";
-
 const TOML: &'static str = include_str!("Cargo.toml");
 
 fn main() {
@@ -128,9 +128,9 @@ fn main() {
     ];
     write_enum_variants_to_file(&mut file, "COMPRESSION_TYPES", libpng_compression_types);
 
-    write_constant_to_file(&mut file, "DEFAULT_THREAD_POOL_SIZE", 5 as usize);
+    write_constant_to_file(&mut file, "DEFAULT_THREAD_POOL_SIZE", num_cpus::get());
 
-    write_constant_to_file(&mut file, "MAX_THREAD_POOL_SIZE", 20 as usize);
+    write_constant_to_file(&mut file, "MAX_THREAD_POOL_SIZE", num_cpus::get() * 10);
 }
 
 fn write_constant_to_file<T>(file: &mut File, key: &str, val: T)
