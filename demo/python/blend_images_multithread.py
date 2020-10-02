@@ -23,7 +23,7 @@ def blend(i):
         os.path.abspath(f"{PATH_TO_ASSETS}back.png"),
         os.path.abspath(f"result{i}.png"),
         options = {
-            "num_threads": 5
+            "num_threads": 20
         }
     )
 
@@ -31,11 +31,10 @@ pool_status_thread = threading.Thread(target=print_pool_status)
 pool_status_thread.daemon = True
 pool_status_thread.start()
 
-blending_threads = [threading.Thread(target=blend, args=(x,)) for x in range(10)]
+blending_threads = [threading.Thread(target=blend, args=(x,)) for x in range(1000)]
 
 for blending_thread in blending_threads:
     blending_thread.start()
-    time.sleep(0.2)
 
 for blending_thread in blending_threads:
     blending_thread.join()
