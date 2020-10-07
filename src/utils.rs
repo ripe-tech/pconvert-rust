@@ -59,6 +59,16 @@ pub fn write_png_to_file(
     encode_png(file, png, compression, filter)
 }
 
+#[cfg(target_arch = "wasm32")]
+pub fn write_png_parallel(
+    file_out: String,
+    png: &ImageBuffer<Rgba<u8>, Vec<u8>>,
+    compression: CompressionType,
+    filter: FilterType,
+) -> Result<(), PConvertError> {
+    write_png_to_file(file_out, png, compression, filter)
+}
+
 #[cfg(not(target_arch = "wasm32"))]
 pub fn write_png_parallel(
     file_out: String,

@@ -23,10 +23,7 @@ use parallelism::{ResultMessage, ThreadPool};
 use std::env;
 use std::str;
 use std::str::FromStr;
-use utils::{read_png_from_file, write_png_to_file};
-
-#[cfg(not(target_arch = "wasm32"))]
-use utils::write_png_parallel;
+use utils::{read_png_from_file, write_png_parallel, write_png_to_file};
 
 pub fn pcompose(args: &mut env::Args) -> Result<(), PConvertError> {
     let dir = match args.next() {
@@ -52,6 +49,8 @@ pub fn pcompose(args: &mut env::Args) -> Result<(), PConvertError> {
         Background::Texture,
         Background::White,
     ];
+
+    // composes with different combinations of blending algorithms and backgrounds
     for background in backgrounds {
         for algorithm in constants::ALGORITHMS.iter() {
             compose(
@@ -125,6 +124,8 @@ pub fn pbenchmark(args: &mut env::Args) -> Result<(), PConvertError> {
     );
     println!("{}", str::from_utf8(&vec![b'-'; 100]).unwrap());
 
+    // tries and outputs to stdout times for different combinations of
+    // blending algorithms, compression and filter types
     let mut total_benchmark = Benchmark::new();
     for algorithm in constants::ALGORITHMS.iter() {
         for compression in constants::COMPRESSION_TYPES.iter() {
@@ -204,6 +205,8 @@ fn compose(
 
     let algorithm_fn = get_blending_algorithm(&algorithm);
 
+    // reads one PNG at the time and blends it with the current result
+
     let top = benchmark.execute(Benchmark::add_read_png_time, || {
         read_png_from_file(format!("{}back.png", dir), demultiply)
     })?;
@@ -240,6 +243,7 @@ fn compose(
         blend_images(&bot, &mut composition, &algorithm_fn, &None)
     });
 
+    // writes the final composition to the file system
     let file_out = format!(
         "{}result_{}_{}_{:#?}_{:#?}.png",
         dir, algorithm, background, compression, filter
@@ -339,17 +343,7 @@ fn compose_parallel(
         dir, algorithm, background, compression, filter
     );
     benchmark.execute(Benchmark::add_write_png_time, || {
-        #[cfg(target_arch = "wasm32")]
-        {
-            println!("Warning: running on WASM32 target, parallel PNG writing using MTPNG crate is not allowed.");
-            println!("Using single-threaded write_png_to_file");
-            write_png_to_file(file_out, &composition, compression, filter)
-        }
-
-        #[cfg(not(target_arch = "wasm32"))] 
-        {
-            write_png_parallel(file_out, &composition, compression, filter)
-        }
+        write_png_parallel(file_out, &composition, compression, filter)
     })?;
 
     Ok(())

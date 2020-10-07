@@ -20,6 +20,7 @@ impl ThreadPool {
                 "Thread Pool size should be a positive number".to_string(),
             ));
         }
+
         let (work_channel_sender, work_channel_receiver) = mpsc::channel();
         let workers = Vec::with_capacity(size);
         let work_channel_receiver_mutex = Arc::new(Mutex::new(work_channel_receiver));
@@ -41,12 +42,14 @@ impl ThreadPool {
     }
 
     fn stop(&mut self) {
+        // sends a Terminate message to all Workers
         for _ in &self.workers {
             self.work_channel_sender
                 .send(WorkMessage::Terminate)
                 .unwrap_or_default();
         }
 
+        // joins main thread with Worker threads
         for worker in &mut self.workers {
             if let Some(thread) = worker.thread.take() {
                 thread.join().unwrap_or_default();
@@ -60,6 +63,9 @@ impl ThreadPool {
     {
         let (result_channel_sender, result_channel_receiver) = mpsc::channel();
         let task = Box::new(func);
+
+        // sends task to task queue and attaches the sender end of the result channel
+        // so that the Worker can send the task result
         self.work_channel_sender
             .send(WorkMessage::NewTask(task, result_channel_sender))
             .unwrap_or_default();
@@ -86,6 +92,8 @@ impl ThreadPool {
     }
 
     fn spawn_worker(&mut self) {
+        // creates Worker instances that receive the receiver end
+        // of the channel where jobs/tasks are submitted
         self.workers.push(Worker::new(
             self.status.clone(),
             Arc::clone(&self.work_channel_receiver_mutex),

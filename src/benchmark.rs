@@ -25,7 +25,10 @@ impl Benchmark {
     where
         F: FnOnce() -> T,
         H: FnOnce(&mut Self, u128),
-    {
+    {   
+        // saves beginning Instant, executes the target function,
+        // measures time spent and updates the benchmark struct according 
+        // to the update function (read, write or blend time)
         let start = Instant::now();
         let result = target_fn();
         update_fn(self, start.elapsed().as_millis() as u128);
