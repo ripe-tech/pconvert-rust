@@ -1,4 +1,6 @@
-# Submodules overview
+# Modules overview
+
+Source files:
 
 - [`main.rs`](./main.rs)
     - exposes a simple CLI
@@ -25,6 +27,8 @@
     - read/write from file system PNG functions
     - external crate type conversions
     - other utility functions
+
+Submodules:
 
 - [`blending`](./blending/)
     - blending algorithms
