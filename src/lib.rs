@@ -1,5 +1,5 @@
 mod benchmark;
-mod blending;
+pub mod blending;
 mod constants;
 pub mod errors;
 mod parallelism;
