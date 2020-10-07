@@ -89,6 +89,8 @@ pub fn blend_images(
     blending_algorithm: &impl Fn((&mut Rgba<u8>, &Rgba<u8>), &Option<BlendAlgorithmParams>) -> (),
     algorithm_params: &Option<BlendAlgorithmParams>,
 ) {
+    // applies the selected blending algorithm to each pair
+    // of pixels made up by both images
     for pixel_pair in bot.pixels_mut().zip(top.pixels()) {
         blending_algorithm(pixel_pair, algorithm_params);
     }

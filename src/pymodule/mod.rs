@@ -69,6 +69,7 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         is_inline: Option<bool>,
         options: Option<Options>,
     ) -> PyResult<()> {
+        // blends two images using either the single-threaded or the multiple-threaded version
         py.allow_threads(|| -> PyResult<()> {
             let num_threads = get_num_threads(&options);
             if num_threads <= 0 {
@@ -106,6 +107,7 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         is_inline: Option<bool>,
         options: Option<Options>,
     ) -> PyResult<()> {
+        // parses python types to rust owned values so that they are safely shared between threads
         let img_paths: Vec<String> = img_paths.extract()?;
         let num_images = img_paths.len();
 
@@ -119,6 +121,7 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
                 vec![(BlendAlgorithm::Multiplicative, None); num_images - 1]
             };
 
+        // blends multiple images using either the single-threaded or the multiple-threaded version
         py.allow_threads(|| -> PyResult<()> {
             let num_threads = get_num_threads(&options);
             if num_threads <= 0 {
@@ -210,6 +213,7 @@ unsafe fn blend_images_multi_thread(
         None => panic!("Unable to access global pconvert thread pool"),
     };
 
+    // expands thread pool to the desired number of threads/parallelism (if necessary and possible)
     thread_pool.expand_to(num_threads as usize);
 
     let top_result_channel = thread_pool
@@ -258,6 +262,8 @@ fn blend_multiple_single_thread(
 
     let _is_inline = is_inline.unwrap_or(false);
 
+    // loops through the algorithms to apply and blends the
+    // current composition with the next layer
     let mut img_paths_iter = img_paths.iter();
     let first_path = img_paths_iter.next().unwrap().to_string();
     let first_demultiply = is_algorithm_multiplied(&algorithms[0].0);
@@ -313,6 +319,8 @@ unsafe fn blend_multiple_multi_thread(
         Some(thread_pool) => thread_pool,
         None => panic!("Unable to access global pconvert thread pool"),
     };
+
+    // expands thread pool to the desired number of threads/parallelism (if necessary and possible)
     thread_pool.expand_to(num_threads as usize);
 
     let mut png_channels: Vec<mpsc::Receiver<ResultMessage>> = Vec::with_capacity(num_images);
@@ -331,6 +339,9 @@ unsafe fn blend_multiple_multi_thread(
         demultiply_image(&mut composition)
     }
 
+    // loops through the algorithms to apply and blends the
+    // current composition with the next layer
+    // retrieves the images from the result channels
     for i in 1..png_channels.len() {
         let (algorithm, algorithm_params) = &algorithms[i - 1];
         let demultiply = is_algorithm_multiplied(&algorithm);

@@ -22,6 +22,8 @@ pub fn build_params(
 ) -> Result<Vec<(BlendAlgorithm, Option<BlendAlgorithmParams>)>, PyErr> {
     let mut result = Vec::new();
 
+    // parses the parameter sequence which is a python sequence (tuple or list)
+    // made of either algorithms or more sequences of algorithms and special parameters
     for i in 0..algorithms.len()? {
         let element = algorithms.get_item(i)?;
 
