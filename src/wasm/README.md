@@ -13,9 +13,8 @@ Source files:
     - type conversions from and to JavaScript types
 
 - [`utils.rs`](./utils.rs)
-    - `console.log` macro
     - decode/encode PNG functions
-    - other utility functions
+    - other utility functions and macros
 
 ## JavaScript Web API
 
