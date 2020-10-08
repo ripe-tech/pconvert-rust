@@ -1,3 +1,5 @@
+//! Benchmark struct implementation, update functions and generic function benchmark
+
 use std::fmt::{Display, Formatter, Result};
 use std::ops::Add;
 use std::time::Instant;

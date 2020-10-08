@@ -1,3 +1,5 @@
+//! PConvert Rust error types and external error type conversions
+
 use image::error::ImageError;
 use std::error::Error;
 use std::fmt::{Display, Formatter, Result};

@@ -1,3 +1,7 @@
+//! PNG decode/encode and read/write functions,
+//! external crate type conversions
+//! and other utility functions
+
 use crate::blending::demultiply_image;
 use crate::errors::PConvertError;
 use image::png::{CompressionType, FilterType, PngDecoder, PngEncoder};
