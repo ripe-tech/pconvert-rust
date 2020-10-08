@@ -66,7 +66,13 @@ $ pconvert-rust version
 
 ## Compiling & Executing
 
-Follow [this](https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_wasm ) guide on how to install `wasm-pack`, how to compile this project as a WASM module and install it.
+Follow [this](https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_wasm ) guide on how to install `wasm-pack`.
+
+To build, use the `wasm` feature:
+
+```console
+$ wasm-pack build -- --features wasm
+```
 
 ## Usage
 
@@ -139,7 +145,7 @@ pconvert_rust.COMPILER_VERSION
 Generate with
 
 ```console
-$ cargo doc --lib
+$ cargo doc --lib --all-features --document-private-items
 ```
 
 ## License

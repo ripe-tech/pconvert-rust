@@ -8,5 +8,5 @@ pub mod utils;
 #[cfg(not(target_arch = "wasm32"))]
 mod pymodule;
 
-#[cfg(target_arch = "wasm32")]
+#[cfg(feature = "wasm")]
 mod wasm;

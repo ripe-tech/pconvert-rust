@@ -12,30 +12,38 @@ build = "build.rs"
 name = "pconvert_rust"
 crate-type = ["rlib", "cdylib"]
 
+[features]
+default = []
+wasm = ["js-sys", "serde", "serde_json", "wasm-bindgen", "wasm-bindgen-futures", "web-sys"]
+
 [dependencies]
+# mandatory dependencies
 image = { version = "0.23", default-features = false, features = ["png"] }
 
-[target.'cfg(target_arch = "wasm32")'.dependencies]
-js-sys = "0.3"
-serde = { version = "1.0", features = ["derive"]}
-serde_json = "1.0"
-wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
-wasm-bindgen-futures = "0.4"
-web-sys = { version = "0.3", features =  ["File", "ImageData"] }
+# optional dependencies (for --features wasm)
+js-sys = { version = "0.3", optional = true }
+serde = { version = "1.0", features = ["derive"], optional = true }
+serde_json = { version = "1.0", optional = true }
+wasm-bindgen = { version = "0.2", features = ["serde-serialize"], optional = true }
+wasm-bindgen-futures = { version = "0.4", optional = true }
+web-sys = { version = "0.3", features =  ["File", "ImageData"], optional = true }
 
+# mandatory dependencies only compiled when target is not WASM 
+# (ideally these would belong to a "feature = python" block but pyo3 does not allow usage of extra flags in compilation)
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-pyo3 = { version = "0.12", features = ["extension-module"]}
-mtpng = "0.3"
+pyo3 = { version = "0.12", features = ["extension-module"] }
+mtpng = { version = "0.3" }
 
 [build-dependencies]
 chrono = "0.4"
-regex = "1"
-num_cpus = "1.13.0"
 image = { version = "0.23", default-features = false, features = ["png"] }
+num_cpus = "1.13.0"
+regex = "1"
 
 [profile.dev]
 opt-level = 3
 
 [profile.release]
-opt-level = 3
+debug = false
 lto = true
+opt-level = 3
