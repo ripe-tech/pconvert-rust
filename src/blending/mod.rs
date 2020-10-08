@@ -83,6 +83,27 @@ impl Display for Background {
     }
 }
 
+/// Blends two [image::ImageBuffer](https://docs.rs/image/latest/image/struct.ImageBuffer.html) with the given blending function and optional parameters
+///
+/// # Arguments
+///
+/// * `top` - A [image::ImageBuffer](https://docs.rs/image/latest/image/struct.ImageBuffer.html) corresponding to the top layer
+/// * `bot` - A [image::ImageBuffer](https://docs.rs/image/latest/image/struct.ImageBuffer.html) corresponding to the bottom layer
+/// * `blending_algorithm` - A function that blends two pixels according to optional blending parameters
+/// * `algorithm_params` - A optional map of key-value pairs of blending properties and values
+///
+/// # Examples
+///
+/// ```rust
+/// use pconvert_rust::blending::{blend_images, get_blending_algorithm, BlendAlgorithm};
+/// use pconvert_rust::utils::read_png_from_file;
+///
+/// let mut bot = read_png_from_file("bot.png".to_string(), false).unwrap();
+/// let top = read_png_from_file("top.png".to_string(), false).unwrap();
+/// let algorithm_fn = get_blending_algorithm(&BlendAlgorithm::Alpha);
+///
+/// blend_images(&top, &mut bot, &algorithm_fn, &None);
+/// ```
 pub fn blend_images(
     top: &ImageBuffer<Rgba<u8>, Vec<u8>>,
     bot: &mut ImageBuffer<Rgba<u8>, Vec<u8>>,

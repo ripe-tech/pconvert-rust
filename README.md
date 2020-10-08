@@ -134,6 +134,14 @@ pconvert_rust.FILTER_TYPES
 pconvert_rust.COMPILER_VERSION
 ```
 
+## Documentation
+
+Generate with
+
+```console
+$ cargo doc --lib 
+```
+
 ## License
 
 P(NG)Convert Rust is currently licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/).
