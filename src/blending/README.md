@@ -1,6 +1,6 @@
 # Blending module
 
-Source files:
+## Source files
 
 - [`mod.rs`](./mod.rs)
     - enum of available blending algorithms

@@ -1,6 +1,6 @@
 # Web Assembly (WASM)
 
-Source files:
+## Source files
 
 - [`mod.rs`](./mod.rs)
     - exposes the WASM module API to be used within JavaScript files that target the web browsers
@@ -16,7 +16,7 @@ Source files:
     - decode/encode PNG functions
     - other utility functions and macros
 
-## JavaScript Web API
+## JavaScript API
 
 ```javascript
 // blends two File objects and returns a File object

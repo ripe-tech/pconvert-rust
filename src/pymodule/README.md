@@ -1,6 +1,6 @@
 # Python module
 
-Source files:
+## Source files
 
 - [`mod.rs`](./mod.rs)
     - exposes the python module and associated API

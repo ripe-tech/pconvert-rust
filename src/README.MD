@@ -1,12 +1,14 @@
 # Modules overview
 
-Source files:
+## Source files
 
 - [`main.rs`](./main.rs)
-    - exposes a simple CLI
+    - exposes the simple CLI
+
+- [`cli.rs`](./cli.rs)
+    - CLI functions to allow testing pconvert binary
 
 - [`lib.rs`](./lib.rs)
-    - exposes functions invoked by the CLI
     - exports blending functions to be used by other Rust crates
     - conditionally imports submodules depending on target environment (e.g. WASM does not make use of the submodule `pymodule`)
 
@@ -28,7 +30,7 @@ Source files:
     - external crate type conversions
     - other utility functions
 
-Submodules:
+## Submodules
 
 - [`blending`](./blending/)
     - blending algorithms
