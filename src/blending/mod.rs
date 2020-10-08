@@ -77,9 +77,6 @@ impl Display for BlendAlgorithm {
 /// # Examples
 ///
 /// ```rust
-/// use pconvert_rust::blending::{blend_images, get_blending_algorithm, BlendAlgorithm};
-/// use pconvert_rust::utils::read_png_from_file;
-///
 /// let mut bot = read_png_from_file("bot.png".to_string(), false).unwrap();
 /// let top = read_png_from_file("top.png".to_string(), false).unwrap();
 /// let algorithm_fn = get_blending_algorithm(&BlendAlgorithm::Alpha);
