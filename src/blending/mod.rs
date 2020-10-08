@@ -138,7 +138,7 @@ pub fn get_blending_algorithm(
     }
 }
 
-/// Returns wether or not a `BlendAlgorithm` enum variant corresponds to a multiplied blending algorithm
+/// Returns whether or not a `BlendAlgorithm` enum variant corresponds to a multiplied blending algorithm
 ///
 /// # Arguments
 ///

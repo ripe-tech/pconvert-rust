@@ -9,6 +9,12 @@ use std::io::{BufWriter, Read, Write};
 #[cfg(not(target_arch = "wasm32"))]
 use mtpng;
 
+/// Decodes and returns a PNG.
+///
+/// # Arguments
+///
+/// * `readable_stream` - Any structure that implements the `Read` trait
+/// * `demultiply` - Whether or not to demultiply the PNG
 pub fn decode_png(
     readable_stream: impl Read,
     demultiply: bool,
@@ -30,6 +36,12 @@ pub fn decode_png(
     Ok(img)
 }
 
+/// Reads a PNG from the local file system.
+///
+/// # Arguments
+///
+/// * `file_in` - Local file system path to the PNG file
+/// * `demultiply` - Whether or not to demultiply the PNG
 pub fn read_png_from_file(
     file_in: String,
     demultiply: bool,
@@ -38,6 +50,14 @@ pub fn read_png_from_file(
     decode_png(file, demultiply)
 }
 
+/// Encodes a PNG and writes it to a buffer.
+///
+/// # Arguments
+///
+/// * `writable_buff` - Any buffer structure that implements the `Write` trait
+/// * `png` - A byte buffer with the image data
+/// * `compression` - Compression type to use in the encoding
+/// * `filter` - Filter type to use in the encoding
 pub fn encode_png(
     writable_buff: impl Write,
     png: &ImageBuffer<Rgba<u8>, Vec<u8>>,
@@ -49,6 +69,14 @@ pub fn encode_png(
     Ok(encoder.encode(&png, png.width(), png.height(), ColorType::Rgba8)?)
 }
 
+/// Writes a PNG to the local file system.
+///
+/// # Arguments
+///
+/// * `file_out` - Local file system path where to write the PNG file
+/// * `png` - A byte buffer with the image data
+/// * `compression` - Compression type to use in the encoding
+/// * `filter` - Filter type to use in the encoding
 pub fn write_png_to_file(
     file_out: String,
     png: &ImageBuffer<Rgba<u8>, Vec<u8>>,
@@ -69,6 +97,14 @@ pub fn write_png_parallel(
     write_png_to_file(file_out, png, compression, filter)
 }
 
+/// Multi-threaded write version of a PNG to the local file system
+///
+/// # Arguments
+///
+/// * `file_out` - Local file system path where to write the PNG file
+/// * `png` - A byte buffer with the image data
+/// * `compression` - Compression type to use in the encoding
+/// * `filter` - Filter type to use in the encoding
 #[cfg(not(target_arch = "wasm32"))]
 pub fn write_png_parallel(
     file_out: String,
@@ -94,6 +130,9 @@ pub fn write_png_parallel(
     Ok(())
 }
 
+/// Converts a `String` to a `image::png::CompressionType`.
+/// This can not be done by implementing the trait `From<String> for CompressionType` due to Rust's
+/// [orphan rule](https://doc.rust-lang.org/book/ch10-02-traits.html#implementing-a-trait-on-a-type).
 pub fn image_compression_from(compression: String) -> CompressionType {
     match compression.trim().to_lowercase().as_str() {
         "best" => CompressionType::Best,
@@ -105,6 +144,9 @@ pub fn image_compression_from(compression: String) -> CompressionType {
     }
 }
 
+/// Converts a `String` to a `image::png::FilterType`.
+/// This can not be done by implementing the trait `From<String> for FilterType` due to Rust's
+/// [orphan rule](https://doc.rust-lang.org/book/ch10-02-traits.html#implementing-a-trait-on-a-type).
 pub fn image_filter_from(filter: String) -> FilterType {
     match filter.trim().to_lowercase().as_str() {
         "avg" => FilterType::Avg,
@@ -138,6 +180,7 @@ fn mtpng_filter_from(filter: FilterType) -> mtpng::Filter {
     }
 }
 
+/// Maximum of two values that implement the `PartialOrd` trait
 pub fn max<T: PartialOrd>(x: T, y: T) -> T {
     if x > y {
         x
@@ -146,6 +189,7 @@ pub fn max<T: PartialOrd>(x: T, y: T) -> T {
     }
 }
 
+/// Minimum of two values that implement the `PartialOrd` trait
 pub fn min<T: PartialOrd>(x: T, y: T) -> T {
     if x < y {
         x
