@@ -139,7 +139,7 @@ pconvert_rust.COMPILER_VERSION
 Generate with
 
 ```console
-$ cargo doc --lib 
+$ cargo doc --lib
 ```
 
 ## License

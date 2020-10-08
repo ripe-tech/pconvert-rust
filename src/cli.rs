@@ -2,14 +2,15 @@ use image::png::{CompressionType, FilterType};
 use image::{ImageFormat, Rgba};
 use pconvert_rust::benchmark::Benchmark;
 use pconvert_rust::blending::{
-    blend_images, get_blending_algorithm, is_algorithm_multiplied, multiply_image, Background,
-    BlendAlgorithm,
+    blend_images, get_blending_algorithm, is_algorithm_multiplied, multiply_image, BlendAlgorithm,
 };
 use pconvert_rust::constants;
 use pconvert_rust::errors::PConvertError;
 use pconvert_rust::parallelism::{ResultMessage, ThreadPool};
 use pconvert_rust::utils::{read_png_from_file, write_png_parallel, write_png_to_file};
 use std::env;
+use std::fmt;
+use std::fmt::{Display, Formatter};
 use std::str;
 use std::str::FromStr;
 
@@ -338,4 +339,23 @@ fn compose_parallel(
     })?;
 
     Ok(())
+}
+
+#[derive(Clone)]
+pub enum Background {
+    Alpha,
+    White,
+    Blue,
+    Texture,
+}
+
+impl Display for Background {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        match self {
+            Background::Alpha => write!(f, "alpha"),
+            Background::White => write!(f, "white"),
+            Background::Blue => write!(f, "blue"),
+            Background::Texture => write!(f, "texture"),
+        }
+    }
 }
