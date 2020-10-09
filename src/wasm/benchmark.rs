@@ -1,3 +1,5 @@
+//! Benchmarking functions of the WASM API exposed
+
 use crate::constants;
 use crate::wasm::utils::{encode_file, load_png, log_benchmark, log_benchmark_header};
 use crate::wasm::{blend_image_buffers, blend_multiple_buffers};
@@ -6,6 +8,8 @@ use js_sys::try_iter;
 use wasm_bindgen::prelude::*;
 use web_sys::File;
 
+/// Benchmarks the `blend_images_js` API method for all combinations of
+/// algorithms, compression and filter types.
 #[wasm_bindgen(js_name = blendImagesBenchmarkAll)]
 pub async fn blend_images_benchmark_all_js(
     top: File,
@@ -32,6 +36,8 @@ pub async fn blend_images_benchmark_all_js(
     Ok(())
 }
 
+/// Benchmarks the `blend_multiple_js` API method for all combinations of
+/// algorithms, compression and filter types.
 #[wasm_bindgen(js_name = blendMultipleBenchmarkAll)]
 pub async fn blend_multiple_benchmark_all_js(
     image_files: JsValue,

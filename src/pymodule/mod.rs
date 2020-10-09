@@ -1,4 +1,4 @@
-//! Python extension module definition, exported functions and type conversions
+//! Python extension, exported functions and type conversions
 
 pub mod conversions;
 pub mod utils;
