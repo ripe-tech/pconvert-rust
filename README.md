@@ -66,7 +66,7 @@ $ pconvert-rust version
 
 ## Compiling & Executing
 
-Follow [this](https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_wasm) guide on how to install `wasm-pack`.
+Follow [this guide](https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_wasm) on how to install `wasm-pack`.
 
 To build, use the `wasm-extension` feature:
 
