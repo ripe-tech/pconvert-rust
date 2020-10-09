@@ -91,17 +91,7 @@ pub fn write_png_to_file(
     encode_png(file, png, compression, filter)
 }
 
-#[cfg(feature = "wasm")]
-pub fn write_png_parallel(
-    file_out: String,
-    png: &ImageBuffer<Rgba<u8>, Vec<u8>>,
-    compression: CompressionType,
-    filter: FilterType,
-) -> Result<(), PConvertError> {
-    write_png_to_file(file_out, png, compression, filter)
-}
-
-/// Multi-threaded write version of a PNG to the local file system
+/// [NOT SUPPORTED IN WASM] Multi-threaded write version of a PNG to the local file system.
 ///
 /// # Arguments
 ///
@@ -109,7 +99,7 @@ pub fn write_png_parallel(
 /// * `png` - A byte buffer with the image data
 /// * `compression` - Compression type to use in the encoding
 /// * `filter` - Filter type to use in the encoding
-#[cfg(not(feature = "wasm"))]
+#[cfg(not(target_arch = "wasm32"))]
 pub fn write_png_parallel(
     file_out: String,
     png: &ImageBuffer<Rgba<u8>, Vec<u8>>,

@@ -1,3 +1,5 @@
+//! [NOT SUPPORTED IN WASM]
+
 pub mod conversions;
 pub mod utils;
 

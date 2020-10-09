@@ -1,3 +1,5 @@
+//! Blending algorithms
+
 use crate::blending::params::{BlendAlgorithmParams, Value};
 use crate::utils::{max, min};
 use image::Rgba;

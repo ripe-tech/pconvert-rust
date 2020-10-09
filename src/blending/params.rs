@@ -1,9 +1,11 @@
+//! Blend algorithms and PConvert API optional parameter types (`BlendAlgorithmParams` and `Options`, respectively)
+
 use std::collections::HashMap;
 
 /// Map of blending algorithm properties and corresponding values
 pub type BlendAlgorithmParams = HashMap<String, Value>;
 
-/// Map of API options and corresponding values
+/// [NOT SUPPORTED IN WASM] Map of API options and corresponding values
 #[cfg(not(target_arch = "wasm32"))]
 pub type Options = HashMap<String, Value>;
 
@@ -16,8 +18,10 @@ pub enum Value {
     Str(String),
 
     #[cfg(not(target_arch = "wasm32"))]
+    /// [NOT SUPPORTED IN WASM]
     Int(i32),
 
+    /// [ONLY SUPPORTED IN WASM]
     #[cfg(feature = "wasm")]
     Invalid,
 }

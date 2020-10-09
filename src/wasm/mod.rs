@@ -1,3 +1,5 @@
+//! [ONLY SUPPORTED IN WASM]
+
 #[macro_use]
 pub mod utils;
 
