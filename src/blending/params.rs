@@ -6,7 +6,7 @@ use std::collections::HashMap;
 pub type BlendAlgorithmParams = HashMap<String, Value>;
 
 /// [NOT SUPPORTED IN WASM] Map of API options and corresponding values
-#[cfg(not(feature = "wasm-extension"))]
+#[cfg(not(target_arch = "wasm32"))]
 pub type Options = HashMap<String, Value>;
 
 /// Abstract data type that can assume multiple primitive types

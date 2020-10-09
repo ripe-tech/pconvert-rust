@@ -99,7 +99,7 @@ pub fn write_png_to_file(
 /// * `png` - A byte buffer with the image data
 /// * `compression` - Compression type to use in the encoding
 /// * `filter` - Filter type to use in the encoding
-#[cfg(not(feature = "wasm-extension"))]
+#[cfg(not(target_arch = "wasm32"))]
 pub fn write_png_parallel(
     file_out: String,
     png: &ImageBuffer<Rgba<u8>, Vec<u8>>,
