@@ -1,3 +1,5 @@
+//! Utilitary functions for argument parsing from python input to inner-crate rust types
+
 use crate::blending::params::{BlendAlgorithmParams, Options, Value};
 use crate::blending::BlendAlgorithm;
 use crate::errors::PConvertError;
@@ -7,6 +9,8 @@ use pyo3::prelude::*;
 use pyo3::types::{PySequence, PyString};
 use std::str::FromStr;
 
+/// Attempts to parse a `&String` to a `BlendAlgorithm`.
+/// Returns the enum variant if it suceeds. Otherwise it returns a `PyErr`.
 pub fn build_algorithm(algorithm: &String) -> Result<BlendAlgorithm, PyErr> {
     match BlendAlgorithm::from_str(algorithm) {
         Ok(algorithm) => Ok(algorithm),
@@ -17,6 +21,8 @@ pub fn build_algorithm(algorithm: &String) -> Result<BlendAlgorithm, PyErr> {
     }
 }
 
+/// Attempts to build a vector of blending operations and extra parameters.
+/// One pair per blending operation. Returns a `PyErr` if it fails parsing.
 pub fn build_params(
     algorithms: &PySequence,
 ) -> Result<Vec<(BlendAlgorithm, Option<BlendAlgorithmParams>)>, PyErr> {
@@ -59,6 +65,8 @@ pub fn build_params(
     Ok(result)
 }
 
+/// Retrieves the `image::png::CompressionType` value from the `Options` map if it exists.
+/// Otherwise it returns the default value: `CompressionType::Fast`.
 pub fn get_compression_type(options: &Option<Options>) -> CompressionType {
     options.clone().map_or(CompressionType::Fast, |options| {
         options
@@ -70,6 +78,8 @@ pub fn get_compression_type(options: &Option<Options>) -> CompressionType {
     })
 }
 
+/// Retrieves the `image::png::FilterType` value from the `Options` map if it exists.
+/// Otherwise it returns the default value: `FilterType::NoFilter`.
 pub fn get_filter_type(options: &Option<Options>) -> FilterType {
     options.clone().map_or(FilterType::NoFilter, |options| {
         options
@@ -81,6 +91,8 @@ pub fn get_filter_type(options: &Option<Options>) -> FilterType {
     })
 }
 
+/// Retrieves the number of threads value from the `Options` map if it exists.
+/// Otherwise it returns the default value: 0.
 pub fn get_num_threads(options: &Option<Options>) -> i32 {
     options.clone().map_or(0, |options| {
         options

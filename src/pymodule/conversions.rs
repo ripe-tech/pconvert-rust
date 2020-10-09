@@ -1,3 +1,5 @@
+//! From and to conversions for rust and python types
+
 use crate::blending::params::Value;
 use crate::errors::PConvertError;
 use crate::parallelism::ThreadPoolStatus;
