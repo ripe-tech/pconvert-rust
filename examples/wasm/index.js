@@ -15,22 +15,23 @@ const textareaAlgorithms = document.querySelector("textarea#algorithms");
 blendButton.addEventListener("click", () => blend());
 benchmarkButton.addEventListener("click", () => benchmark());
 
-setPConvertMetadata()
-setAlgorithmsPlaceholder()
-setAlgorithmSelectOptions()
-setCompressionSelectOptions()
-setFilterSelectOptions()
+setPConvertMetadata();
+setAlgorithmsPlaceholder();
+setAlgorithmSelectOptions();
+setCompressionSelectOptions();
+setFilterSelectOptions();
 
 const API_FUNCTIONS = {
   blendImagesData: "blendImagesData",
   blendImages: "blendImages",
   blendMultipleData: "blendMultipleData",
-  blendMultiple: "blendMultiple"
+  blendMultiple: "blendMultiple",
 };
 
 async function blend() {
-  const pconvert = await js.then(js => js);
-  const apiFunction = apiFunctionSelect.options[apiFunctionSelect.selectedIndex].value;
+  const pconvert = await js.then((js) => js);
+  const apiFunction =
+    apiFunctionSelect.options[apiFunctionSelect.selectedIndex].value;
 
   let composition;
   switch (apiFunction) {
@@ -41,10 +42,16 @@ async function blend() {
       const compression = selectCompression.value;
       const filter = selectFilter.value;
 
-      composition = pconvert.blendImagesData(top, bot, algorithm == "" ? undefined : algorithm, undefined, {
-        compression: compression,
-        filter: filter
-      });
+      composition = pconvert.blendImagesData(
+        top,
+        bot,
+        algorithm === "" ? undefined : algorithm,
+        undefined,
+        {
+          compression: compression,
+          filter: filter,
+        }
+      );
       break;
     }
 
@@ -55,13 +62,15 @@ async function blend() {
       const compression = selectCompression.value;
       const filter = selectFilter.value;
 
-      const file = await pconvert.blendImages(top, bot,
+      const file = await pconvert.blendImages(
+        top,
+        bot,
         "result",
-        algorithm == "" ? undefined : algorithm,
+        algorithm === "" ? undefined : algorithm,
         undefined,
         {
           compression: compression,
-          filter: filter
+          filter: filter,
         }
       );
       composition = getImageData(await loadImage(file));
@@ -70,7 +79,7 @@ async function blend() {
 
     case API_FUNCTIONS.blendMultipleData: {
       const data = [];
-      for (file of inputFiles.files) {
+      for (const file of inputFiles.files) {
         const imageData = getImageData(await loadImage(file));
         data.push(imageData);
       }
@@ -79,18 +88,29 @@ async function blend() {
       const compression = selectCompression.value;
       const filter = selectFilter.value;
       if (isJSONParsable(algorithms)) {
-        const algorithmsJSON = JSON.parse(algorithms)["algorithms"];
-        composition = await pconvert.blendMultipleData(data, undefined, algorithmsJSON, undefined, {
-          compression: compression,
-          filter: filter
-        });
-      }
-      else {
+        const algorithmsJSON = JSON.parse(algorithms).algorithms;
+        composition = await pconvert.blendMultipleData(
+          data,
+          undefined,
+          algorithmsJSON,
+          undefined,
+          {
+            compression: compression,
+            filter: filter,
+          }
+        );
+      } else {
         const algorithm = selectAlgorithm.value;
-        composition = await pconvert.blendMultipleData(data, algorithm == "" ? undefined : algorithm, undefined, undefined, {
-          compression: compression,
-          filter: filter
-        });
+        composition = await pconvert.blendMultipleData(
+          data,
+          algorithm === "" ? undefined : algorithm,
+          undefined,
+          undefined,
+          {
+            compression: compression,
+            filter: filter,
+          }
+        );
       }
       break;
     }
@@ -100,19 +120,32 @@ async function blend() {
       const compression = selectCompression.value;
       const filter = selectFilter.value;
       if (isJSONParsable(algorithms)) {
-        const algorithmsJSON = JSON.parse(algorithms)["algorithms"];
-        const file = await pconvert.blendMultiple(inputFiles.files, "result", undefined, algorithmsJSON, undefined, {
-          compression: compression,
-          filter: filter
-        });
+        const algorithmsJSON = JSON.parse(algorithms).algorithms;
+        const file = await pconvert.blendMultiple(
+          inputFiles.files,
+          "result",
+          undefined,
+          algorithmsJSON,
+          undefined,
+          {
+            compression: compression,
+            filter: filter,
+          }
+        );
         composition = getImageData(await loadImage(file));
-      }
-      else {
+      } else {
         const algorithm = selectAlgorithm.value;
-        const file = await pconvert.blendMultiple(inputFiles.files, "result", algorithm == "" ? undefined : algorithm, undefined, undefined, {
-          compression: compression,
-          filter: filter
-        });
+        const file = await pconvert.blendMultiple(
+          inputFiles.files,
+          "result",
+          algorithm === "" ? undefined : algorithm,
+          undefined,
+          undefined,
+          {
+            compression: compression,
+            filter: filter,
+          }
+        );
         composition = getImageData(await loadImage(file));
       }
       break;
@@ -126,25 +159,24 @@ async function blend() {
 }
 
 async function benchmark() {
-  const pconvert = await js.then(js => js);
+  const pconvert = await js.then((js) => js);
 
-  const apiFunction = apiFunctionSelect.options[apiFunctionSelect.selectedIndex].value;
+  const apiFunction =
+    apiFunctionSelect.options[apiFunctionSelect.selectedIndex].value;
   switch (apiFunction) {
     case API_FUNCTIONS.blendImagesData:
-    case API_FUNCTIONS.blendImages:
-      {
-        const top = inputFiles.files[0];
-        const bot = inputFiles.files[1];
-        await pconvert.blendImagesBenchmarkAll(top, bot);
-        break;
-      }
+    case API_FUNCTIONS.blendImages: {
+      const top = inputFiles.files[0];
+      const bot = inputFiles.files[1];
+      await pconvert.blendImagesBenchmarkAll(top, bot);
+      break;
+    }
 
     case API_FUNCTIONS.blendMultipleData:
-    case API_FUNCTIONS.blendMultiple:
-      {
-        await pconvert.blendMultipleBenchmarkAll(inputFiles.files);
-        break;
-      }
+    case API_FUNCTIONS.blendMultiple: {
+      await pconvert.blendMultipleBenchmarkAll(inputFiles.files);
+      break;
+    }
 
     default:
       console.log("Invalid API function");
@@ -152,22 +184,22 @@ async function benchmark() {
 }
 
 async function setPConvertMetadata() {
-  const pconvert = await js.then(js => js);
+  const pconvert = await js.then((js) => js);
   const constants = pconvert.getModuleConstants();
   metadata.innerHTML = JSON.stringify(constants, undefined, 2);
 }
 
 async function setAlgorithmsPlaceholder() {
-  const json = await placeholderJSON.then(json => json);
-  const placeholder = JSON.stringify(json.default, undefined, 2)
-  textareaAlgorithms.setAttribute("placeholder", placeholder)
+  const json = await placeholderJSON.then((json) => json);
+  const placeholder = JSON.stringify(json.default, undefined, 2);
+  textareaAlgorithms.setAttribute("placeholder", placeholder);
 }
 
 async function setAlgorithmSelectOptions() {
-  const pconvert = await js.then(js => js);
+  const pconvert = await js.then((js) => js);
   const options = pconvert.getModuleConstants().ALGORITHMS;
 
-  for (option of options) {
+  for (const option of options) {
     const optionEl = document.createElement("option");
     optionEl.text = option;
     optionEl.value = option;
@@ -176,10 +208,10 @@ async function setAlgorithmSelectOptions() {
 }
 
 async function setCompressionSelectOptions() {
-  const pconvert = await js.then(js => js);
+  const pconvert = await js.then((js) => js);
   const options = pconvert.getModuleConstants().COMPRESSION_TYPES;
 
-  for (option of options) {
+  for (const option of options) {
     const optionEl = document.createElement("option");
     optionEl.text = option;
     optionEl.value = option;
@@ -188,10 +220,10 @@ async function setCompressionSelectOptions() {
 }
 
 async function setFilterSelectOptions() {
-  const pconvert = await js.then(js => js);
+  const pconvert = await js.then((js) => js);
   const options = pconvert.getModuleConstants().FILTER_TYPES;
 
-  for (option of options) {
+  for (const option of options) {
     const optionEl = document.createElement("option");
     optionEl.text = option;
     optionEl.value = option;
@@ -202,8 +234,8 @@ async function setFilterSelectOptions() {
 function loadImage(file) {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.addEventListener('load', e => resolve(img));
-    img.addEventListener('error', (e) => {
+    img.addEventListener("load", (e) => resolve(img));
+    img.addEventListener("error", (e) => {
       reject(e);
     });
     img.src = URL.createObjectURL(file);
@@ -211,8 +243,8 @@ function loadImage(file) {
 }
 
 function getImageData(img) {
-  const canvas = document.createElement('canvas');
-  const context = canvas.getContext('2d');
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
   canvas.width = img.width;
   canvas.height = img.height;
   context.drawImage(img, 0, 0);
