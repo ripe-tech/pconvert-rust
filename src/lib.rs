@@ -3,8 +3,13 @@ mod blending;
 mod constants;
 pub mod errors;
 mod parallelism;
-mod pymodule;
 mod utils;
+
+#[cfg(not(target_arch = "wasm32"))]
+mod pymodule;
+
+#[cfg(target_arch = "wasm32")]
+mod wasm;
 
 use benchmark::Benchmark;
 use blending::{
@@ -18,7 +23,10 @@ use parallelism::{ResultMessage, ThreadPool};
 use std::env;
 use std::str;
 use std::str::FromStr;
-use utils::{read_png, write_png, write_png_parallel};
+use utils::{read_png_from_file, write_png_to_file};
+
+#[cfg(not(target_arch = "wasm32"))]
+use utils::write_png_parallel;
 
 pub fn pcompose(args: &mut env::Args) -> Result<(), PConvertError> {
     let dir = match args.next() {
@@ -390,7 +398,7 @@ pub fn pconvert(args: &mut env::Args) -> Result<(), PConvertError> {
         }
     };
 
-    let mut img = read_png(file_in, false)?;
+    let mut img = read_png_from_file(file_in, false)?;
 
     for pixel in img.pixels_mut() {
         apply_blue_filter(pixel);
@@ -518,13 +526,13 @@ fn compose(
     let demultiply = is_algorithm_multiplied(&algorithm);
 
     let mut bot = benchmark.execute(Benchmark::add_read_png_time, || {
-        read_png(format!("{}sole.png", dir), demultiply)
+        read_png_from_file(format!("{}sole.png", dir), demultiply)
     })?;
 
     let algorithm_fn = get_blending_algorithm(&algorithm);
 
     let top = benchmark.execute(Benchmark::add_read_png_time, || {
-        read_png(format!("{}back.png", dir), demultiply)
+        read_png_from_file(format!("{}back.png", dir), demultiply)
     })?;
 
     benchmark.execute(Benchmark::add_blend_time, || {
@@ -532,7 +540,7 @@ fn compose(
     });
 
     let top = benchmark.execute(Benchmark::add_read_png_time, || {
-        read_png(format!("{}front.png", dir), demultiply)
+        read_png_from_file(format!("{}front.png", dir), demultiply)
     })?;
 
     benchmark.execute(Benchmark::add_blend_time, || {
@@ -540,7 +548,7 @@ fn compose(
     });
 
     let top = benchmark.execute(Benchmark::add_read_png_time, || {
-        read_png(format!("{}shoelace.png", dir), demultiply)
+        read_png_from_file(format!("{}shoelace.png", dir), demultiply)
     })?;
 
     benchmark.execute(Benchmark::add_blend_time, || {
@@ -552,7 +560,7 @@ fn compose(
     }
 
     let mut composition = benchmark.execute(Benchmark::add_read_png_time, || {
-        read_png(format!("{}background_{}.png", dir, background), false)
+        read_png_from_file(format!("{}background_{}.png", dir, background), false)
     })?;
 
     benchmark.execute(Benchmark::add_blend_time, || {
@@ -564,7 +572,7 @@ fn compose(
         dir, algorithm, background, compression, filter
     );
     benchmark.execute(Benchmark::add_write_png_time, || {
-        write_png(file_out, &composition, compression, filter)
+        write_png_to_file(file_out, &composition, compression, filter)
     })?;
 
     Ok(())
@@ -597,8 +605,8 @@ fn compose_parallel(
     thread_pool.start();
     for png_file_name in png_file_names {
         let path = format!("{}{}", dir, png_file_name);
-        let result_channel =
-            thread_pool.execute(move || ResultMessage::ImageResult(read_png(path, demultiply)));
+        let result_channel = thread_pool
+            .execute(move || ResultMessage::ImageResult(read_png_from_file(path, demultiply)));
         result_channels.push(result_channel);
     }
 
@@ -658,7 +666,17 @@ fn compose_parallel(
         dir, algorithm, background, compression, filter
     );
     benchmark.execute(Benchmark::add_write_png_time, || {
-        write_png_parallel(file_out, &composition, compression, filter)
+        #[cfg(target_arch = "wasm32")]
+        {
+            println!("Warning: running on WASM32 target, parallel PNG writing using MTPNG crate is not allowed.");
+            println!("Using single-threaded write_png_to_file");
+            write_png_to_file(file_out, &composition, compression, filter)
+        }
+
+        #[cfg(not(target_arch = "wasm32"))] 
+        {
+            write_png_parallel(file_out, &composition, compression, filter)
+        }
     })?;
 
     Ok(())

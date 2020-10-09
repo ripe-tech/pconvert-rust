@@ -13,7 +13,7 @@ use std::fmt::{Display, Formatter};
 use std::result;
 use std::str::FromStr;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum BlendAlgorithm {
     Alpha,
     Multiplicative,
@@ -86,10 +86,10 @@ pub fn blend_images(
     top: &ImageBuffer<Rgba<u8>, Vec<u8>>,
     bot: &mut ImageBuffer<Rgba<u8>, Vec<u8>>,
     blending_algorithm: &impl Fn((&mut Rgba<u8>, &Rgba<u8>), &Option<BlendAlgorithmParams>) -> (),
-    params: &Option<BlendAlgorithmParams>,
+    algorithm_params: &Option<BlendAlgorithmParams>,
 ) {
     for pixel_pair in bot.pixels_mut().zip(top.pixels()) {
-        blending_algorithm(pixel_pair, params);
+        blending_algorithm(pixel_pair, algorithm_params);
     }
 }
 

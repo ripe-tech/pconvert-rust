@@ -28,7 +28,7 @@ impl Benchmark {
     {
         let start = Instant::now();
         let result = target_fn();
-        update_fn(self, start.elapsed().as_millis());
+        update_fn(self, start.elapsed().as_millis() as u128);
         result
     }
 

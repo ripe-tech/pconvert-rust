@@ -1,6 +1,4 @@
 use image::error::ImageError;
-use pyo3::exceptions::{AttributeError, Exception, IOError, NotImplementedError};
-use pyo3::PyErr;
 use std::error::Error;
 use std::fmt::{Display, Formatter, Result};
 use std::io;
@@ -47,18 +45,5 @@ impl From<io::Error> for PConvertError {
 impl From<ImageError> for PConvertError {
     fn from(err: ImageError) -> PConvertError {
         PConvertError::ImageLibError(err)
-    }
-}
-
-impl From<PConvertError> for PyErr {
-    fn from(err: PConvertError) -> PyErr {
-        match err {
-            PConvertError::ArgumentError(err) => AttributeError::py_err(err.to_string()),
-            PConvertError::ImageLibError(err) => Exception::py_err(err.to_string()),
-            PConvertError::UnsupportedImageTypeError => {
-                NotImplementedError::py_err(err.to_string())
-            }
-            PConvertError::IOError(err) => IOError::py_err(err.to_string()),
-        }
     }
 }
