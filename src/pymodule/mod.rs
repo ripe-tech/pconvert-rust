@@ -20,46 +20,46 @@ use utils::{
 static mut THREAD_POOL: Option<ThreadPool> = None;
 
 #[pymodule]
-fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
+fn pconvert_rust(_py: Python, module: &PyModule) -> PyResult<()> {
     unsafe {
         let mut thread_pool = ThreadPool::new(constants::DEFAULT_THREAD_POOL_SIZE).unwrap();
         thread_pool.start();
         THREAD_POOL = Some(thread_pool);
     }
 
-    m.add("COMPILATION_DATE", constants::COMPILATION_DATE)?;
+    module.add("COMPILATION_DATE", constants::COMPILATION_DATE)?;
 
-    m.add("COMPILATION_TIME", constants::COMPILATION_TIME)?;
+    module.add("COMPILATION_TIME", constants::COMPILATION_TIME)?;
 
-    m.add("VERSION", constants::VERSION)?;
+    module.add("VERSION", constants::VERSION)?;
 
-    m.add("ALGORITHMS", constants::ALGORITHMS.to_vec())?;
+    module.add("ALGORITHMS", constants::ALGORITHMS.to_vec())?;
 
-    m.add("COMPILER", constants::COMPILER)?;
+    module.add("COMPILER", constants::COMPILER)?;
 
-    m.add("COMPILER_VERSION", constants::COMPILER_VERSION)?;
+    module.add("COMPILER_VERSION", constants::COMPILER_VERSION)?;
 
-    m.add("LIBPNG_VERSION", constants::LIBPNG_VERSION)?;
+    module.add("LIBPNG_VERSION", constants::LIBPNG_VERSION)?;
 
-    m.add("FEATURES", constants::FEATURES.to_vec())?;
+    module.add("FEATURES", constants::FEATURES.to_vec())?;
 
-    m.add("PLATFORM_CPU_BITS", constants::PLATFORM_CPU_BITS)?;
+    module.add("PLATFORM_CPU_BITS", constants::PLATFORM_CPU_BITS)?;
 
     let filters: Vec<String> = constants::FILTER_TYPES
         .to_vec()
         .iter()
         .map(|x| format!("{:?}", x))
         .collect();
-    m.add("FILTER_TYPES", filters)?;
+    module.add("FILTER_TYPES", filters)?;
 
     let compressions: Vec<String> = constants::COMPRESSION_TYPES
         .to_vec()
         .iter()
         .map(|x| format!("{:?}", x))
         .collect();
-    m.add("COMPRESSION_TYPES", compressions)?;
+    module.add("COMPRESSION_TYPES", compressions)?;
 
-    #[pyfn(m, "blend_images")]
+    #[pyfn(module, "blend_images")]
     fn blend_images_py(
         py: Python,
         bot_path: String,
@@ -96,7 +96,7 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         })
     }
 
-    #[pyfn(m, "blend_multiple")]
+    #[pyfn(module, "blend_multiple")]
     fn blend_multiple_py(
         py: Python,
         img_paths: &PySequence,
@@ -144,7 +144,7 @@ fn pconvert_rust(_py: Python, m: &PyModule) -> PyResult<()> {
         })
     }
 
-    #[pyfn(m, "get_thread_pool_status")]
+    #[pyfn(module, "get_thread_pool_status")]
     fn get_thread_pool_status(py: Python) -> PyResult<&PyDict> {
         unsafe {
             match &mut THREAD_POOL {
