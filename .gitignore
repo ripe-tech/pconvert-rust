@@ -6,6 +6,7 @@ Cargo.lock
 constants.rs
 
 /assets/**/result*
+/examples/**/result*
 
 /.vscode/settings.json
 
