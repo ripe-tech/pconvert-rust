@@ -40,12 +40,12 @@ div#metadataContainer {
 }
 
 canvas#composition {
+    outline: #000000 3px solid;
     -o-outline: #000000 3px solid;
     -ms-outline: #000000 3px solid;
     -moz-outline: #000000 3px solid;
     -khtml-outline: #000000 3px solid;
     -webkit-outline: #000000 3px solid;
-    outline: #000000 3px solid;
 }
 
 textarea#algorithms {

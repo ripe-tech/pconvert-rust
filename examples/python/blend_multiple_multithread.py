@@ -11,7 +11,6 @@ PATH_TO_ASSETS = os.path.join(os.path.dirname(__file__), "../../assets/demo/")
 print(f"VERSION: {pconvert.VERSION}")
 print(f"COMPILED ON: {pconvert.COMPILATION_DATE}, {pconvert.COMPILATION_TIME}")
 
-
 def print_pool_status():
     while True:
         print(pconvert.get_thread_pool_status())
@@ -32,11 +31,11 @@ def blend(i):
         }
     )
 
-pool_status_thread = threading.Thread(target=print_pool_status)
+pool_status_thread = threading.Thread(target = print_pool_status)
 pool_status_thread.daemon = True
 pool_status_thread.start()
 
-blending_threads = [threading.Thread(target=blend, args=(x,)) for x in range(1000)]
+blending_threads = [threading.Thread(target = blend, args = (x,)) for x in range(1000)]
 
 for blending_thread in blending_threads:
     blending_thread.start()
