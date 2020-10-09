@@ -91,7 +91,7 @@ pub fn write_png_to_file(
     encode_png(file, png, compression, filter)
 }
 
-#[cfg(target_arch = "wasm32")]
+#[cfg(feature = "wasm")]
 pub fn write_png_parallel(
     file_out: String,
     png: &ImageBuffer<Rgba<u8>, Vec<u8>>,
@@ -109,7 +109,7 @@ pub fn write_png_parallel(
 /// * `png` - A byte buffer with the image data
 /// * `compression` - Compression type to use in the encoding
 /// * `filter` - Filter type to use in the encoding
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(not(feature = "wasm"))]
 pub fn write_png_parallel(
     file_out: String,
     png: &ImageBuffer<Rgba<u8>, Vec<u8>>,

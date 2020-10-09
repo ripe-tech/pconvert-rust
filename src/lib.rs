@@ -6,7 +6,7 @@ pub mod parallelism;
 pub mod utils;
 
 #[cfg(not(target_arch = "wasm32"))]
-mod pymodule;
+pub mod pymodule;
 
 #[cfg(feature = "wasm")]
-mod wasm;
+pub mod wasm;

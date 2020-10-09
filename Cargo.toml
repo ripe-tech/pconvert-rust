@@ -13,7 +13,6 @@ name = "pconvert_rust"
 crate-type = ["rlib", "cdylib"]
 
 [features]
-default = []
 wasm = ["js-sys", "serde", "serde_json", "wasm-bindgen", "wasm-bindgen-futures", "web-sys"]
 
 [dependencies]

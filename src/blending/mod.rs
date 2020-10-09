@@ -1,6 +1,6 @@
 //! Blending algorithms and associated utilitary functions and enums
 
-mod algorithms;
+pub mod algorithms;
 pub mod params;
 
 use algorithms::{

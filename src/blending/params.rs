@@ -18,6 +18,6 @@ pub enum Value {
     #[cfg(not(target_arch = "wasm32"))]
     Int(i32),
 
-    #[cfg(target_arch = "wasm32")]
+    #[cfg(feature = "wasm")]
     Invalid,
 }

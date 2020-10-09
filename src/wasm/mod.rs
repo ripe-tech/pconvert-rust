@@ -1,8 +1,8 @@
 #[macro_use]
-mod utils;
+pub mod utils;
 
-mod benchmark;
-mod conversions;
+pub mod benchmark;
+pub mod conversions;
 
 use crate::blending::params::BlendAlgorithmParams;
 use crate::blending::{

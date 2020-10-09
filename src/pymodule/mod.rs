@@ -1,5 +1,5 @@
-mod conversions;
-mod utils;
+pub mod conversions;
+pub mod utils;
 
 use crate::blending::params::{BlendAlgorithmParams, Options};
 use crate::blending::{
