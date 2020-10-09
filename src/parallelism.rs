@@ -1,4 +1,4 @@
-//! [NOT SUPPORTED IN WASM] Thread pool, thread pool status and workers implementation
+//! Thread pool, thread pool status and workers implementation
 
 use crate::constants;
 use crate::errors::PConvertError;

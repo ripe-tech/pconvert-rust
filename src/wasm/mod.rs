@@ -1,4 +1,4 @@
-//! [ONLY SUPPORTED IN WASM]
+//! Web Assembly (WASM) extension module definition, exported functions and type conversions
 
 #[macro_use]
 pub mod utils;
