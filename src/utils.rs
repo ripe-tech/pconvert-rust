@@ -99,7 +99,7 @@ pub fn write_png_to_file(
 /// * `png` - A byte buffer with the image data
 /// * `compression` - Compression type to use in the encoding
 /// * `filter` - Filter type to use in the encoding
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(not(feature = "wasm-extension"))]
 pub fn write_png_parallel(
     file_out: String,
     png: &ImageBuffer<Rgba<u8>, Vec<u8>>,
@@ -152,7 +152,7 @@ pub fn image_filter_from(filter: String) -> FilterType {
     }
 }
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(not(feature = "wasm-extension"))]
 fn mtpng_compression_from(compression: CompressionType) -> mtpng::CompressionLevel {
     match compression {
         CompressionType::Default => mtpng::CompressionLevel::Default,
@@ -162,7 +162,7 @@ fn mtpng_compression_from(compression: CompressionType) -> mtpng::CompressionLev
     }
 }
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(not(feature = "wasm-extension"))]
 fn mtpng_filter_from(filter: FilterType) -> mtpng::Filter {
     match filter {
         FilterType::Avg => mtpng::Filter::Average,
