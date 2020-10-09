@@ -1,5 +1,6 @@
 [package]
 name = "pconvert-rust"
+description = "Rust version of P(NG)Convert, a simple PNG conversion tool."
 version = "0.1.8"
 authors = ["Platforme International"]
 license = "Apache-2.0"
@@ -29,6 +30,7 @@ mtpng = "0.3.4"
 [build-dependencies]
 chrono = "0.4.13"
 regex = "1"
+image = { version = "0.23.9", default-features = false, features = ["png"] }
 
 [profile.dev]
 opt-level = 3

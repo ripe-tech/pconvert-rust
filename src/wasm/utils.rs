@@ -2,9 +2,13 @@ use crate::blending::params::{BlendAlgorithmParams, Value};
 use crate::blending::BlendAlgorithm;
 use crate::errors::PConvertError;
 use crate::utils::{decode_png, encode_png};
+use crate::utils::{image_compression_from, image_filter_from};
 use crate::wasm::conversions::JSONParams;
+use image::png::{CompressionType, FilterType};
 use image::{ImageBuffer, Rgba};
 use js_sys::{Array, Uint8Array};
+use serde_json::Value as JSONValue;
+use std::collections::HashMap;
 use std::str::FromStr;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::Clamped;
@@ -31,33 +35,30 @@ pub async fn load_png(
     Ok(png)
 }
 
-pub fn encode_file(image_buffer: ImageBuffer<Rgba<u8>, Vec<u8>>) -> Result<File, JsValue> {
+pub fn encode_file(
+    image_buffer: ImageBuffer<Rgba<u8>, Vec<u8>>,
+    compression: CompressionType,
+    filter: FilterType,
+    target_file_name: String,
+) -> Result<File, JsValue> {
     let mut encoded_data = Vec::<u8>::with_capacity(image_buffer.to_vec().capacity());
-    encode_png(
-        &mut encoded_data,
-        &image_buffer,
-        image::png::CompressionType::Default,
-        image::png::FilterType::NoFilter,
-    )?;
+    encode_png(&mut encoded_data, &image_buffer, compression, filter)?;
 
     unsafe {
         let array_buffer = Uint8Array::view(&encoded_data);
-        File::new_with_u8_array_sequence(&Array::of1(&array_buffer), "result.png")
+        File::new_with_u8_array_sequence(&Array::of1(&array_buffer), &target_file_name)
     }
 }
 
 pub fn encode_image_data(
     image_buffer: ImageBuffer<Rgba<u8>, Vec<u8>>,
+    compression: CompressionType,
+    filter: FilterType,
 ) -> Result<ImageData, JsValue> {
     let (width, height) = image_buffer.dimensions();
 
     let mut encoded_data = Vec::<u8>::with_capacity(image_buffer.to_vec().capacity());
-    encode_png(
-        &mut encoded_data,
-        &image_buffer,
-        image::png::CompressionType::Default,
-        image::png::FilterType::NoFilter,
-    )?;
+    encode_png(&mut encoded_data, &image_buffer, compression, filter)?;
 
     let bytes = &mut image_buffer.to_vec();
     let clamped_bytes: Clamped<&mut [u8]> = Clamped(bytes);
@@ -104,10 +105,51 @@ pub fn build_params(
     Ok(result)
 }
 
-pub fn log_benchmark(algorithm: String, blend_time: f64, read_time: f64, write_time: f64) {
+pub fn get_compression_type(options: &Option<HashMap<String, JSONValue>>) -> CompressionType {
+    options.as_ref().map_or(CompressionType::Fast, |options| {
+        options
+            .get("compression")
+            .map_or(CompressionType::Fast, |compression| match compression {
+                JSONValue::String(compression) => image_compression_from(compression.to_string()),
+                _ => CompressionType::Fast,
+            })
+    })
+}
+
+pub fn get_filter_type(options: &Option<HashMap<String, JSONValue>>) -> FilterType {
+    options.as_ref().map_or(FilterType::NoFilter, |options| {
+        options
+            .get("filter")
+            .map_or(FilterType::NoFilter, |filter| match filter {
+                JSONValue::String(filter) => image_filter_from(filter.to_string()),
+                _ => FilterType::NoFilter,
+            })
+    })
+}
+
+pub fn log_benchmark_header() {
     console_log!(
-        "{:<20}{:<20}",
+        "{:<20}{:<20}{:<20}{:<20}",
+        "Algorithm",
+        "Compression",
+        "Filter",
+        "Times"
+    );
+}
+
+pub fn log_benchmark(
+    algorithm: String,
+    compression: CompressionType,
+    filter: FilterType,
+    blend_time: f64,
+    read_time: f64,
+    write_time: f64,
+) {
+    console_log!(
+        "{:<20}{:<20}{:<20}{:<20}",
         algorithm,
+        format!("{:#?}", compression),
+        format!("{:#?}", filter),
         format!(
             "{}ms (blend {}ms, read {}ms, write {}ms)",
             read_time + blend_time + write_time,

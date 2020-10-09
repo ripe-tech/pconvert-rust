@@ -1,51 +1,70 @@
-use crate::constants::ALGORITHMS;
-use crate::wasm::utils::{encode_file, load_png, log_benchmark};
+use crate::constants;
+use crate::wasm::utils::{encode_file, load_png, log_benchmark, log_benchmark_header};
 use crate::wasm::{blend_image_buffers, blend_multiple_buffers};
+use image::png::{CompressionType, FilterType};
 use js_sys::try_iter;
 use wasm_bindgen::prelude::*;
 use web_sys::File;
 
-#[wasm_bindgen]
-pub async fn blend_images_benchmark_all(
+#[wasm_bindgen(js_name = blendImagesBenchmarkAll)]
+pub async fn blend_images_benchmark_all_js(
     top: File,
     bot: File,
     is_inline: Option<bool>,
 ) -> Result<(), JsValue> {
-    for algorithm in ALGORITHMS.iter() {
-        blend_images_benchmark(
-            top.clone(),
-            bot.clone(),
-            Some(algorithm.to_string()),
-            is_inline,
-        )
-        .await?;
+    log_benchmark_header();
+    for algorithm in constants::ALGORITHMS.iter() {
+        for compression in constants::COMPRESSION_TYPES.iter() {
+            for filter in constants::FILTER_TYPES.iter() {
+                blend_images_benchmark_js(
+                    top.clone(),
+                    bot.clone(),
+                    "".to_string(),
+                    Some(algorithm.to_string()),
+                    is_inline,
+                    *compression,
+                    *filter,
+                )
+                .await?;
+            }
+        }
     }
     Ok(())
 }
 
-#[wasm_bindgen]
-pub async fn blend_multiple_benchmark_all(
+#[wasm_bindgen(js_name = blendMultipleBenchmarkAll)]
+pub async fn blend_multiple_benchmark_all_js(
     image_files: JsValue,
     is_inline: Option<bool>,
 ) -> Result<(), JsValue> {
-    for algorithm in ALGORITHMS.iter() {
-        blend_multiple_benchmark(
-            image_files.clone(),
-            Some(algorithm.to_string()),
-            None,
-            is_inline,
-        )
-        .await?;
+    log_benchmark_header();
+    for algorithm in constants::ALGORITHMS.iter() {
+        for compression in constants::COMPRESSION_TYPES.iter() {
+            for filter in constants::FILTER_TYPES.iter() {
+                blend_multiple_benchmark_js(
+                    image_files.clone(),
+                    "".to_string(),
+                    Some(algorithm.to_string()),
+                    None,
+                    is_inline,
+                    *compression,
+                    *filter,
+                )
+                .await?;
+            }
+        }
     }
     Ok(())
 }
 
-#[wasm_bindgen]
-pub async fn blend_images_benchmark(
+async fn blend_images_benchmark_js(
     top: File,
     bot: File,
+    target_file_name: String,
     algorithm: Option<String>,
     is_inline: Option<bool>,
+    compression: CompressionType,
+    filter: FilterType,
 ) -> Result<File, JsValue> {
     let start_read = js_sys::Date::now();
 
@@ -58,7 +77,7 @@ pub async fn blend_images_benchmark(
 
     let start_write = js_sys::Date::now();
 
-    let file = encode_file(bot)?;
+    let file = encode_file(bot, compression, filter, target_file_name)?;
 
     let end = js_sys::Date::now();
 
@@ -68,6 +87,8 @@ pub async fn blend_images_benchmark(
 
     log_benchmark(
         algorithm.unwrap_or("multiplicative".to_string()),
+        compression,
+        filter,
         blend_time,
         read_time,
         write_time,
@@ -76,12 +97,14 @@ pub async fn blend_images_benchmark(
     Ok(file)
 }
 
-#[wasm_bindgen]
-pub async fn blend_multiple_benchmark(
+async fn blend_multiple_benchmark_js(
     image_files: JsValue,
+    target_file_name: String,
     algorithm: Option<String>,
     algorithms: Option<Box<[JsValue]>>,
     is_inline: Option<bool>,
+    compression: CompressionType,
+    filter: FilterType,
 ) -> Result<File, JsValue> {
     let start_read = js_sys::Date::now();
 
@@ -101,7 +124,7 @@ pub async fn blend_multiple_benchmark(
 
     let start_write = js_sys::Date::now();
 
-    let file = encode_file(composition)?;
+    let file = encode_file(composition, compression, filter, target_file_name)?;
 
     let end = js_sys::Date::now();
 
@@ -111,6 +134,8 @@ pub async fn blend_multiple_benchmark(
 
     log_benchmark(
         algorithm.unwrap_or("multiplicative".to_string()),
+        compression,
+        filter,
         blend_time,
         read_time,
         write_time,

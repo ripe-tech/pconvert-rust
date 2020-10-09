@@ -60,7 +60,7 @@ $ pconvert-rust version
 
 ## WebAssembly (WASM)
 
-Follow [this](https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_wasm) guide step by step to install `wasm-pack`, compile the WASM module and install it.
+Follow [this guide](https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_wasm) step by step to install `wasm-pack`, compile the WASM module and install it.
 
 Check the [demo site](assets/demo/site/index.js) to see how to use the PConvert WASM module.
 

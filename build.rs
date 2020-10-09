@@ -21,6 +21,7 @@
 /// );
 /// ```
 use chrono::Utc;
+use image::png::{CompressionType, FilterType};
 use regex::Regex;
 use std::fs::{File, OpenOptions};
 use std::io::Write;
@@ -108,6 +109,24 @@ fn main() {
         "PLATFORM_CPU_BITS",
         &(std::mem::size_of::<usize>() * 8).to_string(),
     );
+
+    let libpng_filter_types = vec![
+        FilterType::NoFilter,
+        FilterType::Avg,
+        FilterType::Paeth,
+        FilterType::Sub,
+        FilterType::Up,
+    ];
+    write_enum_variants_to_file(&mut file, "FILTER_TYPES", libpng_filter_types);
+
+    let libpng_compression_types = vec![
+        CompressionType::Default,
+        CompressionType::Best,
+        CompressionType::Fast,
+        CompressionType::Huffman,
+        CompressionType::Rle,
+    ];
+    write_enum_variants_to_file(&mut file, "COMPRESSION_TYPES", libpng_compression_types);
 }
 
 fn write_str_constant_to_file(file: &mut File, key: &str, val: &str) {
@@ -117,7 +136,10 @@ fn write_str_constant_to_file(file: &mut File, key: &str, val: &str) {
     ));
 }
 
-fn write_vec_constant_to_file(file: &mut File, key: &str, vec: Vec<&str>) {
+fn write_vec_constant_to_file<T>(file: &mut File, key: &str, vec: Vec<T>)
+where
+    T: std::fmt::Display,
+{
     let mut list_str = String::new();
     for value in &vec {
         list_str.push_str(&format!("\"{}\",", value))
@@ -125,8 +147,32 @@ fn write_vec_constant_to_file(file: &mut File, key: &str, vec: Vec<&str>) {
     list_str.pop();
     writeln!(
         file,
-        "pub const {}: [&'static str; {}] = [{}];",
+        "pub const {}: [{}; {}] = [{}];",
         key,
+        std::any::type_name::<T>(),
+        vec.len(),
+        list_str
+    )
+    .expect(&format!(
+        "Failed to write '{}' to 'build_constants.rs'",
+        key
+    ));
+}
+
+fn write_enum_variants_to_file<T>(file: &mut File, key: &str, vec: Vec<T>)
+where
+    T: std::fmt::Debug,
+{
+    let mut list_str = String::new();
+    for value in &vec {
+        list_str.push_str(&format!("{}::{:?},", std::any::type_name::<T>(), value))
+    }
+    list_str.pop();
+    writeln!(
+        file,
+        "pub const {}: [{}; {}] = [{}];",
+        key,
+        std::any::type_name::<T>(),
         vec.len(),
         list_str
     )

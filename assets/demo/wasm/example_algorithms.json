@@ -1,9 +1,0 @@
-{
-    "algorithms": ["alpha", "multiplicative", {
-        "algorithm": "mask_top",
-        "params": {
-            "factor": 1.6,
-            "tobias": true
-        }
-    }]
-}

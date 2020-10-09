@@ -4,42 +4,64 @@ mod utils;
 mod benchmark;
 mod conversions;
 
-use crate::blending;
 use crate::blending::params::BlendAlgorithmParams;
 use crate::blending::{
-    demultiply_image, get_blending_algorithm, is_algorithm_multiplied, BlendAlgorithm,
+    blend_images, demultiply_image, get_blending_algorithm, is_algorithm_multiplied, BlendAlgorithm,
 };
 use crate::constants;
 use crate::errors::PConvertError;
 use image::{ImageBuffer, Rgba, RgbaImage};
 use js_sys::try_iter;
 use serde_json::json;
-use utils::{build_algorithm, build_params, encode_file, encode_image_data, load_png};
+use serde_json::Value as JSONValue;
+use std::collections::HashMap;
+use utils::{
+    build_algorithm, build_params, encode_file, encode_image_data, get_compression_type,
+    get_filter_type, load_png,
+};
 use wasm_bindgen::prelude::*;
 use web_sys::{File, ImageData};
 
-#[wasm_bindgen]
-pub async fn blend_images(
+#[wasm_bindgen(js_name = blendImages)]
+pub async fn blend_images_js(
     top: File,
     bot: File,
+    target_file_name: String,
     algorithm: Option<String>,
     is_inline: Option<bool>,
+    options: JsValue,
 ) -> Result<File, JsValue> {
+    let options = match options.is_object() {
+        true => options.into_serde::<HashMap<String, JSONValue>>().ok(),
+        false => None,
+    };
+
     let mut top = load_png(top, false).await?;
     let mut bot = load_png(bot, false).await?;
 
     blend_image_buffers(&mut top, &mut bot, algorithm, is_inline)?;
 
-    encode_file(bot)
+    encode_file(
+        bot,
+        get_compression_type(&options),
+        get_filter_type(&options),
+        target_file_name,
+    )
 }
 
-#[wasm_bindgen]
-pub fn blend_images_data(
+#[wasm_bindgen(js_name = blendImagesData)]
+pub fn blend_images_data_js(
     top: ImageData,
     bot: ImageData,
     algorithm: Option<String>,
     is_inline: Option<bool>,
+    options: JsValue,
 ) -> Result<ImageData, JsValue> {
+    let options = match options.is_object() {
+        true => options.into_serde::<HashMap<String, JSONValue>>().ok(),
+        false => None,
+    };
+
     let (width, height) = (top.width(), top.height());
     let mut top = ImageBuffer::from_vec(width, height, top.data().to_vec()).ok_or(
         PConvertError::ArgumentError("Could not parse \"top\"".to_string()),
@@ -50,7 +72,11 @@ pub fn blend_images_data(
 
     blend_image_buffers(&mut top, &mut bot, algorithm, is_inline)?;
 
-    encode_image_data(bot)
+    encode_image_data(
+        bot,
+        get_compression_type(&options),
+        get_filter_type(&options),
+    )
 }
 
 pub fn blend_image_buffers(
@@ -70,17 +96,24 @@ pub fn blend_image_buffers(
         demultiply_image(bot);
     }
 
-    blending::blend_images(&top, bot, &algorithm_fn, &None);
+    blend_images(&top, bot, &algorithm_fn, &None);
     Ok(())
 }
 
-#[wasm_bindgen]
-pub async fn blend_multiple(
+#[wasm_bindgen(js_name = blendMultiple)]
+pub async fn blend_multiple_js(
     image_files: JsValue,
+    target_file_name: String,
     algorithm: Option<String>,
     algorithms: Option<Box<[JsValue]>>,
     is_inline: Option<bool>,
+    options: JsValue,
 ) -> Result<File, JsValue> {
+    let options = match options.is_object() {
+        true => options.into_serde::<HashMap<String, JSONValue>>().ok(),
+        false => None,
+    };
+
     let mut image_buffers = Vec::new();
     let image_files = try_iter(&image_files).unwrap().unwrap();
     for file in image_files {
@@ -91,17 +124,27 @@ pub async fn blend_multiple(
     }
 
     let composition = blend_multiple_buffers(image_buffers, algorithm, algorithms, is_inline)?;
-
-    encode_file(composition)
+    encode_file(
+        composition,
+        get_compression_type(&options),
+        get_filter_type(&options),
+        target_file_name,
+    )
 }
 
-#[wasm_bindgen]
-pub fn blend_multiple_data(
+#[wasm_bindgen(js_name = blendMultipleData)]
+pub fn blend_multiple_data_js(
     images: &JsValue,
     algorithm: Option<String>,
     algorithms: Option<Box<[JsValue]>>,
     is_inline: Option<bool>,
+    options: JsValue,
 ) -> Result<ImageData, JsValue> {
+    let options = match options.is_object() {
+        true => options.into_serde::<HashMap<String, JSONValue>>().ok(),
+        false => None,
+    };
+
     let mut image_buffers: Vec<RgbaImage> = Vec::new();
     let mut images = try_iter(images).unwrap().unwrap();
     while let Some(Ok(img_data)) = images.next() {
@@ -119,8 +162,11 @@ pub fn blend_multiple_data(
     }
 
     let composition = blend_multiple_buffers(image_buffers, algorithm, algorithms, is_inline)?;
-
-    encode_image_data(composition)
+    encode_image_data(
+        composition,
+        get_compression_type(&options),
+        get_filter_type(&options),
+    )
 }
 
 fn blend_multiple_buffers(
@@ -172,7 +218,7 @@ fn blend_multiple_buffers(
             demultiply_image(&mut current_layer);
         }
 
-        blending::blend_images(
+        blend_images(
             &current_layer,
             &mut composition,
             &algorithm_fn,
@@ -183,8 +229,20 @@ fn blend_multiple_buffers(
     Ok(composition)
 }
 
-#[wasm_bindgen]
-pub fn get_module_constants() -> JsValue {
+#[wasm_bindgen(js_name = getModuleConstants)]
+pub fn get_module_constants_js() -> JsValue {
+    let filters: Vec<String> = constants::FILTER_TYPES
+        .to_vec()
+        .iter()
+        .map(|x| format!("{:?}", x))
+        .collect();
+
+    let compressions: Vec<String> = constants::COMPRESSION_TYPES
+        .to_vec()
+        .iter()
+        .map(|x| format!("{:?}", x))
+        .collect();
+
     JsValue::from_serde(&json!({
         "COMPILATION_DATE": constants::COMPILATION_DATE,
         "COMPILATION_TIME": constants::COMPILATION_TIME,
@@ -194,7 +252,9 @@ pub fn get_module_constants() -> JsValue {
         "COMPILER_VERSION": constants::COMPILER_VERSION,
         "LIBPNG_VERSION": constants::LIBPNG_VERSION,
         "FEATURES": constants::FEATURES,
-        "PLATFORM_CPU_BITS": constants::PLATFORM_CPU_BITS
+        "PLATFORM_CPU_BITS": constants::PLATFORM_CPU_BITS,
+        "FILTER_TYPES": filters,
+        "COMPRESSION_TYPES": compressions
     }))
     .unwrap()
 }
