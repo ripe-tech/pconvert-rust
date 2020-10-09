@@ -6,7 +6,7 @@ import time
 import threading
 import pconvert_rust as pconvert
 
-PATH_TO_ASSETS = "../"
+PATH_TO_ASSETS = os.path.join(os.path.dirname(__file__), "../../assets/demo/")
 
 print(f"VERSION: {pconvert.VERSION}")
 print(f"COMPILED ON: {pconvert.COMPILATION_DATE}, {pconvert.COMPILATION_TIME}")
