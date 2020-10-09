@@ -5,7 +5,6 @@
     <title>P(NG)Convert Rust (WASM)</title>
     <link rel="stylesheet" href="./index.css" />
   </head>
-
   <body>
     <div id="header">
       <div id="title">P(NG)Convert Rust</div>
@@ -33,34 +32,28 @@
             <button id="blend">Blend</button>
             <button id="benchmark">Benchmark (to stdout)</button>
           </div>
-
           <div class="left-container">
             <label>Algorithm</label><br />
             <select id="algorithm">
               <option selected value=""></option>
             </select>
-
             <label>Compression Type</label><br />
             <select id="compression">
               <option selected value=""></option></select
             ><br />
-
             <label>Filter Type</label><br />
             <select id="filter">
               <option selected value=""></option>
             </select>
           </div>
-
           <div class="algorithms left-container">
             <label>Algorithms</label><br />
             <textarea id="algorithms"></textarea>
           </div>
         </div>
-
         <div class="col">
           <canvas id="composition" width="750" height="750"> </canvas>
         </div>
-
         <div class="col">
           <div id="metadataContainer">
             <pre id="metadata"></pre>
