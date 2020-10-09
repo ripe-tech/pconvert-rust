@@ -1,13 +1,19 @@
 {
-    "scripts": {
-        "serve": "webpack-dev-server"
-    },
-    "dependencies": {
-        "pconvert_rust": "^0.1.0"
-    },
-    "devDependencies": {
-        "webpack": "^4.25.1",
-        "webpack-cli": "^3.1.2",
-        "webpack-dev-server": "^3.1.10"
-    }
+  "scripts": {
+    "serve": "webpack-dev-server",
+    "prettier": "prettier \"./**/*.{js,html,css,json}\" --write",
+    "lint-fix": "npm run lint-fix:base && npm run lint-fix:stylelint",
+    "lint-fix:base": "eslint \"./**/*.{js}\" --fix",
+    "lint-fix:stylelint": "stylelint \"./**/*.{css}\" --fix"
+  },
+  "dependencies": {
+    "eslint": "^7.10.0",
+    "pconvert_rust": "0.1.0",
+    "prettier": "^2.1.2"
+  },
+  "devDependencies": {
+    "webpack": "^4.25.1",
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.1.10"
+  }
 }
