@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <meta charset="utf-8">
   <title>P(NG)Convert Rust (WASM)</title>
   <link rel="stylesheet" href="./index.css">
 </head>
-
 <body>
   <div id="header">
     <div id="title">P(NG)Convert Rust</div>
@@ -15,7 +13,6 @@
   <div id="content">
     <div class="flex-grid">
       <div class="col">
-
         <div id="api" class="left-container">
           <input type="file" id="files" accept="image/png" multiple>
           <select>
@@ -27,27 +24,21 @@
           <button id="blend">Blend</button>
           <button id="benchmark">Benchmark (to stdout)</button>
         </div>
-        
         <div class="left-container">
-          <label>Algorithm</label><br/>
+          <label>Algorithm</label><br />
           <select id="algorithm">
             <option selected value=""></option>
           </select>
         </div>
-
         <div class="algorithms left-container">
-          <label>Algorithms</label><br/>
+          <label>Algorithms</label><br />
           <textarea id="algorithms"></textarea>
         </div>
-
-        
       </div>
-
       <div class="col">
         <canvas id="composition" width=750 height=750>
         </canvas>
       </div>
-
       <div class="col">
         <div id="metadataContainer">
           <pre id="metadata"></pre>
@@ -57,5 +48,4 @@
   </div>
   <script src="./index.js"></script>
 </body>
-
 </html>

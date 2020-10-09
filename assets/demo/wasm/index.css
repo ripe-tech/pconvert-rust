@@ -1,51 +1,56 @@
 body {
-    margin: 0;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
+    margin: 0px 0px 0px 0px;
 }
 
 div#header {
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    text-align: center;
     color: white;
-    width: 100%;
-    height: 100%;
-    font-weight: bold;
     font-size: 200%;
+    font-weight: bold;
+    height: 100%;
+    margin: 0px 0px 0px 0px;
+    overflow: hidden;
+    padding: 0px 0px 0px 0px;
+    text-align: center;
+    width: 100%;
 }
 
 div#title {
     background-color: #3330df;
-    padding: 10px;
+    padding: 10px 10px 10px 10px;
 }
 
 div#subtitle {
     background-color: #523dd6;
-    padding: 10px;
     font-size: 35%;
+    padding: 10px 10px 10px 10px;
 }
 
 pre#metadata {
-    font-size: 150%;
-    margin: auto;
     display: inline-block;
+    font-size: 150%;
+    margin: auto auto auto auto;
     text-align: left;
 }
 
 div#metadataContainer {
-    text-align: center;
     margin-top: 15%;
+    text-align: center;
 }
 
 canvas#composition {
     outline: black 3px solid;
+    -o-outline: black 3px solid;
+    -ms-outline: black 3px solid;
+    -moz-outline: black 3px solid;
+    -khtml-outline: black 3px solid;
+    -webkit-outline: black 3px solid;
 }
 
 textarea#algorithms {
+    height: 100%;
     resize: none;
     width: 100%;
-    height: 100%;
 }
 
 .flex-grid {
@@ -54,7 +59,7 @@ textarea#algorithms {
 
 .col {
     flex: 1;
-    padding: 1em;
+    padding: 1em 1em 1em 1em;
 }
 
 .left-container {
