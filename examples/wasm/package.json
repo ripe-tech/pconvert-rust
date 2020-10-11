@@ -11,14 +11,14 @@
         "pconvert-rust": "^0.1.0"
     },
     "devDependencies": {
-        "webpack": "^4.25.1",
-        "webpack-cli": "^3.1.2",
-        "webpack-dev-server": "^3.1.10",
-        "prettier": "^2.1.1",
+        "eslint": "^7.11.0",
+        "eslint-config-hive": "^0.3.3",
+        "npm-check-updates": "^9.0.4",
+        "prettier": "^2.1.2",
         "prettier-config-hive": "^0.1.7",
-        "sort-package-json": "^1.44.0",
-        "npm-check-updates": "^8.1.1",
-        "eslint": "^7.8.1",
-        "eslint-config-hive": "^0.3.3"
+        "sort-package-json": "^1.46.0",
+        "webpack": "^5.0.0",
+        "webpack-cli": "^4.0.0",
+        "webpack-dev-server": "^3.11.0"
     }
 }
