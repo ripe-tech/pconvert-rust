@@ -22,6 +22,7 @@
 /// ```
 use chrono::Utc;
 use image::png::{CompressionType, FilterType};
+use num_cpus;
 use regex::Regex;
 use std::fs::{File, OpenOptions};
 use std::io::Write;
@@ -31,7 +32,6 @@ use std::str;
 
 const BUILD_OUT_FILE: &str = "constants.rs";
 const SOURCE_DIR: &str = "./src";
-
 const TOML: &'static str = include_str!("Cargo.toml");
 
 fn main() {
@@ -127,6 +127,27 @@ fn main() {
         CompressionType::Rle,
     ];
     write_enum_variants_to_file(&mut file, "COMPRESSION_TYPES", libpng_compression_types);
+
+    write_constant_to_file(&mut file, "DEFAULT_THREAD_POOL_SIZE", num_cpus::get());
+
+    write_constant_to_file(&mut file, "MAX_THREAD_POOL_SIZE", num_cpus::get() * 10);
+}
+
+fn write_constant_to_file<T>(file: &mut File, key: &str, val: T)
+where
+    T: std::fmt::Display,
+{
+    writeln!(
+        file,
+        "pub const {}: {} = {};",
+        key,
+        std::any::type_name::<T>(),
+        val
+    )
+    .expect(&format!(
+        "Failed to write '{}' to 'build_constants.rs'",
+        key
+    ));
 }
 
 fn write_str_constant_to_file(file: &mut File, key: &str, val: &str) {

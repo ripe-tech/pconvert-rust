@@ -1,66 +1,58 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <meta charset="utf-8" />
     <title>P(NG)Convert Rust (WASM)</title>
     <link rel="stylesheet" href="./index.css" />
-  </head>
-  <body>
+</head>
+<body>
     <div id="header">
-      <div id="title">P(NG)Convert Rust</div>
-      <div id="subtitle">WASM Sandbox</div>
+        <div id="title">P(NG)Convert Rust</div>
+        <div id="subtitle">WASM Sandbox</div>
     </div>
     <div id="content">
-      <div class="flex-grid">
-        <div class="col">
-          <div id="api" class="left-container">
-            <input type="file" id="files" accept="image/png" multiple />
-            <select>
-              <option value="blendMultiple">
-                blendMultiple(images, algorithm, algorithms)
-              </option>
-              <option value="blendImages">
-                blendImages(top, bot, algorithm)
-              </option>
-              <option value="blendMultipleData">
-                blendMultipleData(images, algorithm, algorithms)
-              </option>
-              <option value="blendImagesData">
-                blendImagesData(top, bot, algorithm)
-              </option>
-            </select>
-            <button id="blend">Blend</button>
-            <button id="benchmark">Benchmark (to stdout)</button>
-          </div>
-          <div class="left-container">
-            <label>Algorithm</label><br />
-            <select id="algorithm">
-              <option selected value=""></option>
-            </select>
-            <label>Compression Type</label><br />
-            <select id="compression">
-              <option selected value=""></option></select
-            ><br />
-            <label>Filter Type</label><br />
-            <select id="filter">
-              <option selected value=""></option>
-            </select>
-          </div>
-          <div class="algorithms left-container">
-            <label>Algorithms</label><br />
-            <textarea id="algorithms"></textarea>
-          </div>
+        <div class="flex-grid">
+            <div class="col">
+                <div id="api" class="left-container">
+                    <input type="file" id="files" accept="image/png" multiple />
+                    <select>
+                        <option value="blendMultiple">blendMultiple(images, algorithm, algorithms)</option>
+                        <option value="blendImages">blendImages(top, bot, algorithm)</option>
+                        <option value="blendMultipleData">blendMultipleData(images, algorithm, algorithms)</option>
+                        <option value="blendImagesData">blendImagesData(top, bot, algorithm)</option>
+                    </select>
+                    <button id="blend">Blend</button>
+                    <button id="benchmark">Benchmark (to stdout)</button>
+                </div>
+                <div class="left-container">
+                    <label>Algorithm</label><br />
+                    <select id="algorithm">
+                        <option selected value=""></option>
+                    </select>
+                    <label>Compression Type</label><br />
+                    <select id="compression">
+                        <option selected value=""></option>
+                    </select><br />
+                    <label>Filter Type</label><br />
+                    <select id="filter">
+                        <option selected value=""></option>
+                    </select>
+                </div>
+                <div class="algorithms left-container">
+                    <label>Algorithms</label><br />
+                    <textarea id="algorithms"></textarea>
+                </div>
+            </div>
+            <div class="col">
+                <canvas id="composition" width="750" height="750"> </canvas>
+            </div>
+            <div class="col">
+                <div id="metadataContainer">
+                    <pre id="metadata"></pre>
+                </div>
+            </div>
         </div>
-        <div class="col">
-          <canvas id="composition" width="750" height="750"> </canvas>
-        </div>
-        <div class="col">
-          <div id="metadataContainer">
-            <pre id="metadata"></pre>
-          </div>
-        </div>
-      </div>
     </div>
     <script src="./index.js"></script>
-  </body>
+</body>
 </html>

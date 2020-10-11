@@ -64,6 +64,7 @@ impl Display for BlendAlgorithm {
     }
 }
 
+#[derive(Clone)]
 pub enum Background {
     Alpha,
     White,

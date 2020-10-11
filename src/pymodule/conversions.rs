@@ -1,21 +1,23 @@
 use crate::blending::params::Value;
 use crate::errors::PConvertError;
+use crate::parallelism::ThreadPoolStatus;
 use pyo3::conversion::FromPyObject;
-use pyo3::exceptions::TypeError;
-use pyo3::exceptions::{AttributeError, Exception, IOError, NotImplementedError};
+use pyo3::exceptions::{
+    PyAttributeError, PyException, PyIOError, PyNotImplementedError, PyTypeError,
+};
 use pyo3::prelude::*;
-use pyo3::types::{PyBool, PyFloat, PyInt, PyLong, PyString};
+use pyo3::types::{IntoPyDict, PyBool, PyDict, PyFloat, PyInt, PyLong, PyString};
 use pyo3::PyErr;
 
 impl From<PConvertError> for PyErr {
     fn from(err: PConvertError) -> PyErr {
         match err {
-            PConvertError::ArgumentError(err) => AttributeError::py_err(err.to_string()),
-            PConvertError::ImageLibError(err) => Exception::py_err(err.to_string()),
+            PConvertError::ArgumentError(err) => PyAttributeError::new_err(err.to_string()),
+            PConvertError::ImageLibError(err) => PyException::new_err(err.to_string()),
             PConvertError::UnsupportedImageTypeError => {
-                NotImplementedError::py_err(err.to_string())
+                PyNotImplementedError::new_err(err.to_string())
             }
-            PConvertError::IOError(err) => IOError::py_err(err.to_string()),
+            PConvertError::IOError(err) => PyIOError::new_err(err.to_string()),
         }
     }
 }
@@ -35,11 +37,23 @@ impl FromPyObject<'_> for Value {
             let long = long.extract::<i64>()?;
             Ok(Value::Long(long))
         } else if let Ok(string) = ob.cast_as::<PyString>() {
-            let string = string.to_string()?.into_owned();
+            let string = string.to_string();
             Ok(Value::Str(string))
         } else {
             let msg = format!("Failure converting {}", ob);
-            Err(TypeError::py_err(msg))
+            Err(PyTypeError::new_err(msg))
         }
+    }
+}
+
+impl IntoPyDict for ThreadPoolStatus {
+    fn into_py_dict(self, py: Python<'_>) -> &PyDict {
+        let py_dict = PyDict::new(py);
+
+        py_dict.set_item("size", self.size()).unwrap();
+        py_dict.set_item("queued", self.queued()).unwrap();
+        py_dict.set_item("active", self.active()).unwrap();
+
+        py_dict
     }
 }

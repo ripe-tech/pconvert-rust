@@ -4,7 +4,7 @@ body {
 }
 
 div#header {
-    color: white;
+    color: #ffffff;
     font-size: 200%;
     font-weight: bold;
     height: 100%;
@@ -40,12 +40,12 @@ div#metadataContainer {
 }
 
 canvas#composition {
-    outline: black 3px solid;
-    -o-outline: black 3px solid;
-    -ms-outline: black 3px solid;
-    -moz-outline: black 3px solid;
-    -khtml-outline: black 3px solid;
-    -webkit-outline: black 3px solid;
+    outline: #000000 3px solid;
+    -o-outline: #000000 3px solid;
+    -ms-outline: #000000 3px solid;
+    -moz-outline: #000000 3px solid;
+    -khtml-outline: #000000 3px solid;
+    -webkit-outline: #000000 3px solid;
 }
 
 textarea#algorithms {
