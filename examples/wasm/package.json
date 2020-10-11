@@ -1,6 +1,11 @@
 {
     "scripts": {
-        "serve": "webpack-dev-server"
+        "lint": "eslint \"./**/*.js\"",
+        "lint-fix": "eslint \"./**/*.js\" --fix",
+        "prettier": "prettier \"./**/*.{js,json}\" --write",
+        "pretty": "npm run prettier && npm run lint-fix",
+        "serve": "webpack-dev-server",
+        "upgrade": "npx sort-package-json && ncu -u"
     },
     "dependencies": {
         "pconvert-rust": "^0.1.0"
@@ -8,6 +13,12 @@
     "devDependencies": {
         "webpack": "^4.25.1",
         "webpack-cli": "^3.1.2",
-        "webpack-dev-server": "^3.1.10"
+        "webpack-dev-server": "^3.1.10",
+        "prettier": "^2.1.1",
+        "prettier-config-hive": "^0.1.7",
+        "sort-package-json": "^1.44.0",
+        "npm-check-updates": "^8.1.1",
+        "eslint": "^7.8.1",
+        "eslint-config-hive": "^0.3.3"
     }
 }
