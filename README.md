@@ -78,7 +78,7 @@ To run the demo, follow [this](https://developer.mozilla.org/en-US/docs/WebAssem
 
 ## Usage
 
-Check the [demo site](demo/wasm/index.js) to see how to use the PConvert WASM module.
+Check the [demo site](examples/wasm/index.js) to see how to use the PConvert WASM module.
 
 JavaScript API exposed:
 ```javascript
@@ -116,7 +116,7 @@ pip install pconvert-rust/.
 
 ## Usage
 
-Check [this folder](demo/python/) for examples.
+Check [this folder](examples/python/) for examples.
 
 Import the python package with:
 
