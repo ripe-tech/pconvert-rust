@@ -10,32 +10,32 @@ This Rust crate can be used as a **command line application**, as a **crate** in
 
 Build and run with:
 
-```console
-$ cargo run
+```bash
+cargo run
 ```
 
 Alternatively, compile first with:
 
-```console
-$ cargo build
+```bash
+cargo build
 ```
 
 and then run the binary with:
 
-```console
-$ ./target/debug/pconvert-rust
+```bash
+./target/debug/pconvert-rust
 ```
 
 Additionally, for better code optimization, compile with the `--release` flag:
 
-```console
-$ cargo build --release
+```bash
+cargo build --release
 ```
 
 and then run the release binary with:
 
-```console
-$ ./target/release/pconvert-rust
+```bash
+./target/release/pconvert-rust
 ```
 
 ## Usage
@@ -70,8 +70,8 @@ Follow [this guide](https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to
 
 To build, use the `wasm-extension` feature:
 
-```console
-$ wasm-pack build -- --features wasm-extension
+```bash
+wasm-pack build -- --features wasm-extension
 ```
 
 To run the demo, follow [this](https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_wasm#Making_our_package_availabe_to_npm).
@@ -110,8 +110,8 @@ blendMultipleBenchmarkAll(image_files, is_inline)
 
 This crate can be installed as a python package through the use of `pip`. Simply run:
 
-```console
-$ pip install pconvert-rust/.
+```bash
+pip install pconvert-rust/.
 ```
 
 ## Usage
@@ -146,8 +146,8 @@ pconvert_rust.COMPILER_VERSION
 
 Generate with
 
-```console
-$ cargo doc --lib --all-features
+```bash
+cargo doc --lib --all-features
 ```
 
 ## License
