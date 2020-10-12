@@ -41,7 +41,8 @@ setuptools.setup(
     rust_extensions = [
         setuptools_rust.RustExtension(
             "pconvert_rust.pconvert_rust",
-            binding = setuptools_rust.Binding.PyO3
+            binding = setuptools_rust.Binding.PyO3,
+            features = ["python-extension"]
         )
     ],
     install_requires = [],

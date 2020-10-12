@@ -1,8 +1,10 @@
-#[macro_use]
-mod utils;
+//! Web Assembly (WASM) extension, exported functions and type conversions
 
-mod benchmark;
-mod conversions;
+#[macro_use]
+pub mod utils;
+
+pub mod benchmark;
+pub mod conversions;
 
 use crate::blending::params::BlendAlgorithmParams;
 use crate::blending::{
@@ -22,6 +24,8 @@ use utils::{
 use wasm_bindgen::prelude::*;
 use web_sys::{File, ImageData};
 
+/// Blends two `File`s into one, named `target_file_name`, using `algorithm` and the extra
+/// `options` given. Algorithm defaults to `BlendAlgorithm::Multiplicative`.
 #[wasm_bindgen(js_name = blendImages)]
 pub async fn blend_images_js(
     top: File,
@@ -49,6 +53,8 @@ pub async fn blend_images_js(
     )
 }
 
+/// Blends two `ImageData` objects into one using `algorithm` and the extra
+/// `options` given. Algorithm defaults to `BlendAlgorithm::Multiplicative`.
 #[wasm_bindgen(js_name = blendImagesData)]
 pub fn blend_images_data_js(
     top: ImageData,
@@ -79,6 +85,8 @@ pub fn blend_images_data_js(
     )
 }
 
+/// Blends two image buffers using `algorithm` and the extra
+/// `options` given. Algorithm defaults to `BlendAlgorithm::Multiplicative`.
 pub fn blend_image_buffers(
     top: &mut ImageBuffer<Rgba<u8>, Vec<u8>>,
     bot: &mut ImageBuffer<Rgba<u8>, Vec<u8>>,
@@ -100,6 +108,8 @@ pub fn blend_image_buffers(
     Ok(())
 }
 
+/// Blends multiple `File`s into one, named `target_file_name`, using `algorithm` and the extra
+/// `options` given. Algorithm defaults to `BlendAlgorithm::Multiplicative`.
 #[wasm_bindgen(js_name = blendMultiple)]
 pub async fn blend_multiple_js(
     image_files: JsValue,
@@ -132,6 +142,8 @@ pub async fn blend_multiple_js(
     )
 }
 
+/// Blends multiple `ImageData` objects into one using `algorithm` and the extra
+/// `options` given. Algorithm defaults to `BlendAlgorithm::Multiplicative`.
 #[wasm_bindgen(js_name = blendMultipleData)]
 pub fn blend_multiple_data_js(
     images: &JsValue,
@@ -167,6 +179,37 @@ pub fn blend_multiple_data_js(
         get_compression_type(&options),
         get_filter_type(&options),
     )
+}
+
+/// Returns a JSON object with the module constants (e.g. ALGORITHMS, COMPILER, COMPILER_VERSION, ...)
+#[wasm_bindgen(js_name = getModuleConstants)]
+pub fn get_module_constants_js() -> JsValue {
+    let filters: Vec<String> = constants::FILTER_TYPES
+        .to_vec()
+        .iter()
+        .map(|x| format!("{:?}", x))
+        .collect();
+
+    let compressions: Vec<String> = constants::COMPRESSION_TYPES
+        .to_vec()
+        .iter()
+        .map(|x| format!("{:?}", x))
+        .collect();
+
+    JsValue::from_serde(&json!({
+        "COMPILATION_DATE": constants::COMPILATION_DATE,
+        "COMPILATION_TIME": constants::COMPILATION_TIME,
+        "VERSION": constants::VERSION,
+        "ALGORITHMS": constants::ALGORITHMS,
+        "COMPILER": constants::COMPILER,
+        "COMPILER_VERSION": constants::COMPILER_VERSION,
+        "LIBPNG_VERSION": constants::LIBPNG_VERSION,
+        "FEATURES": constants::FEATURES,
+        "PLATFORM_CPU_BITS": constants::PLATFORM_CPU_BITS,
+        "FILTER_TYPES": filters,
+        "COMPRESSION_TYPES": compressions
+    }))
+    .unwrap()
 }
 
 fn blend_multiple_buffers(
@@ -227,34 +270,4 @@ fn blend_multiple_buffers(
     }
 
     Ok(composition)
-}
-
-#[wasm_bindgen(js_name = getModuleConstants)]
-pub fn get_module_constants_js() -> JsValue {
-    let filters: Vec<String> = constants::FILTER_TYPES
-        .to_vec()
-        .iter()
-        .map(|x| format!("{:?}", x))
-        .collect();
-
-    let compressions: Vec<String> = constants::COMPRESSION_TYPES
-        .to_vec()
-        .iter()
-        .map(|x| format!("{:?}", x))
-        .collect();
-
-    JsValue::from_serde(&json!({
-        "COMPILATION_DATE": constants::COMPILATION_DATE,
-        "COMPILATION_TIME": constants::COMPILATION_TIME,
-        "VERSION": constants::VERSION,
-        "ALGORITHMS": constants::ALGORITHMS,
-        "COMPILER": constants::COMPILER,
-        "COMPILER_VERSION": constants::COMPILER_VERSION,
-        "LIBPNG_VERSION": constants::LIBPNG_VERSION,
-        "FEATURES": constants::FEATURES,
-        "PLATFORM_CPU_BITS": constants::PLATFORM_CPU_BITS,
-        "FILTER_TYPES": filters,
-        "COMPRESSION_TYPES": compressions
-    }))
-    .unwrap()
 }

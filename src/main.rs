@@ -1,3 +1,6 @@
+mod cli;
+
+use cli::{pbenchmark, pcompose, pconvert, print_usage, pversion};
 use pconvert_rust::errors::PConvertError;
 use std::env;
 
@@ -10,18 +13,14 @@ fn main() -> Result<(), PConvertError> {
 
     match args.next() {
         Some(action) => match &action[..] {
-            "convert" => pconvert_rust::pconvert(&mut args)?,
-            "compose" => pconvert_rust::pcompose(&mut args)?,
-            "benchmark" => pconvert_rust::pbenchmark(&mut args)?,
-            "version" => pconvert_rust::pversion()?,
+            "convert" => pconvert(&mut args)?,
+            "compose" => pcompose(&mut args)?,
+            "benchmark" => pbenchmark(&mut args)?,
+            "version" => pversion(),
             _ => print_usage(),
         },
         None => print_usage(),
     };
 
     Ok(())
-}
-
-fn print_usage() {
-    println!("Usage: pconvert-rust <command> [args...]\nwhere command can be one of the following: compose, convert, benchmark, version");
 }

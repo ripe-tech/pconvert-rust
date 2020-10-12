@@ -1,3 +1,8 @@
+//! PNG decode/encode and load functions,
+//! console log macros,
+//! argument parsing from javascript input to inner-crate rust types
+//! and other utility functions
+
 use crate::blending::params::{BlendAlgorithmParams, Value};
 use crate::blending::BlendAlgorithm;
 use crate::errors::PConvertError;
@@ -17,6 +22,7 @@ use web_sys::{File, ImageData};
 
 #[wasm_bindgen]
 extern "C" {
+    /// JavaScript `console.log` function
     #[wasm_bindgen(js_namespace = console)]
     pub fn log(s: &str);
 }
@@ -25,6 +31,7 @@ macro_rules! console_log {
     ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
 }
 
+/// Receives a `File` and returns the decoded PNG byte buffer
 pub async fn load_png(
     file: File,
     demultiply: bool,
@@ -35,6 +42,7 @@ pub async fn load_png(
     Ok(png)
 }
 
+/// Receives png buffer data and encodes it as a `File` with specified `CompressionType` and `FilterType`
 pub fn encode_file(
     image_buffer: ImageBuffer<Rgba<u8>, Vec<u8>>,
     compression: CompressionType,
@@ -50,6 +58,7 @@ pub fn encode_file(
     }
 }
 
+/// Receives png buffer data and encodes it as an `ImageData` object with specified `CompressionType` and `FilterType`
 pub fn encode_image_data(
     image_buffer: ImageBuffer<Rgba<u8>, Vec<u8>>,
     compression: CompressionType,
@@ -66,6 +75,8 @@ pub fn encode_image_data(
     ImageData::new_with_u8_clamped_array_and_sh(clamped_bytes, width, height)
 }
 
+/// Attempts to parse a `&String` to a `BlendAlgorithm`.
+/// Returns the enum variant if it suceeds. Otherwise it returns a `PConvertError`.
 pub fn build_algorithm(algorithm: &String) -> Result<BlendAlgorithm, PConvertError> {
     match BlendAlgorithm::from_str(&algorithm) {
         Ok(algorithm) => Ok(algorithm),
@@ -76,6 +87,8 @@ pub fn build_algorithm(algorithm: &String) -> Result<BlendAlgorithm, PConvertErr
     }
 }
 
+/// Attempts to build a vector of blending operations and extra parameters.
+/// One pair per blending operation. Returns a `PConvertError` if it fails parsing.
 pub fn build_params(
     algorithms: Box<[JsValue]>,
 ) -> Result<Vec<(BlendAlgorithm, Option<BlendAlgorithmParams>)>, PConvertError> {
@@ -105,6 +118,8 @@ pub fn build_params(
     Ok(result)
 }
 
+/// Retrieves the `image::png::CompressionType` value from the `HashMap<String, JSONValue>` map if it exists.
+/// Otherwise it returns the default value: `CompressionType::Fast`.
 pub fn get_compression_type(options: &Option<HashMap<String, JSONValue>>) -> CompressionType {
     options.as_ref().map_or(CompressionType::Fast, |options| {
         options
@@ -116,6 +131,8 @@ pub fn get_compression_type(options: &Option<HashMap<String, JSONValue>>) -> Com
     })
 }
 
+/// Retrieves the `image::png::FilterType` value from the `HashMap<String, JSONValue>` map if it exists.
+/// Otherwise it returns the default value: `FilterType::NoFilter`.
 pub fn get_filter_type(options: &Option<HashMap<String, JSONValue>>) -> FilterType {
     options.as_ref().map_or(FilterType::NoFilter, |options| {
         options
@@ -127,6 +144,7 @@ pub fn get_filter_type(options: &Option<HashMap<String, JSONValue>>) -> FilterTy
     })
 }
 
+/// Logs the header/column names of the benchmarks table to the browser console (with `console.log`)
 pub fn log_benchmark_header() {
     console_log!(
         "{:<20}{:<20}{:<20}{:<20}",
@@ -137,6 +155,7 @@ pub fn log_benchmark_header() {
     );
 }
 
+/// Logs one line (algorithm, compression, filter, blend time, read time, write time) of the benchmarks table to the browser console (with `console.log`)
 pub fn log_benchmark(
     algorithm: String,
     compression: CompressionType,

@@ -1,4 +1,6 @@
-mod algorithms;
+//! Blending algorithms and associated utilitary functions and enums
+
+pub mod algorithms;
 pub mod params;
 
 use algorithms::{
@@ -13,6 +15,7 @@ use std::fmt::{Display, Formatter};
 use std::result;
 use std::str::FromStr;
 
+/// Enumeration of supported blending modes
 #[derive(Clone, Debug)]
 pub enum BlendAlgorithm {
     Alpha,
@@ -64,25 +67,24 @@ impl Display for BlendAlgorithm {
     }
 }
 
-#[derive(Clone)]
-pub enum Background {
-    Alpha,
-    White,
-    Blue,
-    Texture,
-}
-
-impl Display for Background {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        match self {
-            Background::Alpha => write!(f, "alpha"),
-            Background::White => write!(f, "white"),
-            Background::Blue => write!(f, "blue"),
-            Background::Texture => write!(f, "texture"),
-        }
-    }
-}
-
+/// Blends two images buffers with the given blending function and optional parameters
+///
+/// # Arguments
+///
+/// * `top` - An image buffer corresponding to the top layer
+/// * `bot` - An image buffer corresponding to the bottom layer
+/// * `blending_algorithm` - A function that blends two pixels according to optional blending parameters
+/// * `algorithm_params` - A optional map of key-value pairs of blending properties and values
+///
+/// # Examples
+///
+/// ```rust
+/// let mut bot = read_png_from_file("bot.png".to_string(), false).unwrap();
+/// let top = read_png_from_file("top.png".to_string(), false).unwrap();
+/// let algorithm_fn = get_blending_algorithm(&BlendAlgorithm::Alpha);
+///
+/// blend_images(&top, &mut bot, &algorithm_fn, &None);
+/// ```
 pub fn blend_images(
     top: &ImageBuffer<Rgba<u8>, Vec<u8>>,
     bot: &mut ImageBuffer<Rgba<u8>, Vec<u8>>,
@@ -94,44 +96,33 @@ pub fn blend_images(
     }
 }
 
+/// Demultiplies an image buffer
+///
+/// # Arguments
+///
+/// * `img` - The image buffer to demultiply
 pub fn demultiply_image(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
     for pixel in img.pixels_mut() {
         demultiply_pixel(pixel);
     }
 }
 
-fn demultiply_pixel(pixel: &mut Rgba<u8>) {
-    let (r, g, b, a) = (pixel[0], pixel[1], pixel[2], pixel[3]);
-    let af = a as f32 / 255.0;
-
-    let r = (r as f32 * af).round() as u8;
-    let g = (g as f32 * af).round() as u8;
-    let b = (b as f32 * af).round() as u8;
-
-    pixel[0] = r;
-    pixel[1] = g;
-    pixel[2] = b;
-}
-
+/// Multiplies an image buffer
+///
+/// # Arguments
+///
+/// * `img` - The image buffer to multiply
 pub fn multiply_image(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
     for pixel in img.pixels_mut() {
         multiply_pixel(pixel);
     }
 }
 
-fn multiply_pixel(pixel: &mut Rgba<u8>) {
-    let (r, g, b, a) = (pixel[0], pixel[1], pixel[2], pixel[3]);
-    let af = a as f32 / 255.0;
-
-    let r = (r as f32 / af).round() as u8;
-    let g = (g as f32 / af).round() as u8;
-    let b = (b as f32 / af).round() as u8;
-
-    pixel[0] = r;
-    pixel[1] = g;
-    pixel[2] = b;
-}
-
+/// Matches a `BlendAlgorithm` enum variant with a blend function
+///
+/// # Arguments
+///
+/// * `algorithm` - The BlendAlgorithm enum variant
 pub fn get_blending_algorithm(
     algorithm: &BlendAlgorithm,
 ) -> impl Fn((&mut Rgba<u8>, &Rgba<u8>), &Option<BlendAlgorithmParams>) -> () {
@@ -149,6 +140,11 @@ pub fn get_blending_algorithm(
     }
 }
 
+/// Returns whether or not a `BlendAlgorithm` enum variant corresponds to a multiplied blending algorithm
+///
+/// # Arguments
+///
+/// * `algorithm` - The BlendAlgorithm enum variant
 pub fn is_algorithm_multiplied(algorithm: &BlendAlgorithm) -> bool {
     match algorithm {
         BlendAlgorithm::Alpha => false,
@@ -162,4 +158,30 @@ pub fn is_algorithm_multiplied(algorithm: &BlendAlgorithm) -> bool {
         BlendAlgorithm::DisjointUnder => true,
         BlendAlgorithm::DisjointDebug => true,
     }
+}
+
+fn demultiply_pixel(pixel: &mut Rgba<u8>) {
+    let (r, g, b, a) = (pixel[0], pixel[1], pixel[2], pixel[3]);
+    let af = a as f32 / 255.0;
+
+    let r = (r as f32 * af).round() as u8;
+    let g = (g as f32 * af).round() as u8;
+    let b = (b as f32 * af).round() as u8;
+
+    pixel[0] = r;
+    pixel[1] = g;
+    pixel[2] = b;
+}
+
+fn multiply_pixel(pixel: &mut Rgba<u8>) {
+    let (r, g, b, a) = (pixel[0], pixel[1], pixel[2], pixel[3]);
+    let af = a as f32 / 255.0;
+
+    let r = (r as f32 / af).round() as u8;
+    let g = (g as f32 / af).round() as u8;
+    let b = (b as f32 / af).round() as u8;
+
+    pixel[0] = r;
+    pixel[1] = g;
+    pixel[2] = b;
 }

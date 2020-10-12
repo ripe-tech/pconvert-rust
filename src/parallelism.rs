@@ -1,3 +1,5 @@
+//! Thread pool, thread pool status and workers implementation
+
 use crate::constants;
 use crate::errors::PConvertError;
 use crate::utils::min;
@@ -6,6 +8,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{mpsc, Arc, Mutex};
 use std::thread::{spawn, JoinHandle};
 
+/// Thread pool used in multi-threaded pconvert calls
 pub struct ThreadPool {
     workers: Vec<Worker>,
     work_channel_sender: mpsc::Sender<WorkMessage>,
@@ -14,12 +17,14 @@ pub struct ThreadPool {
 }
 
 impl ThreadPool {
+    /// Creates a thread pool with `size` worker threads
     pub fn new(size: usize) -> Result<ThreadPool, PConvertError> {
         if size == 0 {
             return Err(PConvertError::ArgumentError(
                 "Thread Pool size should be a positive number".to_string(),
             ));
         }
+
         let (work_channel_sender, work_channel_receiver) = mpsc::channel();
         let workers = Vec::with_capacity(size);
         let work_channel_receiver_mutex = Arc::new(Mutex::new(work_channel_receiver));
@@ -34,19 +39,23 @@ impl ThreadPool {
         })
     }
 
+    /// Begin execution of worker threads
     pub fn start(&mut self) {
         for _ in 0..self.workers.capacity() {
             self.spawn_worker();
         }
     }
 
+    /// Stops worker threads and joins them with the calling thread
     fn stop(&mut self) {
+        // sends a Terminate message to all Workers
         for _ in &self.workers {
             self.work_channel_sender
                 .send(WorkMessage::Terminate)
                 .unwrap_or_default();
         }
 
+        // joins main thread with Worker threads
         for worker in &mut self.workers {
             if let Some(thread) = worker.thread.take() {
                 thread.join().unwrap_or_default();
@@ -54,12 +63,33 @@ impl ThreadPool {
         }
     }
 
+    /// Enqueues a task for execution by any of the worker threads.
+    ///
+    /// # Arguments
+    ///
+    /// * `func` - The task to execute.  
+    ///
+    /// # Return
+    ///
+    /// Returns the receiver end of a channel where the result will be placed.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// let result_channel = thread_pool.execute(move || ResultMessage::ImageResult(read_png_from_file(top_path, demultiply)));
+    /// let top = match result_channel.recv().unwrap() {
+    ///     ResultMessage::ImageResult(result) => result,
+    /// }.unwrap();
+    /// ```
     pub fn execute<F>(&self, func: F) -> mpsc::Receiver<ResultMessage>
     where
         F: FnOnce() -> ResultMessage + Send + 'static,
     {
         let (result_channel_sender, result_channel_receiver) = mpsc::channel();
         let task = Box::new(func);
+
+        // sends task to task queue and attaches the sender end of the result channel
+        // so that the Worker can send the task result
         self.work_channel_sender
             .send(WorkMessage::NewTask(task, result_channel_sender))
             .unwrap_or_default();
@@ -69,6 +99,8 @@ impl ThreadPool {
         result_channel_receiver
     }
 
+    /// Expands the thread pool to `num_threads`.
+    /// Creates `n` workers, where `n = num_threads - thread_pool_size`.
     pub fn expand_to(&mut self, num_threads: usize) {
         let num_threads = min(
             num_threads as isize,
@@ -86,6 +118,8 @@ impl ThreadPool {
     }
 
     fn spawn_worker(&mut self) {
+        // creates Worker instances that receive the receiver end
+        // of the channel where jobs/tasks are submitted
         self.workers.push(Worker::new(
             self.status.clone(),
             Arc::clone(&self.work_channel_receiver_mutex),
@@ -139,10 +173,13 @@ enum WorkMessage {
     Terminate,
 }
 
+/// Result message types for `self.execute()`
 pub enum ResultMessage {
     ImageResult(Result<ImageBuffer<Rgba<u8>, Vec<u8>>, PConvertError>),
 }
 
+/// Represents the status of the thread pool (e.g. size, queued jobs, active jobs).
+/// Status counts use `Atomic*` data types in order to be safely shared across workers.
 pub struct ThreadPoolStatus {
     size: AtomicUsize,
     queued_count: AtomicUsize,

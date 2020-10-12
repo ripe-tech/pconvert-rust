@@ -43,6 +43,9 @@ fn main() {
         .open(dest_path)
         .expect(&format!("Can't open '{}'", BUILD_OUT_FILE));
 
+    let module_doc_string = "//! Global constants, such as compiler version used, algorithms, compression and filters supported and others";
+    writeln!(file, "{}", module_doc_string).unwrap();
+
     let now_utc = Utc::now();
     write_str_constant_to_file(
         &mut file,

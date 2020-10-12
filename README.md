@@ -2,6 +2,10 @@
 
 The [Rust](https://www.rust-lang.org) version of the famous [P(NG)Convert](https://github.com/hivesolutions/pconvert) from Hive Solutions.
 
+This Rust crate can be used as a **command line application**, as a **crate** in another rust project, as a **Web Assembly module** (able to be used within JavaScript that targets web browsers) or as a **python package**.
+
+# Command Line Application
+
 ## Compiling & Executing
 
 Build and run with:
@@ -58,11 +62,93 @@ $ pconvert-rust benchmark <dir> [--parallel]
 $ pconvert-rust version
 ```
 
-## WebAssembly (WASM)
+# WebAssembly (WASM) Module
 
-Follow [this guide](https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_wasm) step by step to install `wasm-pack`, compile the WASM module and install it.
+## Compiling & Executing
 
-Check the [demo site](assets/demo/site/index.js) to see how to use the PConvert WASM module.
+Follow [this guide](https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_wasm) on how to install `wasm-pack`.
+
+To build, use the `wasm-extension` feature:
+
+```bash
+wasm-pack build -- --features wasm-extension
+```
+
+To run the demo, follow [this](https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_wasm#Making_our_package_availabe_to_npm).
+
+## Usage
+
+Check the [demo site](demo/wasm/index.js) to see how to use the PConvert WASM module.
+
+JavaScript API exposed:
+```javascript
+// blends two File objects and returns a File object
+blendImages(top, bot, target_file_name, algorithm, is_inline, options)
+
+// blends two ImageData objects and returns an ImageData object
+blendImagesData(top, bot, algorithm, is_inline, options)
+
+// blends multiple File objects and returns a File object
+blendMultiple(image_files, target_file_name, algorithm, algorithms, is_inline, options)
+
+// blends multiple ImageData objects  and returns an ImageData object
+blendMultipleData(images, algorithm, algorithms, is_inline, options)
+
+// returns a JSON of module constants (e.g. ALGORITHMS, FILTER_TYPES, COMPILER_VERSION, ...)
+getModuleConstants()
+
+// benchmarks and prints to console various times for different combinations of blending algorithms, compression algorithms and filters for `blendImages`
+blendImagesBenchmarkAll(top, bot, is_inline)
+
+// benchmarks and prints to console various times for different combinations of blending algorithms, compression algorithms and filters for `blendMultiple`
+blendMultipleBenchmarkAll(image_files, is_inline)
+```
+
+# Python package
+
+## Compiling & Executing
+
+This crate can be installed as a python package through the use of `pip`. Simply run:
+
+```bash
+pip install pconvert-rust/.
+```
+
+## Usage
+
+Check [this folder](demo/python/) for examples.
+
+Import the python package with:
+
+```python
+import pconvert_rust
+```
+
+Python API exposed. The parameter `options` is a python dictionary of optional parameters and if `num_threads` is specified with a value of 1 or more, the work load will be distributed across multiple threads (belonging to a internally managed thread pool).
+
+```python
+# blends two images read from the local file system and writes the result to the file system
+blend_images(bot_path, top_path, target_path, algorithm, is_inline, options)
+
+# blends multiple images read from the local file system and writes the result to the file system
+blend_multiple(img_paths, out_path, algorithm, algorithms, is_inline, options)
+
+# returns a python dict with summary information about the internal thread pool (size, active jobs, queued jobs)
+get_thread_pool_status()
+
+# access module constants (e.g. ALGORITHMS, FILTER_TYPES, COMPILER_VERSION, ...)
+pconvert_rust.ALGORITHMS
+pconvert_rust.FILTER_TYPES
+pconvert_rust.COMPILER_VERSION
+```
+
+## Documentation
+
+Generate with
+
+```bash
+cargo doc --lib --all-features
+```
 
 ## License
 
