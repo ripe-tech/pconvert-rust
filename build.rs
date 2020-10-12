@@ -105,7 +105,17 @@ fn main() {
     );
     write_str_constant_to_file(&mut file, "LIBPNG_VERSION", &libpng_version);
 
-    write_vec_constant_to_file(&mut file, "FEATURES", vec!["cpu", "python"]);
+    let mut features = vec!["cpu"];
+
+    if cfg!(feature = "wasm-extension") {
+        features.push("wasm")
+    }
+
+    if cfg!(feature = "python-extension") {
+        features.push("python")
+    }
+
+    write_vec_constant_to_file(&mut file, "FEATURES", features);
 
     write_str_constant_to_file(
         &mut file,
