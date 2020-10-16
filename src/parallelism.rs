@@ -144,12 +144,14 @@ impl Worker {
     ) -> Worker {
         let thread = spawn(move || loop {
             let message = receiver.lock().unwrap().recv().unwrap();
+
             match message {
                 WorkMessage::NewTask(task, result_channel_sender) => {
                     thread_pool_status.dec_queued_count();
                     thread_pool_status.inc_active_count();
 
                     let result = task();
+
                     result_channel_sender.send(result).unwrap_or_default();
 
                     thread_pool_status.dec_active_count();
@@ -157,6 +159,7 @@ impl Worker {
 
                 WorkMessage::Terminate => {
                     thread_pool_status.dec_size();
+                    break;
                 }
             }
         });
