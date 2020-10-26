@@ -15,4 +15,4 @@ jobs:
           python-version: "3.8"
       - run: ls -la ${pythonLocation}
       - run: ls -la ${pythonLocation}/bin
-      - run: PATH=${pythonLocation}/bin:${PATH} ${pythonLocation}/bin/pip install --upgrade .
+      - run: ${pythonLocation}/bin/python3 -m pip install --upgrade .
