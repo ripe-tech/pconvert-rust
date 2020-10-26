@@ -65,7 +65,7 @@ pub fn build_params(
     Ok(result)
 }
 
-/// Retrieves the `image::png::CompressionType` value from the `Options` map if it exists.
+/// Retrieves the `image::codecs::png::CompressionType` value from the `Options` map if it exists.
 /// Otherwise it returns the default value: `CompressionType::Fast`.
 pub fn get_compression_type(options: &Option<Options>) -> CompressionType {
     options.clone().map_or(CompressionType::Fast, |options| {
@@ -78,7 +78,7 @@ pub fn get_compression_type(options: &Option<Options>) -> CompressionType {
     })
 }
 
-/// Retrieves the `image::png::FilterType` value from the `Options` map if it exists.
+/// Retrieves the `image::codecs::png::FilterType` value from the `Options` map if it exists.
 /// Otherwise it returns the default value: `FilterType::NoFilter`.
 pub fn get_filter_type(options: &Option<Options>) -> FilterType {
     options.clone().map_or(FilterType::NoFilter, |options| {

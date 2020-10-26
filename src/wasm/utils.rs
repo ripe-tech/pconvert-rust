@@ -118,7 +118,7 @@ pub fn build_params(
     Ok(result)
 }
 
-/// Retrieves the `image::png::CompressionType` value from the `HashMap<String, JSONValue>` map if it exists.
+/// Retrieves the `image::codecs::png::CompressionType` value from the `HashMap<String, JSONValue>` map if it exists.
 /// Otherwise it returns the default value: `CompressionType::Fast`.
 pub fn get_compression_type(options: &Option<HashMap<String, JSONValue>>) -> CompressionType {
     options.as_ref().map_or(CompressionType::Fast, |options| {
@@ -131,7 +131,7 @@ pub fn get_compression_type(options: &Option<HashMap<String, JSONValue>>) -> Com
     })
 }
 
-/// Retrieves the `image::png::FilterType` value from the `HashMap<String, JSONValue>` map if it exists.
+/// Retrieves the `image::codecs::png::FilterType` value from the `HashMap<String, JSONValue>` map if it exists.
 /// Otherwise it returns the default value: `FilterType::NoFilter`.
 pub fn get_filter_type(options: &Option<HashMap<String, JSONValue>>) -> FilterType {
     options.as_ref().map_or(FilterType::NoFilter, |options| {

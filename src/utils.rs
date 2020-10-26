@@ -142,7 +142,7 @@ pub fn write_png_parallel(
     write_png_to_file(file_out, png, compression, filter)
 }
 
-/// Converts a `String` to a `image::png::CompressionType`.
+/// Converts a `String` to a `image::codecs::png::CompressionType`.
 /// This can not be done by implementing the trait `From<String> for CompressionType` due to Rust's
 /// [orphan rule](https://doc.rust-lang.org/book/ch10-02-traits.html#implementing-a-trait-on-a-type).
 pub fn image_compression_from(compression: String) -> CompressionType {
@@ -156,7 +156,7 @@ pub fn image_compression_from(compression: String) -> CompressionType {
     }
 }
 
-/// Converts a `String` to a `image::png::FilterType`.
+/// Converts a `String` to a `image::codecs::png::FilterType`.
 /// This can not be done by implementing the trait `From<String> for FilterType` due to Rust's
 /// [orphan rule](https://doc.rust-lang.org/book/ch10-02-traits.html#implementing-a-trait-on-a-type).
 pub fn image_filter_from(filter: String) -> FilterType {
