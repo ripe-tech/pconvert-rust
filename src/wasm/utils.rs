@@ -9,7 +9,7 @@ use crate::errors::PConvertError;
 use crate::utils::{decode_png, encode_png};
 use crate::utils::{image_compression_from, image_filter_from};
 use crate::wasm::conversions::JSONParams;
-use image::png::{CompressionType, FilterType};
+use image::codecs::png::{CompressionType, FilterType};
 use image::{ImageBuffer, Rgba};
 use js_sys::{Array, Uint8Array};
 use serde_json::Value as JSONValue;

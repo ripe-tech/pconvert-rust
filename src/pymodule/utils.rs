@@ -4,7 +4,7 @@ use crate::blending::params::{BlendAlgorithmParams, Options, Value};
 use crate::blending::BlendAlgorithm;
 use crate::errors::PConvertError;
 use crate::utils::{image_compression_from, image_filter_from};
-use image::png::{CompressionType, FilterType};
+use image::codecs::png::{CompressionType, FilterType};
 use pyo3::prelude::*;
 use pyo3::types::{PySequence, PyString};
 use std::str::FromStr;

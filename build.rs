@@ -21,7 +21,7 @@
 /// );
 /// ```
 use chrono::Utc;
-use image::png::{CompressionType, FilterType};
+use image::codecs::png::{CompressionType, FilterType};
 use num_cpus;
 use regex::Regex;
 use std::fs::{File, OpenOptions};

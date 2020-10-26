@@ -3,7 +3,7 @@
 use crate::constants;
 use crate::wasm::utils::{encode_file, load_png, log_benchmark, log_benchmark_header};
 use crate::wasm::{blend_image_buffers, blend_multiple_buffers};
-use image::png::{CompressionType, FilterType};
+use image::codecs::png::{CompressionType, FilterType};
 use js_sys::try_iter;
 use wasm_bindgen::prelude::*;
 use web_sys::File;
