@@ -15,5 +15,4 @@ jobs:
           python-version: "3.8"
       - run: ls -la ${pythonLocation}
       - run: ls -la ${pythonLocation}/bin
-      - run: ls -la ${pythonLocation}/scripts
       - run: ${pythonLocation}/bin/pip install --upgrade .
