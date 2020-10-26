@@ -13,11 +13,4 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: "3.8"
-      - run: cargo build
-      - run: cargo build --features python-extension
-      - run: cargo build --features wasm-extension
-      - run: cargo run version
-      - run: cargo run benchmark assets/demo/
-      - run: cargo run benchmark assets/demo/ --parallel
-      - run: cargo doc --lib --all-features
-      - run: pip install --upgrade .
+      - run: ${pythonLocation}/bin/pip install --upgrade .
