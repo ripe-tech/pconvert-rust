@@ -41,8 +41,8 @@ The parameter `options` is a python dictionary of optional parameters. It may lo
 }
 ```
 
-If `num_threads` is specified with a value of 1 or more, the work load is distributed across multiple threads (belonging to the internally managed thread pool). 
+If `num_threads` is specified with a value of 1 or more, the work load is distributed across multiple threads (belonging to the internally managed thread pool).
 
-For example, for `num_threads: 5`, pconvert ensures there exist at least 5 threads in the pool. However, these may be occupied. Hence, this property is a request of a certain degree of parallelism, but it is not certain that the number of threads is the same. 
+For example, for `num_threads: 5`, pconvert ensures there exist at least 5 threads in the pool. However, these may be occupied. Hence, this property is a request of a certain degree of parallelism, but it is not certain that the number of threads is the same.
 
 Additionally, the pool has a maximum number of threads.

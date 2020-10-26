@@ -1,4 +1,4 @@
-use image::png::{CompressionType, FilterType};
+use image::codecs::png::{CompressionType, FilterType};
 use image::{ImageFormat, Rgba};
 use pconvert_rust::benchmark::Benchmark;
 use pconvert_rust::blending::{

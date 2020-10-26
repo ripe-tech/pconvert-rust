@@ -4,13 +4,13 @@
 
 use crate::blending::demultiply_image;
 use crate::errors::PConvertError;
-use image::png::{CompressionType, FilterType, PngDecoder, PngEncoder};
+use image::codecs::png::{CompressionType, FilterType, PngDecoder, PngEncoder};
 use image::ImageDecoder;
 use image::{ColorType, ImageBuffer, Rgba};
 use std::fs::File;
 use std::io::{BufWriter, Read, Write};
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(not(feature = "wasm-extension"))]
 use mtpng;
 
 /// Decodes and returns a PNG.
@@ -99,7 +99,7 @@ pub fn write_png_to_file(
 /// * `png` - A byte buffer with the image data
 /// * `compression` - Compression type to use in the encoding
 /// * `filter` - Filter type to use in the encoding
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(not(feature = "wasm-extension"))]
 pub fn write_png_parallel(
     file_out: String,
     png: &ImageBuffer<Rgba<u8>, Vec<u8>>,
@@ -124,7 +124,25 @@ pub fn write_png_parallel(
     Ok(())
 }
 
-/// Converts a `String` to a `image::png::CompressionType`.
+/// [SUPPORTED IN WASM] WASM stub; single-threaded write PNG to the local file system.
+///
+/// # Arguments
+///
+/// * `file_out` - Local file system path where to write the PNG file
+/// * `png` - A byte buffer with the image data
+/// * `compression` - Compression type to use in the encoding
+/// * `filter` - Filter type to use in the encoding
+#[cfg(feature = "wasm-extension")]
+pub fn write_png_parallel(
+    file_out: String,
+    png: &ImageBuffer<Rgba<u8>, Vec<u8>>,
+    compression: CompressionType,
+    filter: FilterType,
+) -> Result<(), PConvertError> {
+    write_png_to_file(file_out, png, compression, filter)
+}
+
+/// Converts a `String` to a `image::codecs::png::CompressionType`.
 /// This can not be done by implementing the trait `From<String> for CompressionType` due to Rust's
 /// [orphan rule](https://doc.rust-lang.org/book/ch10-02-traits.html#implementing-a-trait-on-a-type).
 pub fn image_compression_from(compression: String) -> CompressionType {
@@ -138,7 +156,7 @@ pub fn image_compression_from(compression: String) -> CompressionType {
     }
 }
 
-/// Converts a `String` to a `image::png::FilterType`.
+/// Converts a `String` to a `image::codecs::png::FilterType`.
 /// This can not be done by implementing the trait `From<String> for FilterType` due to Rust's
 /// [orphan rule](https://doc.rust-lang.org/book/ch10-02-traits.html#implementing-a-trait-on-a-type).
 pub fn image_filter_from(filter: String) -> FilterType {
