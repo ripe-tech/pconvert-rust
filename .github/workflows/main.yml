@@ -17,3 +17,4 @@ jobs:
       - run: cargo run benchmark assets/demo/
       - run: cargo run benchmark assets/demo/ --parallel
       - run: cargo doc --lib --all-features
+      - run: pip3 install --upgrade .
