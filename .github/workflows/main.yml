@@ -10,6 +10,9 @@ jobs:
     container: rust:${{ matrix.rust-version }}
     steps:
       - uses: actions/checkout@v1
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"
       - run: cargo build
       - run: cargo build --features python-extension
       - run: cargo build --features wasm-extension
