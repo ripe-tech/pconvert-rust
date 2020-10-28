@@ -12,8 +12,9 @@ use crate::errors::PConvertError;
 use crate::parallelism::{ResultMessage, ThreadPool};
 use crate::utils::{read_png_from_file, write_png_parallel, write_png_to_file};
 use pyo3::exceptions::PyException;
+use image::{ImageBuffer};
 use pyo3::prelude::*;
-use pyo3::types::{IntoPyDict, PyDict, PySequence};
+use pyo3::types::{PyBytes, IntoPyDict, PyDict, PySequence};
 use std::sync::mpsc;
 use utils::{
     build_algorithm, build_params, get_compression_type, get_filter_type, get_num_threads,
@@ -61,6 +62,7 @@ fn pconvert_rust(_py: Python, module: &PyModule) -> PyResult<()> {
         .collect();
     module.add("COMPRESSION_TYPES", compressions)?;
 
+
     #[pyfn(module, "blend_images")]
     fn blend_images_py(
         py: Python,
@@ -97,6 +99,21 @@ fn pconvert_rust(_py: Python, module: &PyModule) -> PyResult<()> {
                 }
             }
         })
+    }
+
+    #[pyfn(module, "blend_images")]
+    fn blend_images_data_py(
+        py: Python,
+        bot: Vec<u8>,
+        top: Vec<u8>,
+        algorithm: Option<String>,
+        is_inline: Option<bool>,
+        options: Option<Options>,
+    ) -> PyResult<PyObject> {
+        let data = py.allow_threads(|| -> PyResult<Vec<u8>> {
+            blend_images_data(bot, top, algorithm, is_inline, options)
+        })?;
+        Ok(PyBytes::new(py, &data).into())
     }
 
     #[pyfn(module, "blend_multiple")]
@@ -193,6 +210,29 @@ fn blend_images_single_thread(
     write_png_to_file(target_path, &bot, compression_type, filter_type)?;
 
     Ok(())
+}
+
+fn blend_images_data(
+    bot: Vec<u8>,
+    top: Vec<u8>,
+    algorithm: Option<String>,
+    is_inline: Option<bool>,
+    options: Option<Options>,
+) -> PyResult<Vec<u8>> {
+    let algorithm = algorithm.unwrap_or(String::from("multiplicative"));
+    let algorithm = build_algorithm(&algorithm)?;
+
+    let _is_inline = is_inline.unwrap_or(false);
+
+    let demultiply = is_algorithm_multiplied(&algorithm);
+    let algorithm_fn = get_blending_algorithm(&algorithm);
+
+    let top = ImageBuffer::from_raw(top.len() as u32 / 4 as u32, 1, top).unwrap();
+    let mut bot = ImageBuffer::from_raw(bot.len() as u32 / 4 as u32, 1, bot).unwrap();
+
+    blend_images(&top, &mut bot, &algorithm_fn, &None);
+
+    Ok(bot.to_vec())
 }
 
 unsafe fn blend_images_multi_thread(

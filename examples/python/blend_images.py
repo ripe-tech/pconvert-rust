@@ -15,8 +15,8 @@ pconvert.blend_images(
     os.path.abspath("result.png")
 )
 
-pconvert.blend_images(
-    os.path.abspath("result.png"),
-    os.path.abspath(f"{PATH_TO_ASSETS}front.png"),
-    os.path.abspath("result.png")
-)
+# pconvert.blend_images(
+#     os.path.abspath("result.png"),
+#     os.path.abspath(f"{PATH_TO_ASSETS}front.png"),
+#     os.path.abspath("result.png")
+# )
