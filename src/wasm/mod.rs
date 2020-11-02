@@ -13,7 +13,7 @@ use crate::blending::{
 use crate::constants;
 use crate::errors::PConvertError;
 use image::{ImageBuffer, Rgba, RgbaImage};
-use js_sys::try_iter;
+use js_sys::{try_iter, Uint8Array};
 use serde_json::json;
 use serde_json::Value as JSONValue;
 use std::collections::HashMap;
@@ -270,4 +270,41 @@ fn blend_multiple_buffers(
     }
 
     Ok(composition)
+}
+
+
+// TODO CLEAN IT UP
+#[wasm_bindgen(js_name = blendMultipleDataTest)]
+pub fn blend_multiple_data_test_js(
+    images: &JsValue,
+    algorithm: Option<String>,
+    algorithms: Option<Box<[JsValue]>>,
+    is_inline: Option<bool>,
+    options: JsValue,
+) -> Result<Uint8Array, JsValue> {
+    let _options = match options.is_object() {
+        true => options.into_serde::<HashMap<String, JSONValue>>().ok(),
+        false => None,
+    };
+
+    let mut image_buffers: Vec<RgbaImage> = Vec::new();
+    let mut images = try_iter(images).unwrap().unwrap();
+    while let Some(Ok(img_data)) = images.next() {
+        let img_data: Uint8Array = img_data.into();
+        let img_buffer: RgbaImage = ImageBuffer::from_vec(
+            img_data.length() / 4,
+            1,
+            img_data.to_vec(),
+        )
+        .ok_or(PConvertError::ArgumentError(
+            "Could not parse \"bot\"".to_string(),
+        ))?;
+
+        image_buffers.push(img_buffer);
+    }
+
+    let composition = blend_multiple_buffers(image_buffers, algorithm, algorithms, is_inline)?;
+    unsafe {
+        Ok(Uint8Array::view(&composition))
+    }
 }
