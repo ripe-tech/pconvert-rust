@@ -12,8 +12,9 @@ use crate::blending::{
 };
 use crate::constants;
 use crate::errors::PConvertError;
+use crate::utils::{decode_png, encode_png};
 use image::{ImageBuffer, Rgba, RgbaImage};
-use js_sys::{try_iter, Uint8Array};
+use js_sys::try_iter;
 use serde_json::json;
 use serde_json::Value as JSONValue;
 use std::collections::HashMap;
@@ -212,6 +213,97 @@ pub fn get_module_constants_js() -> JsValue {
     .unwrap()
 }
 
+/// [NodeJS only]
+/// Blends multiple images read from local file system into one using `algorithm` or `algorithms` and the extra
+/// `options` given. Algorithm defaults to `BlendAlgorithm::Multiplicative`.
+#[wasm_bindgen(js_name = blendMultipleFromLocalFs)]
+pub fn blend_multiple_from_local_fs(
+    image_paths: Box<[JsValue]>,
+    out_path: String,
+    algorithm: Option<String>,
+    algorithms: Option<Box<[JsValue]>>,
+    is_inline: Option<bool>,
+    options: JsValue,
+) -> Result<(), JsValue> {
+    let num_images = image_paths.len();
+
+    if num_images < 1 {
+        return Err(PConvertError::ArgumentError(
+            "ArgumentError: 'img_paths' must contain at least one path".to_string(),
+        )
+        .into());
+    }
+
+    let options = match options.is_object() {
+        true => options.into_serde::<HashMap<String, JSONValue>>().ok(),
+        false => None,
+    };
+
+    let algorithms_to_apply: Vec<(BlendAlgorithm, Option<BlendAlgorithmParams>)> =
+        if let Some(algorithms) = algorithms {
+            build_params(algorithms)?
+        } else if let Some(algorithm) = algorithm {
+            let algorithm = build_algorithm(&algorithm)?;
+            vec![(algorithm, None); num_images - 1]
+        } else {
+            vec![(BlendAlgorithm::Multiplicative, None); num_images - 1]
+        };
+
+    if algorithms_to_apply.len() != num_images - 1 {
+        return Err(PConvertError::ArgumentError(format!(
+            "ArgumentError: 'algorithms' must be of size {} (one per blending operation)",
+            num_images - 1
+        ))
+        .into());
+    };
+
+    let _is_inline = is_inline.unwrap_or(false);
+
+    // loops through the algorithms to apply and blends the
+    // current composition with the next layer
+    let mut img_paths_iter = image_paths.iter();
+    let first_path = img_paths_iter
+        .next()
+        .unwrap()
+        .as_string()
+        .expect("path must be a string");
+
+    let first_demultiply = is_algorithm_multiplied(&algorithms_to_apply[0].0);
+    let composition = nodejs_helper::fs::read_file_sync(&first_path);
+    let mut composition = decode_png(&composition[..], first_demultiply)?;
+
+    let mut zip_iter = img_paths_iter.zip(algorithms_to_apply.iter());
+    while let Some(pair) = zip_iter.next() {
+        let path = pair.0.as_string().expect("path must be a string");
+        let (algorithm, algorithm_params) = pair.1;
+        let demultiply = is_algorithm_multiplied(&algorithm);
+        let algorithm_fn = get_blending_algorithm(&algorithm);
+        let current_layer = nodejs_helper::fs::read_file_sync(&path);
+        let current_layer = decode_png(&current_layer[..], demultiply)?;
+        blend_images(
+            &current_layer,
+            &mut composition,
+            &algorithm_fn,
+            algorithm_params,
+        );
+    }
+
+    let compression_type = get_compression_type(&options);
+    let filter_type = get_filter_type(&options);
+
+    let mut encoded_data = Vec::<u8>::with_capacity(composition.to_vec().capacity());
+    encode_png(
+        &mut encoded_data,
+        &composition,
+        compression_type,
+        filter_type,
+    )?;
+
+    nodejs_helper::fs::write_file_sync(&out_path, &encoded_data);
+
+    Ok(())
+}
+
 fn blend_multiple_buffers(
     image_buffers: Vec<ImageBuffer<Rgba<u8>, Vec<u8>>>,
     algorithm: Option<String>,
@@ -270,41 +362,4 @@ fn blend_multiple_buffers(
     }
 
     Ok(composition)
-}
-
-
-// TODO CLEAN IT UP
-#[wasm_bindgen(js_name = blendMultipleDataTest)]
-pub fn blend_multiple_data_test_js(
-    images: &JsValue,
-    algorithm: Option<String>,
-    algorithms: Option<Box<[JsValue]>>,
-    is_inline: Option<bool>,
-    options: JsValue,
-) -> Result<Uint8Array, JsValue> {
-    let _options = match options.is_object() {
-        true => options.into_serde::<HashMap<String, JSONValue>>().ok(),
-        false => None,
-    };
-
-    let mut image_buffers: Vec<RgbaImage> = Vec::new();
-    let mut images = try_iter(images).unwrap().unwrap();
-    while let Some(Ok(img_data)) = images.next() {
-        let img_data: Uint8Array = img_data.into();
-        let img_buffer: RgbaImage = ImageBuffer::from_vec(
-            img_data.length() / 4,
-            1,
-            img_data.to_vec(),
-        )
-        .ok_or(PConvertError::ArgumentError(
-            "Could not parse \"bot\"".to_string(),
-        ))?;
-
-        image_buffers.push(img_buffer);
-    }
-
-    let composition = blend_multiple_buffers(image_buffers, algorithm, algorithms, is_inline)?;
-    unsafe {
-        Ok(Uint8Array::view(&composition))
-    }
 }
