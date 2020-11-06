@@ -20,7 +20,7 @@ use serde_json::Value as JSONValue;
 use std::collections::HashMap;
 use utils::{
     build_algorithm, build_params, encode_file, encode_image_data, get_compression_type,
-    get_filter_type, load_png,
+    get_filter_type, load_png, node_read_file_sync, node_require, node_write_file_sync,
 };
 use wasm_bindgen::prelude::*;
 use web_sys::{File, ImageData};
@@ -268,8 +268,10 @@ pub fn blend_multiple_from_local_fs(
         .as_string()
         .expect("path must be a string");
 
+    let node_fs = node_require("fs");
+
     let first_demultiply = is_algorithm_multiplied(&algorithms_to_apply[0].0);
-    let composition = nodejs_helper::fs::read_file_sync(&first_path);
+    let composition = node_read_file_sync(&node_fs, &first_path);
     let mut composition = decode_png(&composition[..], first_demultiply)?;
 
     let mut zip_iter = img_paths_iter.zip(algorithms_to_apply.iter());
@@ -278,7 +280,7 @@ pub fn blend_multiple_from_local_fs(
         let (algorithm, algorithm_params) = pair.1;
         let demultiply = is_algorithm_multiplied(&algorithm);
         let algorithm_fn = get_blending_algorithm(&algorithm);
-        let current_layer = nodejs_helper::fs::read_file_sync(&path);
+        let current_layer = node_read_file_sync(&node_fs, &path);
         let current_layer = decode_png(&current_layer[..], demultiply)?;
         blend_images(
             &current_layer,
@@ -299,7 +301,7 @@ pub fn blend_multiple_from_local_fs(
         filter_type,
     )?;
 
-    nodejs_helper::fs::write_file_sync(&out_path, &encoded_data);
+    node_write_file_sync(&node_fs, &out_path, &encoded_data);
 
     Ok(())
 }
