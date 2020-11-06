@@ -22,9 +22,21 @@ use web_sys::{File, ImageData};
 
 #[wasm_bindgen]
 extern "C" {
+    #[derive(Clone, Debug)]
+    pub type NodeFs;
+
     /// JavaScript `console.log` function
     #[wasm_bindgen(js_namespace = console)]
     pub fn log(s: &str);
+
+    #[wasm_bindgen(js_name = require)]
+    pub fn node_require(s: &str) -> NodeFs;
+
+    #[wasm_bindgen(method, js_name = readFileSync, structural)]
+    fn readFileSync(me: &NodeFs, path: &str) -> Vec<u8>;
+
+    #[wasm_bindgen(method, js_name = writeFileSync, structural)]
+    fn writeFileSync(me: &NodeFs, path: &str, data: &[u8]);
 }
 
 macro_rules! console_log {
@@ -177,4 +189,12 @@ pub fn log_benchmark(
             write_time
         )
     );
+}
+
+pub fn node_read_file_sync(fs: &NodeFs, path: &str) -> Vec<u8> {
+    fs.readFileSync(path)
+}
+
+pub fn node_write_file_sync(fs: &NodeFs, path: &str, data: &[u8]) {
+    fs.writeFileSync(path, data);
 }
