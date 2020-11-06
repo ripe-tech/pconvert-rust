@@ -216,8 +216,8 @@ pub fn get_module_constants_js() -> JsValue {
 /// [NodeJS only]
 /// Blends multiple images read from local file system into one using `algorithm` or `algorithms` and the extra
 /// `options` given. Algorithm defaults to `BlendAlgorithm::Multiplicative`.
-#[wasm_bindgen(js_name = blendMultipleFromLocalFs)]
-pub fn blend_multiple_from_local_fs(
+#[wasm_bindgen(js_name = blendMultipleFs)]
+pub fn blend_multiple_fs(
     image_paths: Box<[JsValue]>,
     out_path: String,
     algorithm: Option<String>,
