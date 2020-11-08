@@ -4,9 +4,9 @@ The [Rust](https://www.rust-lang.org) version of the famous [P(NG)Convert](https
 
 This Rust crate can be used as a **command line application**, as a **crate** in another rust project, as a **Web Assembly module** (able to be used within JavaScript that targets web browsers) or as a **python package**.
 
-# Command Line Application
+## Command Line Application
 
-## Compiling & Executing
+### Compiling & Executing
 
 Build and run with:
 
@@ -38,7 +38,7 @@ and then run the release binary with:
 ./target/release/pconvert-rust
 ```
 
-## Usage
+### Usage
 
 ```console
 $ pconvert-rust
@@ -46,25 +46,25 @@ Usage: pconvert-rust <command> [args...]
 where command can be one of the following: compose, convert, benchmark, version
 ```
 
-```console
-$ pconvert-rust compose <dir>
+```bash
+pconvert-rust compose <dir>
 ```
 
-```console
-$ pconvert-rust convert <file_in> <file_out>
+```bash
+pconvert-rust convert <file_in> <file_out>
 ```
 
-```console
-$ pconvert-rust benchmark <dir> [--parallel]
+```bash
+pconvert-rust benchmark <dir> [--parallel]
 ```
 
-```console
-$ pconvert-rust version
+```bash
+pconvert-rust version
 ```
 
-# WebAssembly (WASM) Module
+## WebAssembly (WASM) Module
 
-## Compiling & Executing
+### Compiling & Executing
 
 Follow [this guide](https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_wasm) on how to install `wasm-pack`.
 
@@ -76,11 +76,12 @@ wasm-pack build -- --features wasm-extension
 
 To run the demo, follow [this](https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_wasm#Making_our_package_availabe_to_npm).
 
-## Usage
+### Usage
 
 Check the [demo site](examples/wasm/index.js) to see how to use the PConvert WASM module.
 
 JavaScript API exposed:
+
 ```javascript
 // blends two File objects and returns a File object
 blendImages(top, bot, target_file_name, algorithm, is_inline, options)
@@ -104,9 +105,9 @@ blendImagesBenchmarkAll(top, bot, is_inline)
 blendMultipleBenchmarkAll(image_files, is_inline)
 ```
 
-# Python package
+## Python package
 
-## Compiling & Executing
+### Compiling & Executing
 
 This crate can be installed as a python package through the use of `pip`. Simply run:
 
@@ -114,7 +115,7 @@ This crate can be installed as a python package through the use of `pip`. Simply
 pip install .
 ```
 
-## Usage
+### Usage
 
 Check [this folder](examples/python/) for examples.
 
@@ -144,7 +145,7 @@ pconvert_rust.COMPILER_VERSION
 
 ## Documentation
 
-Generate with
+Generate documentation using:
 
 ```bash
 cargo doc --lib --all-features
