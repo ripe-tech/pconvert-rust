@@ -46,20 +46,20 @@ Usage: pconvert-rust <command> [args...]
 where command can be one of the following: compose, convert, benchmark, version
 ```
 
-```bash
-pconvert-rust compose <dir>
+```console
+$ pconvert-rust compose <dir>
 ```
 
-```bash
-pconvert-rust convert <file_in> <file_out>
+```console
+$ pconvert-rust convert <file_in> <file_out>
 ```
 
-```bash
-pconvert-rust benchmark <dir> [--parallel]
+```console
+$ pconvert-rust benchmark <dir> [--parallel]
 ```
 
-```bash
-pconvert-rust version
+```console
+$ pconvert-rust version
 ```
 
 ## WebAssembly (WASM) Module
