@@ -111,7 +111,7 @@ blendMultipleBenchmarkAll(image_files, is_inline)
 This crate can be installed as a python package through the use of `pip`. Simply run:
 
 ```bash
-pip install pconvert-rust/.
+pip install .
 ```
 
 ## Usage
