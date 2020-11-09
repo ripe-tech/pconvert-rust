@@ -1,0 +1,26 @@
+
+name: Deploy Workflow
+on:
+  push:
+    tags:
+      - "*"
+jobs:
+  build:
+    name: Deploy
+    strategy:
+      matrix:
+        rust-version: ["1.40"]
+    runs-on: ubuntu-latest
+    container: rust:${{ matrix.rust-version }}
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "12"
+      - run: node --version
+      - run: wasm-pack build --release --target=nodejs -- --features wasm-extension
+      - run: |
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+          npm publish
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
