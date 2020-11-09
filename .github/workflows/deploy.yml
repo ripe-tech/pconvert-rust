@@ -18,6 +18,7 @@ jobs:
         with:
           node-version: "12"
       - run: node --version
+      - run: cargo install wasm-pack
       - run: wasm-pack build --release --target=nodejs -- --features wasm-extension
       - run: |
           echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
