@@ -21,6 +21,6 @@ jobs:
       - run: wasm-pack build --release --target=nodejs -- --features wasm-extension
       - run: |
           echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-          cd pconvert-rust/pkg && npm publish
+          cd pkg && npm publish
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
