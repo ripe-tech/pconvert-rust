@@ -20,7 +20,8 @@ use serde_json::Value as JSONValue;
 use std::collections::HashMap;
 use utils::{
     build_algorithm, build_params, encode_file, encode_image_data, get_compression_type,
-    get_filter_type, load_png, node_read_file_sync, node_require, node_write_file_sync,
+    get_filter_type, load_png, node_read_file_async, node_read_file_sync, node_require,
+    node_write_file_sync,
 };
 use wasm_bindgen::prelude::*;
 use web_sys::{File, ImageData};
@@ -306,6 +307,103 @@ pub fn blend_multiple_fs(
     Ok(())
 }
 
+/// [NodeJS only]
+/// Blends multiple images read from local file system into one using `algorithm` or `algorithms` and the extra
+/// `options` given. Algorithm defaults to `BlendAlgorithm::Multiplicative`.
+#[wasm_bindgen(js_name = blendMultipleFsAsync)]
+pub async fn blend_multiple_fs_async(
+    image_paths: Box<[JsValue]>,
+    out_path: String,
+    algorithm: Option<String>,
+    algorithms: Option<Box<[JsValue]>>,
+    is_inline: Option<bool>,
+    options: JsValue,
+) -> Result<(), JsValue> {
+    let num_images = image_paths.len();
+
+    if num_images < 1 {
+        return Err(PConvertError::ArgumentError(
+            "ArgumentError: 'img_paths' must contain at least one path".to_string(),
+        )
+        .into());
+    }
+
+    let options = match options.is_object() {
+        true => options.into_serde::<HashMap<String, JSONValue>>().ok(),
+        false => None,
+    };
+
+    let algorithms_to_apply: Vec<(BlendAlgorithm, Option<BlendAlgorithmParams>)> =
+        if let Some(algorithms) = algorithms {
+            build_params(algorithms)?
+        } else if let Some(algorithm) = algorithm {
+            let algorithm = build_algorithm(&algorithm)?;
+            vec![(algorithm, None); num_images - 1]
+        } else {
+            vec![(BlendAlgorithm::Multiplicative, None); num_images - 1]
+        };
+
+    if algorithms_to_apply.len() != num_images - 1 {
+        return Err(PConvertError::ArgumentError(format!(
+            "ArgumentError: 'algorithms' must be of size {} (one per blending operation)",
+            num_images - 1
+        ))
+        .into());
+    };
+
+    let _is_inline = is_inline.unwrap_or(false);
+
+    // loops through the algorithms to apply and blends the
+    // current composition with the next layer
+    let mut img_paths_iter = image_paths.iter();
+    let first_path = img_paths_iter
+        .next()
+        .unwrap()
+        .as_string()
+        .expect("path must be a string");
+
+    let node_fs = node_require("fs");
+
+    let first_demultiply = is_algorithm_multiplied(&algorithms_to_apply[0].0);
+
+    let composition = node_read_file_async(&node_fs, &first_path).await?;
+    let composition = js_sys::Uint8Array::from(composition).to_vec();
+    // console_log!("console log {:?}", composition);
+
+    let mut composition = decode_png(&composition[..], first_demultiply)?;
+
+    let mut zip_iter = img_paths_iter.zip(algorithms_to_apply.iter());
+    while let Some(pair) = zip_iter.next() {
+        let path = pair.0.as_string().expect("path must be a string");
+        let (algorithm, algorithm_params) = pair.1;
+        let demultiply = is_algorithm_multiplied(&algorithm);
+        let algorithm_fn = get_blending_algorithm(&algorithm);
+        let current_layer = node_read_file_sync(&node_fs, &path);
+        let current_layer = decode_png(&current_layer[..], demultiply)?;
+        blend_images(
+            &current_layer,
+            &mut composition,
+            &algorithm_fn,
+            algorithm_params,
+        );
+    }
+
+    let compression_type = get_compression_type(&options);
+    let filter_type = get_filter_type(&options);
+
+    let mut encoded_data = Vec::<u8>::with_capacity(composition.to_vec().capacity());
+    encode_png(
+        &mut encoded_data,
+        &composition,
+        compression_type,
+        filter_type,
+    )?;
+
+    node_write_file_sync(&node_fs, &out_path, &encoded_data);
+
+    Ok(())
+}
+
 fn blend_multiple_buffers(
     image_buffers: Vec<ImageBuffer<Rgba<u8>, Vec<u8>>>,
     algorithm: Option<String>,
@@ -364,4 +462,19 @@ fn blend_multiple_buffers(
     }
 
     Ok(composition)
+}
+
+#[wasm_bindgen]
+extern "C" {
+    #[derive(Clone, Debug)]
+    pub type NodeFs;
+
+    /// JavaScript `console.log` function
+    #[wasm_bindgen(js_namespace = console)]
+    pub fn log(s: &str);
+
+}
+
+macro_rules! console_log {
+    ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
 }
