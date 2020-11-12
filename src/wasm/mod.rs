@@ -353,33 +353,32 @@ pub async fn blend_multiple_fs_async(
 
     let _is_inline = is_inline.unwrap_or(false);
 
-    // loops through the algorithms to apply and blends the
-    // current composition with the next layer
-    let mut img_paths_iter = image_paths.iter();
-    let first_path = img_paths_iter
-        .next()
-        .unwrap()
-        .as_string()
-        .expect("path must be a string");
-
     let node_fs = node_require("fs");
 
+    let mut png_futures: Vec<Option<wasm_bindgen_futures::JsFuture>> =
+        Vec::with_capacity(num_images);
+    for path in image_paths.iter() {
+        let path = path.as_string().expect("path must be a string");
+        let png_future = node_read_file_async(&node_fs, &path);
+        png_futures.push(Some(png_future));
+    }
+
     let first_demultiply = is_algorithm_multiplied(&algorithms_to_apply[0].0);
-
-    let composition = node_read_file_async(&node_fs, &first_path).await?;
+    let composition = png_futures[0].take().unwrap().await?;
     let composition = js_sys::Uint8Array::from(composition).to_vec();
-    // console_log!("console log {:?}", composition);
-
     let mut composition = decode_png(&composition[..], first_demultiply)?;
 
-    let mut zip_iter = img_paths_iter.zip(algorithms_to_apply.iter());
-    while let Some(pair) = zip_iter.next() {
-        let path = pair.0.as_string().expect("path must be a string");
-        let (algorithm, algorithm_params) = pair.1;
+    // loops through the algorithms to apply and blends the
+    // current composition with the next layer
+    // retrieves the images from the result channels
+    for i in 1..png_futures.len() {
+        let (algorithm, algorithm_params) = &algorithms_to_apply[i - 1];
         let demultiply = is_algorithm_multiplied(&algorithm);
         let algorithm_fn = get_blending_algorithm(&algorithm);
-        let current_layer = node_read_file_sync(&node_fs, &path);
+        let current_layer = png_futures[i].take().unwrap().await?;
+        let current_layer = js_sys::Uint8Array::from(current_layer).to_vec();
         let current_layer = decode_png(&current_layer[..], demultiply)?;
+
         blend_images(
             &current_layer,
             &mut composition,
