@@ -308,7 +308,7 @@ pub fn blend_multiple_fs(
 }
 
 /// [NodeJS only]
-/// Blends multiple images read from local file system into one using `algorithm` or `algorithms` and the extra
+/// Asynchronously blends multiple images read from local file system into one using `algorithm` or `algorithms` and the extra
 /// `options` given. Algorithm defaults to `BlendAlgorithm::Multiplicative`.
 #[wasm_bindgen(js_name = blendMultipleFsAsync)]
 pub async fn blend_multiple_fs_async(

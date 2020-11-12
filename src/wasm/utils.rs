@@ -193,10 +193,12 @@ pub fn log_benchmark(
     );
 }
 
+/// Wrapper function for nodejs `fs.readFileSync`
 pub fn node_read_file_sync(fs: &NodeFs, path: &str) -> Vec<u8> {
     fs.readFileSync(path)
 }
 
+/// Rust Future from nodejs `fs.readFile` Promise (awaitable in node)
 pub fn node_read_file_async(fs: &NodeFs, path: &str) -> wasm_bindgen_futures::JsFuture {
     let promise = js_sys::Promise::new(&mut |resolve, reject| {
         let callback = js_sys::Function::new_with_args(
@@ -210,6 +212,7 @@ pub fn node_read_file_async(fs: &NodeFs, path: &str) -> wasm_bindgen_futures::Js
     wasm_bindgen_futures::JsFuture::from(promise)
 }
 
+/// Wrapper function for nodejs `fs.writeFileSync`
 pub fn node_write_file_sync(fs: &NodeFs, path: &str, data: &[u8]) {
     fs.writeFileSync(path, data);
 }
