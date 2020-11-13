@@ -25,7 +25,6 @@ extern "C" {
     #[derive(Clone, Debug)]
     pub type NodeFs;
 
-    /// JavaScript `console.log` function
     #[wasm_bindgen(js_namespace = console)]
     pub fn log(s: &str);
 
@@ -33,10 +32,13 @@ extern "C" {
     pub fn node_require(s: &str) -> NodeFs;
 
     #[wasm_bindgen(method, js_name = readFileSync, structural)]
-    fn readFileSync(me: &NodeFs, path: &str) -> Vec<u8>;
+    fn readFileSync(fs: &NodeFs, path: &str) -> Vec<u8>;
+
+    #[wasm_bindgen(method, js_name = readFile, structural)]
+    fn readFile(fs: &NodeFs, path: &str, callback: js_sys::Function);
 
     #[wasm_bindgen(method, js_name = writeFileSync, structural)]
-    fn writeFileSync(me: &NodeFs, path: &str, data: &[u8]);
+    fn writeFileSync(fs: &NodeFs, path: &str, data: &[u8]);
 }
 
 macro_rules! console_log {
@@ -191,10 +193,26 @@ pub fn log_benchmark(
     );
 }
 
+/// Wrapper function for nodejs `fs.readFileSync`
 pub fn node_read_file_sync(fs: &NodeFs, path: &str) -> Vec<u8> {
     fs.readFileSync(path)
 }
 
+/// Rust Future from nodejs `fs.readFile` Promise (awaitable in node)
+pub fn node_read_file_async(fs: &NodeFs, path: &str) -> wasm_bindgen_futures::JsFuture {
+    let promise = js_sys::Promise::new(&mut |resolve, reject| {
+        let callback = js_sys::Function::new_with_args(
+            "resolve, reject, err, data",
+            "err ? reject(err) : resolve(data);",
+        )
+        .bind2(&JsValue::NULL, &resolve, &reject);
+        fs.readFile(path, callback)
+    });
+
+    wasm_bindgen_futures::JsFuture::from(promise)
+}
+
+/// Wrapper function for nodejs `fs.writeFileSync`
 pub fn node_write_file_sync(fs: &NodeFs, path: &str, data: &[u8]) {
     fs.writeFileSync(path, data);
 }
