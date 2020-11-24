@@ -4,8 +4,8 @@ on:
     tags:
       - "*"
 jobs:
-  build:
-    name: Deploy
+  build-npm:
+    name: Deploy NPM
     strategy:
       matrix:
         rust-version: ["1.40"]
@@ -24,3 +24,17 @@ jobs:
           cd pkg && npm publish
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+  build-pypi:
+    name: Deploy PyPi
+    strategy:
+      matrix:
+        rust-version: ["1.40"]
+    runs-on: ubuntu-latest
+    container: rust:${{ matrix.rust-version }}
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"
+      - run: cargo build --features python-extension
+      - run: ./deploy.sh
