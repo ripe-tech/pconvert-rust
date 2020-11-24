@@ -38,3 +38,6 @@ jobs:
           python-version: "3.8"
       - run: cargo build --features python-extension
       - run: ./deploy.sh
+        env:
+          PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
