@@ -25,7 +25,7 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
   build-pypi:
-    name: Deploy PyPi
+    name: Deploy PyPI
     strategy:
       matrix:
         rust-version: ["1.40"]
