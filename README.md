@@ -157,7 +157,7 @@ P(NG)Convert Rust is currently licensed under the [Apache License, Version 2.0](
 
 ## Build Automation
 
-[![Build Status](https://travis-ci.org/ripe-tech/pconvert-rust.svg?branch=master)](https://travis-ci.org/ripe-tech/pconvert-rust)
+[![Build Status](https://travis-ci.com/ripe-tech/pconvert-rust.svg?branch=master)](https://travis-ci.com/ripe-tech/pconvert-rust)
 [![Build Status GitHub](https://github.com/ripe-tech/pconvert-rust/workflows/Main%20Workflow/badge.svg)](https://github.com/ripe-tech/pconvert-rust/actions)
 [![PyPi Status](https://img.shields.io/pypi/v/pconvert-rust.svg)](https://pypi.python.org/pypi/pconvert-rust)
 [![npm Status](https://img.shields.io/npm/v/pconvert-rust.svg)](https://www.npmjs.com/package/pconvert-rust)
