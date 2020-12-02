@@ -39,7 +39,7 @@ fn test_compose() {
                 FilterType::NoFilter,
                 &mut benchmark,
             )
-            .unwrap();
+            .expect(&format!("failed composing with algorithm={} background={} compression=Fast filter=NoFilter", algorithm, background));
         }
     }
 }
@@ -66,7 +66,7 @@ fn test_compose_parallel() {
                 FilterType::NoFilter,
                 &mut benchmark,
             )
-            .unwrap();
+            .expect(&format!("failed composing with algorithm={} background={} compression=Fast filter=NoFilter", algorithm, background));
         }
     }
 }
@@ -77,14 +77,15 @@ fn test_convert() {
     let test_file = "tux.png";
     let test_file_out = "result_tux.png";
 
-    let mut img = read_png_from_file(format!("{}{}", test_dir, test_file), false).unwrap();
+    let file_in = format!("{}{}", test_dir, test_file);
+    let mut img = read_png_from_file(file_in.clone(), false).expect(&format!("failure reading {}", file_in));
 
     for pixel in img.pixels_mut() {
         apply_blue_filter(pixel);
     }
 
     let out = format!("{}{}", test_dir, test_file_out);
-    img.save_with_format(out.clone(), ImageFormat::Png).unwrap();
+    img.save_with_format(out.clone(), ImageFormat::Png).expect(&format!("failure writing {}", out));
 }
 
 #[derive(Clone)]
