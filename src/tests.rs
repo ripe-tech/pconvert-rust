@@ -2,13 +2,19 @@ use crate::benchmark::Benchmark;
 use crate::blending::{
     blend_images, get_blending_algorithm, is_algorithm_multiplied, multiply_image, BlendAlgorithm,
 };
-use crate::constants;
 use crate::errors::PConvertError;
 use crate::parallelism::{ResultMessage, ThreadPool};
 use crate::utils::{read_png_from_file, write_png_parallel, write_png_to_file};
 use image::codecs::png::{CompressionType, FilterType};
+use image::Rgba;
 use std::fmt;
 use std::fmt::{Display, Formatter};
+
+#[cfg(test)]
+use crate::constants;
+#[cfg(test)]
+use image::ImageFormat;
+#[cfg(test)]
 use std::str::FromStr;
 
 #[test]
@@ -32,10 +38,12 @@ fn test_compose() {
                 CompressionType::Fast,
                 FilterType::NoFilter,
                 &mut benchmark,
-            ).unwrap();
+            )
+            .unwrap();
 
             let result = read_png_from_file(format!("{}{}", test_dir, result_name), false).unwrap();
-            let expected = read_png_from_file(format!("{}expected/{}", test_dir, result_name), false).unwrap();
+            let expected =
+                read_png_from_file(format!("{}expected/{}", test_dir, result_name), false).unwrap();
             assert!(result == expected);
         }
     }
@@ -62,13 +70,37 @@ fn test_compose_parallel() {
                 CompressionType::Fast,
                 FilterType::NoFilter,
                 &mut benchmark,
-            ).unwrap();
+            )
+            .unwrap();
 
             let result = read_png_from_file(format!("{}{}", test_dir, result_name), false).unwrap();
-            let expected = read_png_from_file(format!("{}expected/{}", test_dir, result_name), false).unwrap();
+            let expected =
+                read_png_from_file(format!("{}expected/{}", test_dir, result_name), false).unwrap();
             assert!(result == expected);
         }
     }
+}
+
+#[test]
+fn test_convert() {
+    let test_dir = "assets/test/";
+    let test_file = "tux.png";
+    let test_file_out = "result_tux.png";
+
+    let mut img = read_png_from_file(format!("{}{}", test_dir, test_file), false).unwrap();
+
+    for pixel in img.pixels_mut() {
+        apply_blue_filter(pixel);
+    }
+
+    let out = format!("{}{}", test_dir, test_file_out);
+    img.save_with_format(out.clone(), ImageFormat::Png).unwrap();
+
+    let result = read_png_from_file(out, false).unwrap();
+    let expected =
+        read_png_from_file(format!("{}expected/{}", test_dir, test_file_out), false).unwrap();
+
+    assert!(result == expected);
 }
 
 #[derive(Clone)]
@@ -149,10 +181,7 @@ pub fn compose(
         "result_{}_{}_{:#?}_{:#?}.png",
         algorithm, background, compression, filter
     );
-    let file_out = format!(
-        "{}{}",
-        dir, file_name.clone()
-    );
+    let file_out = format!("{}{}", dir, file_name.clone());
     benchmark.execute(Benchmark::add_write_png_time, || {
         write_png_to_file(file_out, &composition, compression, filter)
     })?;
@@ -247,13 +276,16 @@ pub fn compose_parallel(
         "result_{}_{}_{:#?}_{:#?}.png",
         algorithm, background, compression, filter
     );
-    let file_out = format!(
-        "{}{}",
-        dir, file_name.clone()
-    );
+    let file_out = format!("{}{}", dir, file_name.clone());
     benchmark.execute(Benchmark::add_write_png_time, || {
         write_png_parallel(file_out, &composition, compression, filter)
     })?;
 
     Ok(file_name)
+}
+
+pub fn apply_blue_filter(pixel: &mut Rgba<u8>) {
+    // sets red value to 0 and green value to the blue one (blue filter effect)
+    pixel[0] = 0;
+    pixel[1] = pixel[2];
 }

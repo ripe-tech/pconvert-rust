@@ -1,12 +1,10 @@
 use image::codecs::png::{CompressionType, FilterType};
-use image::{ImageFormat, Rgba};
+use image::ImageFormat;
 use pconvert_rust::benchmark::Benchmark;
-use pconvert_rust::blending::{
-    blend_images, get_blending_algorithm, is_algorithm_multiplied, multiply_image, BlendAlgorithm,
-};
+use pconvert_rust::blending::BlendAlgorithm;
 use pconvert_rust::constants;
 use pconvert_rust::errors::PConvertError;
-use pconvert_rust::tests::{compose, compose_parallel, Background};
+use pconvert_rust::tests::{apply_blue_filter, compose, compose_parallel, Background};
 use pconvert_rust::utils::read_png_from_file;
 use std::env;
 use std::str;
@@ -171,10 +169,4 @@ pub fn pversion() {
         constants::FEATURES
     );
     println!("Copyright (c) 2008-2020 Platforme International Limited. All rights reserved.");
-}
-
-fn apply_blue_filter(pixel: &mut Rgba<u8>) {
-    // sets red value to 0 and green value to the blue one (blue filter effect)
-    pixel[0] = 0;
-    pixel[1] = pixel[2];
 }
