@@ -13,7 +13,7 @@ use std::str::FromStr;
 
 #[test]
 fn test_compose() {
-    let dir = "assets/test/";
+    let test_dir = "assets/test/";
     let mut benchmark = Benchmark::new();
     let backgrounds = vec![
         Background::Alpha,
@@ -25,14 +25,18 @@ fn test_compose() {
     // composes with different combinations of blending algorithms and backgrounds
     for background in backgrounds {
         for algorithm in constants::ALGORITHMS.iter() {
-            compose(
-                &dir,
+            let result_name = compose(
+                &test_dir,
                 BlendAlgorithm::from_str(algorithm).unwrap(),
                 background.clone(),
                 CompressionType::Fast,
                 FilterType::NoFilter,
                 &mut benchmark,
             ).unwrap();
+
+            let result = read_png_from_file(format!("{}{}", test_dir, result_name), false).unwrap();
+            let expected = read_png_from_file(format!("{}expected/{}", test_dir, result_name), false).unwrap();
+            assert!(result == expected);
         }
     }
 }
@@ -63,7 +67,7 @@ pub fn compose(
     compression: CompressionType,
     filter: FilterType,
     benchmark: &mut Benchmark,
-) -> Result<(), PConvertError> {
+) -> Result<String, PConvertError> {
     let demultiply = is_algorithm_multiplied(&algorithm);
 
     let mut bot = benchmark.execute(Benchmark::add_read_png_time, || {
@@ -111,15 +115,19 @@ pub fn compose(
     });
 
     // writes the final composition to the file system
+    let file_name = format!(
+        "result_{}_{}_{:#?}_{:#?}.png",
+        algorithm, background, compression, filter
+    );
     let file_out = format!(
-        "{}result_{}_{}_{:#?}_{:#?}.png",
-        dir, algorithm, background, compression, filter
+        "{}{}",
+        dir, file_name.clone()
     );
     benchmark.execute(Benchmark::add_write_png_time, || {
         write_png_to_file(file_out, &composition, compression, filter)
     })?;
 
-    Ok(())
+    Ok(file_name)
 }
 
 pub fn compose_parallel(
