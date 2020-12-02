@@ -22,7 +22,6 @@
 /// ```
 use chrono::Utc;
 use image::codecs::png::{CompressionType, FilterType};
-use num_cpus;
 use regex::Regex;
 use std::fs::{File, OpenOptions};
 use std::io::Write;
@@ -32,7 +31,7 @@ use std::str;
 
 const BUILD_OUT_FILE: &str = "constants.rs";
 const SOURCE_DIR: &str = "./src";
-const TOML: &'static str = include_str!("Cargo.toml");
+const TOML: &str = include_str!("Cargo.toml");
 
 fn main() {
     let dest_path = Path::new(SOURCE_DIR).join(Path::new(BUILD_OUT_FILE));
