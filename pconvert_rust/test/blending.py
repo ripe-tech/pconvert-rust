@@ -80,7 +80,7 @@ class BlendingTest(unittest.TestCase):
                 os.path.abspath(f"{TEST_ASSETS}shoelace.png"),
                 os.path.abspath(f"{TEST_ASSETS}background_alpha.png")
             ),
-            os.path.abspath("result_alpha_alpha_Fast_NoFilter.png")
+            os.path.abspath(f"{TEST_ASSETS}result_alpha_alpha_Fast_NoFilter.png")
         )
 
     def test_blend_multiple_multithread(self):
@@ -92,7 +92,7 @@ class BlendingTest(unittest.TestCase):
                 os.path.abspath(f"{TEST_ASSETS}shoelace.png"),
                 os.path.abspath(f"{TEST_ASSETS}background_alpha.png")
             ),
-            os.path.abspath("result_alpha_alpha_Fast_NoFilter.png"),
+            os.path.abspath(f"{TEST_ASSETS}result_alpha_alpha_Fast_NoFilter.png"),
             options = {
                 "num_threads": 5
             }
