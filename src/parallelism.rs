@@ -75,8 +75,14 @@ impl ThreadPool {
     ///
     /// # Examples
     ///
-    /// ```rust
-    /// let result_channel = thread_pool.execute(move || ResultMessage::ImageResult(read_png_from_file(top_path, demultiply)));
+    /// ```no_run
+    /// use pconvert_rust::parallelism::{ResultMessage, ThreadPool};
+    /// use pconvert_rust::utils::read_png_from_file;
+    ///
+    /// let mut thread_pool = ThreadPool::new(10).unwrap();
+    /// let path = "path/to/file.png".to_owned();
+    /// let demultiply = false;
+    /// let result_channel = thread_pool.execute(move || ResultMessage::ImageResult(read_png_from_file(path, demultiply)));
     /// let top = match result_channel.recv().unwrap() {
     ///     ResultMessage::ImageResult(result) => result,
     /// }.unwrap();
