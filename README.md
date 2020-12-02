@@ -2,7 +2,7 @@
 
 The [Rust](https://www.rust-lang.org) version of the famous [P(NG)Convert](https://github.com/hivesolutions/pconvert) from Hive Solutions.
 
-This Rust crate can be used as a **command line application**, as a **crate** in another rust project, as a **Web Assembly module** (able to be used within JavaScript that targets web browsers) or as a **python package**.
+This Rust crate can be used as a **command line application**, as a **crate** in another rust project, as a **Web Assembly module** (able to be used within JavaScript that targets web browsers or NodeJS) or as a **python package**.
 
 ## Command Line Application
 
