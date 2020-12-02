@@ -28,6 +28,7 @@ pub mod blending;
 pub mod constants;
 pub mod errors;
 pub mod parallelism;
+pub mod tests;
 pub mod utils;
 
 #[cfg(feature = "python-extension")]
