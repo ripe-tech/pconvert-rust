@@ -7,7 +7,6 @@ constants.rs
 
 /assets/**/result*
 /examples/**/result*
-!/assets/test/expected/result*
 
 /.vscode/settings.json
 
