@@ -143,6 +143,26 @@ pconvert_rust.FILTER_TYPES
 pconvert_rust.COMPILER_VERSION
 ```
 
+## Tests
+
+For rust crate tests:
+
+```bash
+cargo test
+```
+
+For python API tests:
+
+```bash
+pythons setup.py test
+```
+
+For WASM API tests:
+
+```bash
+cargo test --features wasm-extension
+```
+
 ## Documentation
 
 Generate documentation using:
