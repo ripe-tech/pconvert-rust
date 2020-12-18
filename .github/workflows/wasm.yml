@@ -16,3 +16,5 @@ jobs:
       - run: node --version
       - run: cargo install wasm-pack
       - run: wasm-pack build --release --target=nodejs -- --features wasm-extension
+      - run: npm install
+      - run: npm run test
