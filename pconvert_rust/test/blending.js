@@ -6,7 +6,7 @@ const pconvert = require("pconvert-rust");
 const TEST_ASSETS = path.resolve("assets/test");
 
 describe("NodeJS WASM", async function() {
-    it("should get module constants with specific keys", () => {
+    it("should have known module constants", () => {
         const constants = pconvert.getModuleConstants();
         const keys = [
             "ALGORITHMS",
@@ -40,7 +40,7 @@ describe("NodeJS WASM", async function() {
         assert(fs.existsSync(out));
     });
 
-    it("should blend multiple files from local file system in an async fashion", async () => {
+    it("should asynchronously blend multiple files from local file system", async () => {
         const paths = [
             path.resolve(`${TEST_ASSETS}/sole.png`),
             path.resolve(`${TEST_ASSETS}/back.png`),
