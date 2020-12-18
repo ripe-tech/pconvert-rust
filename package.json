@@ -25,6 +25,7 @@
     "test": "mocha pconvert_rust/test/ --recursive"
   },
   "devDependencies": {
+    "pconvert-rust": "^0.2.0",
     "eslint": "^6.8.0",
     "eslint-config-hive": "^0.2.2",
     "mocha": "^6.2.2",

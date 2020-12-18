@@ -1,14 +1,23 @@
 const assert = require("assert");
+const pconvert = require("pconvert-rust");
 
-describe("Array", function() {
-    describe("#indexOf()", function() {
-        it("should return -1 when the value is not present", () => {
-            assert.strictEqual(-1, [1, 2, 3].indexOf(4));
-        });
-    });
-    describe("#length", function() {
-        it("should return proper length", () => {
-            assert.strictEqual(3, [1, 2, 3].length);
-        });
+describe("NodeJS WASM", async function() {
+    it("should get module constants with specific keys", () => {
+        const constants = pconvert.getModuleConstants();
+        const keys = [
+            "ALGORITHMS",
+            "COMPILATION_DATE",
+            "COMPILATION_TIME",
+            "COMPILER",
+            "COMPILER_VERSION",
+            "COMPRESSION_TYPES",
+            "FEATURES",
+            "FILTER_TYPES",
+            "LIBPNG_VERSION",
+            "PLATFORM_CPU_BITS",
+            "VERSION"
+        ];
+        keys.forEach(k => assert(k in constants));
+        Object.keys(constants).forEach(k => keys.includes(k));
     });
 });
