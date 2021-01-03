@@ -30,8 +30,8 @@ use web_sys::{File, ImageData};
 /// `options` given. Algorithm defaults to `BlendAlgorithm::Multiplicative`.
 #[wasm_bindgen(js_name = blendImages)]
 pub async fn blend_images_js(
-    top: File,
     bot: File,
+    top: File,
     target_file_name: String,
     algorithm: Option<String>,
     is_inline: Option<bool>,
@@ -42,10 +42,10 @@ pub async fn blend_images_js(
         false => None,
     };
 
-    let mut top = load_png(top, false).await?;
     let mut bot = load_png(bot, false).await?;
+    let mut top = load_png(top, false).await?;
 
-    blend_image_buffers(&mut top, &mut bot, algorithm, is_inline)?;
+    blend_image_buffers(&mut bot, &mut top, algorithm, is_inline)?;
 
     encode_file(
         bot,
@@ -59,8 +59,8 @@ pub async fn blend_images_js(
 /// `options` given. Algorithm defaults to `BlendAlgorithm::Multiplicative`.
 #[wasm_bindgen(js_name = blendImagesData)]
 pub fn blend_images_data_js(
-    top: ImageData,
     bot: ImageData,
+    top: ImageData,
     algorithm: Option<String>,
     is_inline: Option<bool>,
     options: JsValue,
@@ -70,15 +70,15 @@ pub fn blend_images_data_js(
         false => None,
     };
 
-    let (width, height) = (top.width(), top.height());
-    let mut top = ImageBuffer::from_vec(width, height, top.data().to_vec()).ok_or(
-        PConvertError::ArgumentError("Could not parse \"top\"".to_string()),
-    )?;
+    let (width, height) = (bot.width(), bot.height());
     let mut bot = ImageBuffer::from_vec(width, height, bot.data().to_vec()).ok_or(
         PConvertError::ArgumentError("Could not parse \"bot\"".to_string()),
     )?;
+    let mut top = ImageBuffer::from_vec(width, height, top.data().to_vec()).ok_or(
+        PConvertError::ArgumentError("Could not parse \"top\"".to_string()),
+    )?;
 
-    blend_image_buffers(&mut top, &mut bot, algorithm, is_inline)?;
+    blend_image_buffers(&mut bot, &mut top, algorithm, is_inline)?;
 
     encode_image_data(
         bot,
@@ -90,8 +90,8 @@ pub fn blend_images_data_js(
 /// Blends two image buffers using `algorithm` and the extra
 /// `options` given. Algorithm defaults to `BlendAlgorithm::Multiplicative`.
 pub fn blend_image_buffers(
-    top: &mut ImageBuffer<Rgba<u8>, Vec<u8>>,
     bot: &mut ImageBuffer<Rgba<u8>, Vec<u8>>,
+    top: &mut ImageBuffer<Rgba<u8>, Vec<u8>>,
     algorithm: Option<String>,
     is_inline: Option<bool>,
 ) -> Result<(), PConvertError> {
@@ -102,11 +102,11 @@ pub fn blend_image_buffers(
     let _is_inline = is_inline.unwrap_or(false);
 
     if demultiply {
-        demultiply_image(top);
         demultiply_image(bot);
+        demultiply_image(top);
     }
 
-    blend_images(&top, bot, &algorithm_fn, &None);
+    blend_images(bot, &top, &algorithm_fn, &None);
     Ok(())
 }
 
@@ -284,8 +284,8 @@ pub fn blend_multiple_fs(
         let current_layer = node_read_file_sync(&node_fs, &path);
         let current_layer = decode_png(&current_layer[..], demultiply)?;
         blend_images(
-            &current_layer,
             &mut composition,
+            &current_layer,
             &algorithm_fn,
             algorithm_params,
         );
@@ -380,8 +380,8 @@ pub async fn blend_multiple_fs_async(
         let current_layer = decode_png(&current_layer[..], demultiply)?;
 
         blend_images(
-            &current_layer,
             &mut composition,
+            &current_layer,
             &algorithm_fn,
             algorithm_params,
         );
@@ -453,8 +453,8 @@ fn blend_multiple_buffers(
         }
 
         blend_images(
-            &current_layer,
             &mut composition,
+            &current_layer,
             &algorithm_fn,
             algorithm_params,
         );

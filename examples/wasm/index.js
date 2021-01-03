@@ -35,15 +35,15 @@ async function blend() {
     let composition;
     switch (apiFunction) {
         case API_FUNCTIONS.blendImagesData: {
-            const top = getImageData(await loadImage(inputFiles.files[0]));
-            const bot = getImageData(await loadImage(inputFiles.files[1]));
+            const bot = getImageData(await loadImage(inputFiles.files[0]));
+            const top = getImageData(await loadImage(inputFiles.files[1]));
             const algorithm = selectAlgorithm.value;
             const compression = selectCompression.value;
             const filter = selectFilter.value;
 
             composition = pconvert.blendImagesData(
-                top,
                 bot,
+                top,
                 algorithm === "" ? undefined : algorithm,
                 undefined,
                 {
@@ -55,15 +55,15 @@ async function blend() {
         }
 
         case API_FUNCTIONS.blendImages: {
-            const top = inputFiles.files[0];
-            const bot = inputFiles.files[1];
+            const bot = inputFiles.files[0];
+            const top = inputFiles.files[1];
             const algorithm = selectAlgorithm.value;
             const compression = selectCompression.value;
             const filter = selectFilter.value;
 
             const file = await pconvert.blendImages(
-                top,
                 bot,
+                top,
                 "result",
                 algorithm === "" ? undefined : algorithm,
                 undefined,
@@ -164,9 +164,9 @@ async function benchmark() {
     switch (apiFunction) {
         case API_FUNCTIONS.blendImagesData:
         case API_FUNCTIONS.blendImages: {
-            const top = inputFiles.files[0];
-            const bot = inputFiles.files[1];
-            await pconvert.blendImagesBenchmarkAll(top, bot);
+            const bot = inputFiles.files[0];
+            const top = inputFiles.files[1];
+            await pconvert.blendImagesBenchmarkAll(bot, top);
             break;
         }
 

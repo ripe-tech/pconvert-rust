@@ -12,8 +12,8 @@ use web_sys::File;
 /// algorithms, compression and filter types.
 #[wasm_bindgen(js_name = blendImagesBenchmarkAll)]
 pub async fn blend_images_benchmark_all_js(
-    top: File,
     bot: File,
+    top: File,
     is_inline: Option<bool>,
 ) -> Result<(), JsValue> {
     log_benchmark_header();
@@ -21,8 +21,8 @@ pub async fn blend_images_benchmark_all_js(
         for compression in constants::COMPRESSION_TYPES.iter() {
             for filter in constants::FILTER_TYPES.iter() {
                 blend_images_benchmark_js(
-                    top.clone(),
                     bot.clone(),
+                    top.clone(),
                     "".to_string(),
                     Some(algorithm.to_string()),
                     is_inline,
@@ -64,8 +64,8 @@ pub async fn blend_multiple_benchmark_all_js(
 }
 
 async fn blend_images_benchmark_js(
-    top: File,
     bot: File,
+    top: File,
     target_file_name: String,
     algorithm: Option<String>,
     is_inline: Option<bool>,
@@ -74,12 +74,12 @@ async fn blend_images_benchmark_js(
 ) -> Result<File, JsValue> {
     let start_read = js_sys::Date::now();
 
-    let mut top = load_png(top, false).await?;
     let mut bot = load_png(bot, false).await?;
+    let mut top = load_png(top, false).await?;
 
     let start_blend = js_sys::Date::now();
 
-    blend_image_buffers(&mut top, &mut bot, algorithm.clone(), is_inline)?;
+    blend_image_buffers(&mut bot, &mut top, algorithm.clone(), is_inline)?;
 
     let start_write = js_sys::Date::now();
 

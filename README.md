@@ -75,7 +75,7 @@ let mut bottom = pconvert_rust::utils::read_png_from_file("bottom.png".to_string
 let blending_fn = pconvert_rust::blending::get_blending_algorithm(
     &pconvert_rust::blending::BlendAlgorithm::DestinationOver,
 );
-pconvert_rust::blending::blend_images(&top, &mut bottom, &blending_fn, &None);
+pconvert_rust::blending::blend_images(&mut bottom, &top, &blending_fn, &None);
 
 // "outputs" the blended image contents to the `out.png` file
 pconvert_rust::utils::write_png_to_file_d("out.png".to_string(), &bottom).unwrap();
@@ -103,10 +103,10 @@ JavaScript API exposed:
 
 ```javascript
 // blends two File objects and returns a File object
-blendImages(top, bot, target_file_name, algorithm, is_inline, options)
+blendImages(bot, top, target_file_name, algorithm, is_inline, options)
 
 // blends two ImageData objects and returns an ImageData object
-blendImagesData(top, bot, algorithm, is_inline, options)
+blendImagesData(bot, top, algorithm, is_inline, options)
 
 // blends multiple File objects and returns a File object
 blendMultiple(image_files, target_file_name, algorithm, algorithms, is_inline, options)
@@ -118,7 +118,7 @@ blendMultipleData(images, algorithm, algorithms, is_inline, options)
 getModuleConstants()
 
 // benchmarks and prints to console various times for different combinations of blending algorithms, compression algorithms and filters for `blendImages`
-blendImagesBenchmarkAll(top, bot, is_inline)
+blendImagesBenchmarkAll(bot, top, is_inline)
 
 // benchmarks and prints to console various times for different combinations of blending algorithms, compression algorithms and filters for `blendMultiple`
 blendMultipleBenchmarkAll(image_files, is_inline)

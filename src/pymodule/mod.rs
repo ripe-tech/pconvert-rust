@@ -186,7 +186,7 @@ fn blend_images_single_thread(
     let mut bot = read_png_from_file(bot_path, demultiply)?;
     let top = read_png_from_file(top_path, demultiply)?;
 
-    blend_images(&top, &mut bot, &algorithm_fn, &None);
+    blend_images(&mut bot, &top, &algorithm_fn, &None);
 
     let compression_type = get_compression_type(&options);
     let filter_type = get_filter_type(&options);
@@ -218,20 +218,19 @@ unsafe fn blend_images_multi_thread(
     // expands thread pool to the desired number of threads/parallelism (if necessary and possible)
     thread_pool.expand_to(num_threads as usize);
 
-    let top_result_channel = thread_pool
-        .execute(move || ResultMessage::ImageResult(read_png_from_file(top_path, demultiply)));
     let bot_result_channel = thread_pool
         .execute(move || ResultMessage::ImageResult(read_png_from_file(bot_path, demultiply)));
-
-    let top = match top_result_channel.recv().unwrap() {
-        ResultMessage::ImageResult(result) => result,
-    }?;
+    let top_result_channel = thread_pool
+        .execute(move || ResultMessage::ImageResult(read_png_from_file(top_path, demultiply)));
 
     let mut bot = match bot_result_channel.recv().unwrap() {
         ResultMessage::ImageResult(result) => result,
     }?;
+    let top = match top_result_channel.recv().unwrap() {
+        ResultMessage::ImageResult(result) => result,
+    }?;
 
-    blend_images(&top, &mut bot, &algorithm_fn, &None);
+    blend_images(&mut bot, &top, &algorithm_fn, &None);
 
     let compression_type = get_compression_type(&options);
     let filter_type = get_filter_type(&options);
@@ -278,8 +277,8 @@ fn blend_multiple_single_thread(
         let algorithm_fn = get_blending_algorithm(&algorithm);
         let current_layer = read_png_from_file(path, demultiply)?;
         blend_images(
-            &current_layer,
             &mut composition,
+            &current_layer,
             &algorithm_fn,
             algorithm_params,
         );
@@ -356,8 +355,8 @@ unsafe fn blend_multiple_multi_thread(
         }
 
         blend_images(
-            &current_layer,
             &mut composition,
+            &current_layer,
             &algorithm_fn,
             algorithm_params,
         );
