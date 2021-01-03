@@ -2,19 +2,19 @@
 
 ## Source files
 
-- [`mod.rs`](./mod.rs)
-    - exposes the WASM module API to be used within JavaScript files that target the web browsers
+* [`mod.rs`](./mod.rs)
+  * exposes the WASM module API to be used within JavaScript files that target the web browsers
 
-- [`benchmark.rs`](./benchmark.rs)
-    - exposes the WASM module benchmark API to be used within JavaScript files that target the web browsers
-    - prints measured times to the console
+* [`benchmark.rs`](./benchmark.rs)
+  * exposes the WASM module benchmark API to be used within JavaScript files that target the web browsers
+  * prints measured times to the console
 
-- [`conversions.rs`](./conversions.rs)
-    - type conversions from and to JavaScript types
+* [`conversions.rs`](./conversions.rs)
+  * type conversions from and to JavaScript types
 
-- [`utils.rs`](./utils.rs)
-    - decode/encode PNG functions
-    - other utility functions and macros
+* [`utils.rs`](./utils.rs)
+  * decode/encode PNG functions
+  * other utility functions and macros
 
 ## JavaScript API
 
