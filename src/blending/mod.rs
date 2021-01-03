@@ -72,8 +72,8 @@ impl Display for BlendAlgorithm {
 ///
 /// # Arguments
 ///
-/// * `top` - An image buffer corresponding to the top layer
 /// * `bot` - An image buffer corresponding to the bottom layer
+/// * `top` - An image buffer corresponding to the top layer
 /// * `blending_algorithm` - A function that blends two pixels according to optional blending parameters
 /// * `algorithm_params` - A optional map of key-value pairs of blending properties and values
 ///
@@ -84,11 +84,11 @@ impl Display for BlendAlgorithm {
 /// let top = read_png_from_file("top.png".to_string(), false).unwrap();
 /// let algorithm_fn = get_blending_algorithm(&BlendAlgorithm::Alpha);
 ///
-/// blend_images(&top, &mut bot, &algorithm_fn, &None);
+/// blend_images(&mut bot, &top, &algorithm_fn, &None);
 /// ```
 pub fn blend_images(
-    top: &ImageBuffer<Rgba<u8>, Vec<u8>>,
     bot: &mut ImageBuffer<Rgba<u8>, Vec<u8>>,
+    top: &ImageBuffer<Rgba<u8>, Vec<u8>>,
     blending_algorithm: &impl Fn((&mut Rgba<u8>, &Rgba<u8>), &Option<BlendAlgorithmParams>) -> (),
     algorithm_params: &Option<BlendAlgorithmParams>,
 ) {

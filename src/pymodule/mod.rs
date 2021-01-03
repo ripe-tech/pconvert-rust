@@ -186,7 +186,7 @@ fn blend_images_single_thread(
     let mut bot = read_png_from_file(bot_path, demultiply)?;
     let top = read_png_from_file(top_path, demultiply)?;
 
-    blend_images(&top, &mut bot, &algorithm_fn, &None);
+    blend_images(&mut bot, &top, &algorithm_fn, &None);
 
     let compression_type = get_compression_type(&options);
     let filter_type = get_filter_type(&options);
@@ -231,7 +231,7 @@ unsafe fn blend_images_multi_thread(
         ResultMessage::ImageResult(result) => result,
     }?;
 
-    blend_images(&top, &mut bot, &algorithm_fn, &None);
+    blend_images(&mut bot, &top, &algorithm_fn, &None);
 
     let compression_type = get_compression_type(&options);
     let filter_type = get_filter_type(&options);
