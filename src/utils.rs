@@ -91,6 +91,21 @@ pub fn write_png_to_file(
     encode_png(file, png, compression, filter)
 }
 
+/// Writes a PNG to the local file system using the default
+/// compression and filter settings.
+///
+/// # Arguments
+///
+/// * `file_out` - Local file system path where to write the PNG file
+/// * `png` - A byte buffer with the image data
+pub fn write_png_to_file_d(
+    file_out: String,
+    png: &ImageBuffer<Rgba<u8>, Vec<u8>>
+) -> Result<(), PConvertError> {
+    let file = File::create(&file_out)?;
+    encode_png(file, png, CompressionType::Default, FilterType::Avg)
+}
+
 /// [NOT SUPPORTED IN WASM] Multi-threaded write version of a PNG to the local file system.
 ///
 /// # Arguments
