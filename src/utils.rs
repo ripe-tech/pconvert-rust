@@ -103,7 +103,7 @@ pub fn write_png_to_file_d(
     png: &ImageBuffer<Rgba<u8>, Vec<u8>>
 ) -> Result<(), PConvertError> {
     let file = File::create(&file_out)?;
-    encode_png(file, png, CompressionType::Default, FilterType::Avg)
+    encode_png(file, png, CompressionType::Fast, FilterType::NoFilter)
 }
 
 /// [NOT SUPPORTED IN WASM] Multi-threaded write version of a PNG to the local file system.
