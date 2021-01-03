@@ -30,21 +30,13 @@ fn pconvert_rust(_py: Python, module: &PyModule) -> PyResult<()> {
     }
 
     module.add("COMPILATION_DATE", constants::COMPILATION_DATE)?;
-
     module.add("COMPILATION_TIME", constants::COMPILATION_TIME)?;
-
     module.add("VERSION", constants::VERSION)?;
-
     module.add("ALGORITHMS", constants::ALGORITHMS.to_vec())?;
-
     module.add("COMPILER", constants::COMPILER)?;
-
     module.add("COMPILER_VERSION", constants::COMPILER_VERSION)?;
-
     module.add("LIBPNG_VERSION", constants::LIBPNG_VERSION)?;
-
     module.add("FEATURES", constants::FEATURES.to_vec())?;
-
     module.add("PLATFORM_CPU_BITS", constants::PLATFORM_CPU_BITS)?;
 
     let filters: Vec<String> = constants::FILTER_TYPES
