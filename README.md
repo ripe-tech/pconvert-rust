@@ -73,7 +73,7 @@ let mut bottom = pconvert_rust::utils::read_png_from_file("bottom.png".to_string
 // gathers the mask top blending algorithm function and
 // uses it to blend both images
 let blending_fn = pconvert_rust::blending::get_blending_algorithm(
-    &pconvert_rust::blending::BlendAlgorithm::MaskTop,
+    &pconvert_rust::blending::BlendAlgorithm::DestinationOver,
 );
 pconvert_rust::blending::blend_images(&top, &mut bottom, &blending_fn, &None);
 
