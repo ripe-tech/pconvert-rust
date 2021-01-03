@@ -62,6 +62,25 @@ $ pconvert-rust benchmark <dir> [--parallel]
 $ pconvert-rust version
 ```
 
+### Example
+
+```rust
+// blends the provided image as a new image to be used
+// under the current instance
+let top = pconvert_rust::utils::read_png_from_file("top.png".to_string(), false).unwrap();
+let mut bottom = pconvert_rust::utils::read_png_from_file("bottom.png".to_string(), false).unwrap();
+
+// gathers the mask top blending algorithm function and
+// uses it to blend both images
+let blending_fn = pconvert_rust::blending::get_blending_algorithm(
+    &pconvert_rust::blending::BlendAlgorithm::MaskTop,
+);
+pconvert_rust::blending::blend_images(&top, &mut bottom, &blending_fn, &None);
+
+// "outputs" the blended image contents to the `out.png` file
+pconvert_rust::utils::write_png_to_file_d("out.png".to_string(), &bottom).unwrap();
+```
+
 ## WebAssembly (WASM) Module
 
 ### Compiling & Executing
