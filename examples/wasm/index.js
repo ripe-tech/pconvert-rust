@@ -1,4 +1,4 @@
-const js = import("./node_modules/pconvert-rust/pconvert_rust.js");
+const js = import("./node_modules/pconvert-rust/pconvert_rust_bundler");
 const placeholderJSON = import("./example_algorithms.json");
 
 const apiFunctionSelect = document.querySelector("div#api select");
