@@ -99,8 +99,12 @@ fn main() {
     write_str_constant_to_file(&mut file, "COMPILER_VERSION", &compiler_version);
 
     let re = Regex::new("image.*version = \"(.*)\"[,\n]").unwrap();
-    let libpng_capture = re.captures(CARGO_TOML).unwrap().get(1);
-    let libpng_capture_s = if libpng_capture == None { "undefined" } else { libpng_capture.unwrap().as_str() };
+    let libpng_capture = re.captures(CARGO_TOML);
+    let libpng_capture_s = if re.captures(CARGO_TOML).is_some() {
+        libpng_capture.unwrap().get(1).unwrap().as_str()
+    } else {
+        "undefined"
+    };
     let libpng_version = format!("image-{}", libpng_capture_s);
 
     write_str_constant_to_file(&mut file, "LIBPNG_VERSION", &libpng_version);
