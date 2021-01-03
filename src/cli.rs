@@ -177,6 +177,7 @@ pub fn pversion() {
 
 fn apply_blue_filter(pixel: &mut Rgba<u8>) {
     // sets red value to 0 and green value to the blue one (blue filter effect)
+    // this is used as a visual debug operation
     pixel[0] = 0;
     pixel[1] = pixel[2];
 }
@@ -195,9 +196,9 @@ fn compose(
         read_png_from_file(format!("{}sole.png", dir), demultiply)
     })?;
 
+    // gathers th function that is going to be used for the blending
+    // from the provided struct value representation
     let algorithm_fn = get_blending_algorithm(&algorithm);
-
-    // reads one PNG at the time and blends it with the current result
 
     let top = benchmark.execute(Benchmark::add_read_png_time, || {
         read_png_from_file(format!("{}back.png", dir), demultiply)
