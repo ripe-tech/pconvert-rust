@@ -72,10 +72,14 @@ impl Display for BlendAlgorithm {
 ///
 /// # Arguments
 ///
-/// * `bot` - An image buffer corresponding to the bottom layer.
-/// * `top` - An image buffer corresponding to the top layer.
-/// * `blending_algorithm` - A function that blends two pixels according to optional blending parameters.
-/// * `algorithm_params` - A optional map of key-value pairs of blending properties and values.
+/// * `bot` - An image buffer corresponding to the bottom layer, in typical
+/// composition language this should be considered the `source`.
+/// * `top` - An image buffer corresponding to the top layer, in typical
+/// composition language this should be considered the `destination`.
+/// * `blending_algorithm` - A function that blends two pixels according
+/// to optional blending parameters.
+/// * `algorithm_params` - A optional map of key-value pairs of blending
+/// properties and values.
 ///
 /// # Examples
 ///
