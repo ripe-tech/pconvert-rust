@@ -277,8 +277,8 @@ fn blend_multiple_single_thread(
         let algorithm_fn = get_blending_algorithm(&algorithm);
         let current_layer = read_png_from_file(path, demultiply)?;
         blend_images(
-            &current_layer,
             &mut composition,
+            &current_layer,
             &algorithm_fn,
             algorithm_params,
         );
@@ -355,8 +355,8 @@ unsafe fn blend_multiple_multi_thread(
         }
 
         blend_images(
-            &current_layer,
             &mut composition,
+            &current_layer,
             &algorithm_fn,
             algorithm_params,
         );
