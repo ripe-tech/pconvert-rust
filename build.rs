@@ -32,7 +32,7 @@ use std::str;
 
 const BUILD_OUT_FILE: &str = "constants.rs";
 const SOURCE_DIR: &str = "./src";
-const TOML: &'static str = include_str!("Cargo.toml");
+const CARGO_TOML: &'static str = include_str!("Cargo.toml");
 
 fn main() {
     let dest_path = Path::new(SOURCE_DIR).join(Path::new(BUILD_OUT_FILE));
@@ -101,7 +101,7 @@ fn main() {
     let re = Regex::new("image.*version = \"(.*)\",").unwrap();
     let libpng_version = format!(
         "image-{}",
-        re.captures(TOML).unwrap().get(1).unwrap().as_str()
+        re.captures(CARGO_TOML).unwrap().get(1).unwrap().as_str()
     );
     write_str_constant_to_file(&mut file, "LIBPNG_VERSION", &libpng_version);
 
