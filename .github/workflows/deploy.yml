@@ -31,7 +31,9 @@ jobs:
           node-version: "12"
       - run: node --version
       - run: cargo install wasm-pack
-      - run: wasm-pack build --release --target=nodejs -- --features wasm-extension
+      - run: |
+          wasm-pack build --release --target=nodejs -- --features wasm-extension
+          wasm-pack build --release --target=bundler --out-name pconvert_rust_bundler  -- --features wasm-extension
       - run: |
           echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
           cd pkg && npm publish
