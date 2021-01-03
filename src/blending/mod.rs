@@ -1,4 +1,4 @@
-//! Blending algorithms and associated utility functions and enums
+//! Blending algorithms and associated utility functions and enums.
 
 pub mod algorithms;
 pub mod params;
@@ -15,7 +15,7 @@ use std::fmt::{Display, Formatter};
 use std::result;
 use std::str::FromStr;
 
-/// Enumeration of supported blending modes
+/// Enumeration of supported blending modes.
 #[derive(Clone, Debug)]
 pub enum BlendAlgorithm {
     Alpha,
@@ -72,10 +72,10 @@ impl Display for BlendAlgorithm {
 ///
 /// # Arguments
 ///
-/// * `bot` - An image buffer corresponding to the bottom layer
-/// * `top` - An image buffer corresponding to the top layer
-/// * `blending_algorithm` - A function that blends two pixels according to optional blending parameters
-/// * `algorithm_params` - A optional map of key-value pairs of blending properties and values
+/// * `bot` - An image buffer corresponding to the bottom layer.
+/// * `top` - An image buffer corresponding to the top layer.
+/// * `blending_algorithm` - A function that blends two pixels according to optional blending parameters.
+/// * `algorithm_params` - A optional map of key-value pairs of blending properties and values.
 ///
 /// # Examples
 ///
@@ -102,7 +102,7 @@ pub fn blend_images(
 ///
 /// # Arguments
 ///
-/// * `img` - The image buffer to demultiply
+/// * `img` - The image buffer to demultiply.
 pub fn demultiply_image(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
     for pixel in img.pixels_mut() {
         demultiply_pixel(pixel);
@@ -114,7 +114,7 @@ pub fn demultiply_image(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
 ///
 /// # Arguments
 ///
-/// * `img` - The image buffer to multiply
+/// * `img` - The image buffer to multiply.
 pub fn multiply_image(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
     for pixel in img.pixels_mut() {
         multiply_pixel(pixel);
@@ -125,7 +125,7 @@ pub fn multiply_image(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
 ///
 /// # Arguments
 ///
-/// * `algorithm` - The BlendAlgorithm enum variant
+/// * `algorithm` - The BlendAlgorithm enum variant.
 pub fn get_blending_algorithm(
     algorithm: &BlendAlgorithm,
 ) -> impl Fn((&mut Rgba<u8>, &Rgba<u8>), &Option<BlendAlgorithmParams>) -> () {
@@ -148,7 +148,7 @@ pub fn get_blending_algorithm(
 ///
 /// # Arguments
 ///
-/// * `algorithm` - The BlendAlgorithm enum variant
+/// * `algorithm` - The BlendAlgorithm enum variant.
 pub fn is_algorithm_multiplied(algorithm: &BlendAlgorithm) -> bool {
     match algorithm {
         BlendAlgorithm::Alpha => false,

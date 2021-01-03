@@ -1,4 +1,5 @@
 //! Global constants, such as compiler version used, algorithms, compression and filters supported and others
+
 pub const COMPILATION_DATE: &str = "-";
 pub const COMPILATION_TIME: &str = "-";
 pub const VERSION: &str = "x.x.x";

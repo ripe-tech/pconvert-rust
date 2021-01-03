@@ -1,4 +1,4 @@
-//! Blending algorithms
+//! Low-level implementation of the blending algorithms.
 
 use crate::blending::params::{BlendAlgorithmParams, Value};
 use crate::utils::{max, min};

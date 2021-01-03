@@ -1,4 +1,4 @@
-//! Web Assembly (WASM) extension, exported functions and type conversions
+//! Web Assembly (WASM) extension, exported functions and type conversions.
 
 #[macro_use]
 pub mod utils;
@@ -183,7 +183,7 @@ pub fn blend_multiple_data_js(
     )
 }
 
-/// Returns a JSON object with the module constants (e.g. ALGORITHMS, COMPILER, COMPILER_VERSION, ...)
+/// Returns a JSON object with the module constants (e.g. ALGORITHMS, COMPILER, COMPILER_VERSION, ...).
 #[wasm_bindgen(js_name = getModuleConstants)]
 pub fn get_module_constants_js() -> JsValue {
     let filters: Vec<String> = constants::FILTER_TYPES

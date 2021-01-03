@@ -1,4 +1,4 @@
-//! Constants that define the current build and execution environment
+//! Constants that define the current build and execution environment.
 
 #[cfg(feature = "readonly")]
 pub mod mock;

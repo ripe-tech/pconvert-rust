@@ -1,6 +1,7 @@
 /// Build script (https://doc.rust-lang.org/cargo/reference/build-scripts.html)
 /// This script is executed as the first step in the compilation process.
-/// Here we export metadata constants to a `constants/generated.rs` file which is then imported and used by the remaining crate.
+/// Here we export metadata constants to a `constants/generated.rs` file which is then
+/// imported and used by the remaining crate.
 ///
 /// # Examples
 ///
@@ -50,7 +51,7 @@ fn main() {
         .open(dest_path)
         .expect(&format!("Can't open '{}'", BUILD_OUT_FILE));
 
-    let module_doc_string = "//! Global constants, such as compiler version used, algorithms, compression and filters supported and others";
+    let module_doc_string = "//! Global constants, such as compiler version used, algorithms, compression and filters supported and others\n";
     writeln!(file, "{}", module_doc_string).unwrap();
 
     let now_utc = Utc::now();
