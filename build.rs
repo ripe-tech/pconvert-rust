@@ -1,6 +1,6 @@
 /// Build script (https://doc.rust-lang.org/cargo/reference/build-scripts.html)
 /// This script is executed as the first step in the compilation process.
-/// Here we export metadata constants to a `constants.rs` file which is then imported and used by the remaining crate.
+/// Here we export metadata constants to a `constants/generated.rs` file which is then imported and used by the remaining crate.
 ///
 /// # Examples
 ///
@@ -30,11 +30,18 @@ use std::path::Path;
 use std::process::Command;
 use std::str;
 
-const BUILD_OUT_FILE: &str = "constants.rs";
+const BUILD_OUT_FILE: &str = "constants/generated.rs";
 const SOURCE_DIR: &str = "./src";
 const CARGO_TOML: &'static str = include_str!("Cargo.toml");
 
 fn main() {
+    // in case we're running under docs.rs then we must return the control
+    // flow immediately as it's not possible to generated files under the
+    // expected read only file system present in docs.rs build environment
+    if let Ok(_) = std::env::var("DOCS_RS") {
+        return;
+    }
+
     let dest_path = Path::new(SOURCE_DIR).join(Path::new(BUILD_OUT_FILE));
     let mut file = OpenOptions::new()
         .truncate(true)
@@ -146,7 +153,6 @@ fn main() {
     write_enum_variants_to_file(&mut file, "COMPRESSION_TYPES", libpng_compression_types);
 
     write_constant_to_file(&mut file, "DEFAULT_THREAD_POOL_SIZE", num_cpus::get());
-
     write_constant_to_file(&mut file, "MAX_THREAD_POOL_SIZE", num_cpus::get() * 10);
 }
 

@@ -15,6 +15,7 @@ name = "pconvert_rust"
 crate-type = ["rlib", "cdylib"]
 
 [features]
+readonly = []
 python-extension = ["pyo3"]
 wasm-extension = ["js-sys", "serde", "serde_json", "wasm-bindgen", "wasm-bindgen-futures", "web-sys"]
 
@@ -51,5 +52,5 @@ lto = true
 opt-level = 3
 
 [package.metadata.docs.rs]
-all-features = true
+features = ["readonly", "python-extension", "wasm-extension"]
 rustc-args = ["--lib"]

@@ -3,7 +3,7 @@
 .DS_Store
 
 Cargo.lock
-constants.rs
+generated.rs
 
 /assets/**/result*
 /examples/**/result*
