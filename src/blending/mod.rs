@@ -67,7 +67,8 @@ impl Display for BlendAlgorithm {
     }
 }
 
-/// Blends two images buffers with the given blending function and optional parameters
+/// Blends two images buffers with the given blending function and
+/// optional parameters.
 ///
 /// # Arguments
 ///
@@ -97,7 +98,7 @@ pub fn blend_images(
 }
 
 /// Demultiplies an image buffer, by applying the demultiply operation over the
-/// complete set of pixels in the provided image buffer
+/// complete set of pixels in the provided image buffer.
 ///
 /// # Arguments
 ///
@@ -109,7 +110,7 @@ pub fn demultiply_image(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
 }
 
 /// Multiplies an image buffer, running the opposite operation over the
-/// complete set of pixels in the image buffer
+/// complete set of pixels in the image buffer.
 ///
 /// # Arguments
 ///
@@ -120,7 +121,7 @@ pub fn multiply_image(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
     }
 }
 
-/// Matches a `BlendAlgorithm` enum variant with a blend function
+/// Matches a `BlendAlgorithm` enum variant with a blend function.
 ///
 /// # Arguments
 ///
@@ -142,7 +143,8 @@ pub fn get_blending_algorithm(
     }
 }
 
-/// Returns whether or not a `BlendAlgorithm` enum variant corresponds to a multiplied blending algorithm
+/// Returns whether or not a `BlendAlgorithm` enum variant corresponds to a
+/// multiplied blending algorithm.
 ///
 /// # Arguments
 ///
