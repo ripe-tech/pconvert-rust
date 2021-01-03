@@ -64,6 +64,7 @@ fn pconvert_rust(_py: Python, module: &PyModule) -> PyResult<()> {
         options: Option<Options>,
     ) -> PyResult<()> {
         // blends two images using either the single-threaded or the multiple-threaded version
+        // taking into consideration the requested number of thread in options
         py.allow_threads(|| -> PyResult<()> {
             let num_threads = get_num_threads(&options);
             if num_threads <= 0 {
@@ -116,6 +117,7 @@ fn pconvert_rust(_py: Python, module: &PyModule) -> PyResult<()> {
             };
 
         // blends multiple images using either the single-threaded or the multiple-threaded version
+        // taking into consideration the requested number of thread in options
         py.allow_threads(|| -> PyResult<()> {
             let num_threads = get_num_threads(&options);
             if num_threads <= 0 {
