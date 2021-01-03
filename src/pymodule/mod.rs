@@ -218,16 +218,15 @@ unsafe fn blend_images_multi_thread(
     // expands thread pool to the desired number of threads/parallelism (if necessary and possible)
     thread_pool.expand_to(num_threads as usize);
 
-    let top_result_channel = thread_pool
-        .execute(move || ResultMessage::ImageResult(read_png_from_file(top_path, demultiply)));
     let bot_result_channel = thread_pool
         .execute(move || ResultMessage::ImageResult(read_png_from_file(bot_path, demultiply)));
-
-    let top = match top_result_channel.recv().unwrap() {
-        ResultMessage::ImageResult(result) => result,
-    }?;
+    let top_result_channel = thread_pool
+        .execute(move || ResultMessage::ImageResult(read_png_from_file(top_path, demultiply)));
 
     let mut bot = match bot_result_channel.recv().unwrap() {
+        ResultMessage::ImageResult(result) => result,
+    }?;
+    let top = match top_result_channel.recv().unwrap() {
         ResultMessage::ImageResult(result) => result,
     }?;
 

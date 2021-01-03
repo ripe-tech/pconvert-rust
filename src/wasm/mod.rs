@@ -70,12 +70,12 @@ pub fn blend_images_data_js(
         false => None,
     };
 
-    let (width, height) = (top.width(), top.height());
-    let mut top = ImageBuffer::from_vec(width, height, top.data().to_vec()).ok_or(
-        PConvertError::ArgumentError("Could not parse \"top\"".to_string()),
-    )?;
+    let (width, height) = (bot.width(), bot.height());
     let mut bot = ImageBuffer::from_vec(width, height, bot.data().to_vec()).ok_or(
         PConvertError::ArgumentError("Could not parse \"bot\"".to_string()),
+    )?;
+    let mut top = ImageBuffer::from_vec(width, height, top.data().to_vec()).ok_or(
+        PConvertError::ArgumentError("Could not parse \"top\"".to_string()),
     )?;
 
     blend_image_buffers(&mut bot, &mut top, algorithm, is_inline)?;
