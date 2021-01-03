@@ -16,7 +16,7 @@ jobs:
       - run: cargo build
       - run: |
           cargo login ${{ secrets.CRATES_TOKEN }}
-          cargo publish --dry-run
+          cargo publish --no-verify
   build-npm:
     name: Deploy NPM
     strategy:
