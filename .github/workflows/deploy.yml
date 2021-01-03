@@ -4,6 +4,19 @@ on:
     tags:
       - "*"
 jobs:
+  build-crates:
+    name: Deploy crates.io
+    strategy:
+      matrix:
+        rust-version: ["1.40"]
+    runs-on: ubuntu-latest
+    container: rust:${{ matrix.rust-version }}
+    steps:
+      - uses: actions/checkout@v1
+      - run: cargo build
+      - run: |
+          cargo login ${{ secrets.CRATES_TOKEN }}
+          cargo publish --dry-run
   build-npm:
     name: Deploy NPM
     strategy:
