@@ -284,8 +284,8 @@ pub fn blend_multiple_fs(
         let current_layer = node_read_file_sync(&node_fs, &path);
         let current_layer = decode_png(&current_layer[..], demultiply)?;
         blend_images(
-            &current_layer,
             &mut composition,
+            &current_layer,
             &algorithm_fn,
             algorithm_params,
         );
@@ -380,8 +380,8 @@ pub async fn blend_multiple_fs_async(
         let current_layer = decode_png(&current_layer[..], demultiply)?;
 
         blend_images(
-            &current_layer,
             &mut composition,
+            &current_layer,
             &algorithm_fn,
             algorithm_params,
         );
@@ -453,8 +453,8 @@ fn blend_multiple_buffers(
         }
 
         blend_images(
-            &current_layer,
             &mut composition,
+            &current_layer,
             &algorithm_fn,
             algorithm_params,
         );
