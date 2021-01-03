@@ -1,4 +1,4 @@
-//! Blending algorithms and associated utilitary functions and enums
+//! Blending algorithms and associated utility functions and enums
 
 pub mod algorithms;
 pub mod params;
@@ -96,7 +96,8 @@ pub fn blend_images(
     }
 }
 
-/// Demultiplies an image buffer
+/// Demultiplies an image buffer, by applying the demultiply operation over the
+/// complete set of pixels in the provided image buffer
 ///
 /// # Arguments
 ///
@@ -107,7 +108,8 @@ pub fn demultiply_image(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
     }
 }
 
-/// Multiplies an image buffer
+/// Multiplies an image buffer, running the opposite operation over the
+/// complete set of pixels in the image buffer
 ///
 /// # Arguments
 ///
