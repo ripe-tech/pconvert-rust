@@ -8,6 +8,7 @@ repository = "https://github.com/ripe-tech/pconvert-rust"
 homepage = "https://github.com/ripe-tech/pconvert-rust"
 edition = "2018"
 build = "build.rs"
+readme = "README.md"
 
 [lib]
 name = "pconvert_rust"
