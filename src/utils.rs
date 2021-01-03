@@ -72,7 +72,8 @@ pub fn encode_png(
     Ok(encoder.encode(&png, png.width(), png.height(), ColorType::Rgba8)?)
 }
 
-/// Writes a PNG to the local file system.
+/// Writes a PNG to the local file system using the provided compression
+/// and filter definitions.
 ///
 /// # Arguments
 ///
@@ -92,6 +93,8 @@ pub fn write_png_to_file(
 
 /// Writes a PNG to the local file system using the default
 /// compression and filter settings.
+/// 
+/// Avoid the usage of external enumeration values.
 ///
 /// # Arguments
 ///
