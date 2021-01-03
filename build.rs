@@ -98,10 +98,10 @@ fn main() {
         .as_str();
     write_str_constant_to_file(&mut file, "COMPILER_VERSION", &compiler_version);
 
-    let re = Regex::new("image.*version = \"(.*)\"[,\n]").unwrap();
+    let re = Regex::new("image(.|\n)*version = \"(.*)\"[,\n]").unwrap();
     let libpng_capture = re.captures(CARGO_TOML);
     let libpng_capture_s = if re.captures(CARGO_TOML).is_some() {
-        libpng_capture.unwrap().get(1).unwrap().as_str()
+        libpng_capture.unwrap().get(2).unwrap().as_str()
     } else {
         "undefined"
     };
