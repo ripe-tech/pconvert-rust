@@ -52,5 +52,5 @@ lto = true
 opt-level = 3
 
 [package.metadata.docs.rs]
-features = ["readonly", "python-extension", "wasm-extension"]
+all-features = true
 rustc-args = ["--lib"]
