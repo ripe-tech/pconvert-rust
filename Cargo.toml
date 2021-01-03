@@ -5,6 +5,7 @@ version = "0.2.7"
 authors = ["Platforme International"]
 license = "Apache-2.0"
 repository = "https://github.com/ripe-tech/pconvert-rust"
+homepage = "https://github.com/ripe-tech/pconvert-rust"
 edition = "2018"
 build = "build.rs"
 
