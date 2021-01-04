@@ -3,6 +3,7 @@
 
 use std::fmt::{Display, Formatter, Result};
 use std::ops::Add;
+use std::ops::Sub;
 use std::time::Instant;
 
 /// Holds the times for read, write and blend operations.
@@ -88,6 +89,18 @@ impl Add for Benchmark {
             blend_time: self.blend_time + other.blend_time,
             read_png_time: self.read_png_time + other.read_png_time,
             write_png_time: self.write_png_time + other.write_png_time,
+        }
+    }
+}
+
+impl Sub for Benchmark {
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self {
+        Self {
+            blend_time: self.blend_time - other.blend_time,
+            read_png_time: self.read_png_time - other.read_png_time,
+            write_png_time: self.write_png_time - other.write_png_time,
         }
     }
 }

@@ -93,7 +93,7 @@ pub fn write_png_to_file(
 
 /// Writes a PNG to the local file system using the default
 /// compression and filter settings.
-/// 
+///
 /// Avoid the usage of external enumeration values.
 ///
 /// # Arguments
