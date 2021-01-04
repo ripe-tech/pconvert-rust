@@ -11,11 +11,7 @@
         "upgrade": "npx sort-package-json && ncu -u"
     },
     "dependencies": {
-<<<<<<< HEAD
-        "pconvert-rust": "^0.2.0"
-=======
         "pconvert-rust": "^0.4.7"
->>>>>>> master
     },
     "devDependencies": {
         "eslint": "^7.17.0",
