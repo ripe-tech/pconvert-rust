@@ -23,7 +23,8 @@ impl Benchmark {
         }
     }
 
-    /// Returns the total time, i.e., the sum of read, write and blend times.
+    /// Returns the total time (in milliseconds), i.e., the sum of read,
+    /// write and blend times.
     pub fn total(&self) -> u128 {
         self.blend_time + self.read_png_time + self.write_png_time
     }
