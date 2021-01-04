@@ -2,28 +2,28 @@
 
 ## Source files
 
-- [`mod.rs`](./mod.rs)
-    - exposes the WASM module API to be used within JavaScript files that target the web browsers
+* [`mod.rs`](./mod.rs)
+  * exposes the WASM module API to be used within JavaScript files that target the web browsers
 
-- [`benchmark.rs`](./benchmark.rs)
-    - exposes the WASM module benchmark API to be used within JavaScript files that target the web browsers
-    - prints measured times to the console
+* [`benchmark.rs`](./benchmark.rs)
+  * exposes the WASM module benchmark API to be used within JavaScript files that target the web browsers
+  * prints measured times to the console
 
-- [`conversions.rs`](./conversions.rs)
-    - type conversions from and to JavaScript types
+* [`conversions.rs`](./conversions.rs)
+  * type conversions from and to JavaScript types
 
-- [`utils.rs`](./utils.rs)
-    - decode/encode PNG functions
-    - other utility functions and macros
+* [`utils.rs`](./utils.rs)
+  * decode/encode PNG functions
+  * other utility functions and macros
 
 ## JavaScript API
 
 ```javascript
 // blends two File objects and returns a File object
-blendImages(top, bot, target_file_name, algorithm, is_inline, options)
+blendImages(bot, top, target_file_name, algorithm, is_inline, options)
 
 // blends two ImageData objects and returns an ImageData object
-blendImagesData(top, bot, algorithm, is_inline, options)
+blendImagesData(bot, top, algorithm, is_inline, options)
 
 // blends multiple File objects and returns a File object
 blendMultiple(image_files, target_file_name, algorithm, algorithms, is_inline, options)
@@ -35,7 +35,7 @@ blendMultipleData(images, algorithm, algorithms, is_inline, options)
 getModuleConstants()
 
 // benchmarks and prints to console various times for different combinations of blending algorithms, compression algorithms and filters for `blendImages`
-blendImagesBenchmarkAll(top, bot, is_inline)
+blendImagesBenchmarkAll(bot, top, is_inline)
 
 // benchmarks and prints to console various times for different combinations of blending algorithms, compression algorithms and filters for `blendMultiple`
 blendMultipleBenchmarkAll(image_files, is_inline)

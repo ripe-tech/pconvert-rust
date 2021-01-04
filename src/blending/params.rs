@@ -1,15 +1,18 @@
-//! Blend algorithms and PConvert API optional parameter types (`BlendAlgorithmParams` and `Options`, respectively)
+//! Blend algorithms and PConvert API optional parameter types (`BlendAlgorithmParams` and `Options`, respectively).
+//! Low level layer for the composition system.
 
 use std::collections::HashMap;
 
-/// Map of blending algorithm properties and corresponding values
+/// Map of blending algorithm properties and corresponding values.
 pub type BlendAlgorithmParams = HashMap<String, Value>;
 
-/// Map of API options and corresponding values
+/// Map of API options and corresponding values.
 #[cfg(not(target_arch = "wasm32"))]
 pub type Options = HashMap<String, Value>;
 
-/// Abstract data type that can assume multiple primitive types
+/// Abstract data type that can assume multiple primitive types.
+/// The data structure is going to be used in the passing of parameters
+/// between heterogenous type systems (eg: different VMs).
 #[derive(Clone, Debug)]
 pub enum Value {
     Bool(bool),

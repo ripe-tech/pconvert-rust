@@ -1,18 +1,21 @@
 [package]
 name = "pconvert-rust"
 description = "Rust version of P(NG)Convert, a simple PNG conversion tool."
-version = "0.2.3"
-authors = ["Platforme International"]
+version = "0.4.7"
+authors = ["Platforme <development@platforme.com>"]
 license = "Apache-2.0"
 repository = "https://github.com/ripe-tech/pconvert-rust"
+homepage = "https://github.com/ripe-tech/pconvert-rust"
 edition = "2018"
 build = "build.rs"
+readme = "README.md"
 
 [lib]
 name = "pconvert_rust"
 crate-type = ["rlib", "cdylib"]
 
 [features]
+readonly = []
 python-extension = ["pyo3"]
 wasm-extension = ["js-sys", "serde", "serde_json", "wasm-bindgen", "wasm-bindgen-futures", "web-sys"]
 
@@ -47,3 +50,6 @@ opt-level = 3
 debug = false
 lto = true
 opt-level = 3
+
+[package.metadata.docs.rs]
+all-features = true

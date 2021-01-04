@@ -138,7 +138,7 @@ pub fn compose(
     })?;
 
     benchmark.execute(Benchmark::add_blend_time, || {
-        blend_images(&top, &mut bot, &algorithm_fn, &None)
+        blend_images(&mut bot, &top, &algorithm_fn, &None)
     });
 
     let top = benchmark.execute(Benchmark::add_read_png_time, || {
@@ -146,7 +146,7 @@ pub fn compose(
     })?;
 
     benchmark.execute(Benchmark::add_blend_time, || {
-        blend_images(&top, &mut bot, &algorithm_fn, &None)
+        blend_images(&mut bot, &top, &algorithm_fn, &None)
     });
 
     let top = benchmark.execute(Benchmark::add_read_png_time, || {
@@ -154,7 +154,7 @@ pub fn compose(
     })?;
 
     benchmark.execute(Benchmark::add_blend_time, || {
-        blend_images(&top, &mut bot, &algorithm_fn, &None)
+        blend_images(&mut bot, &top, &algorithm_fn, &None)
     });
 
     if demultiply {
@@ -166,7 +166,7 @@ pub fn compose(
     })?;
 
     benchmark.execute(Benchmark::add_blend_time, || {
-        blend_images(&bot, &mut composition, &algorithm_fn, &None)
+        blend_images(&mut composition, &bot, &algorithm_fn, &None)
     });
 
     // writes the final composition to the file system
@@ -228,7 +228,7 @@ pub fn compose_parallel(
         }
     })?;
     benchmark.execute(Benchmark::add_blend_time, || {
-        blend_images(&top, &mut bot, &algorithm_fn, &None)
+        blend_images(&mut bot, &top, &algorithm_fn, &None)
     });
 
     let top = benchmark.execute(Benchmark::add_read_png_time, || {
@@ -237,7 +237,7 @@ pub fn compose_parallel(
         }
     })?;
     benchmark.execute(Benchmark::add_blend_time, || {
-        blend_images(&top, &mut bot, &algorithm_fn, &None)
+        blend_images(&mut bot, &top, &algorithm_fn, &None)
     });
 
     let top = benchmark.execute(Benchmark::add_read_png_time, || {
@@ -246,7 +246,7 @@ pub fn compose_parallel(
         }
     })?;
     benchmark.execute(Benchmark::add_blend_time, || {
-        blend_images(&top, &mut bot, &algorithm_fn, &None)
+        blend_images(&mut bot, &top, &algorithm_fn, &None)
     });
 
     if demultiply {
@@ -260,7 +260,7 @@ pub fn compose_parallel(
             }
         })?;
     benchmark.execute(Benchmark::add_blend_time, || {
-        blend_images(&bot, &mut composition, &algorithm_fn, &None)
+        blend_images(&mut composition, &top, &algorithm_fn, &None)
     });
 
     // writes the final composition PNG to the output file,

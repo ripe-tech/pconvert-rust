@@ -2,16 +2,16 @@
 
 ## Source files
 
-- [`mod.rs`](./mod.rs)
-    - exposes the python module and associated API
-    - manages the internal global thread pool
+* [`mod.rs`](./mod.rs)
+  * exposes the python module and associated API
+  * manages the internal global thread pool
 
-- [`conversions.rs`](./conversions.rs)
-    - type conversions from and to Python types
+* [`conversions.rs`](./conversions.rs)
+  * type conversions from and to Python types
 
-- [`utils.rs`](./utils.rs)
-    - optional parameter parsing functions
-    - other utility functions
+* [`utils.rs`](./utils.rs)
+  * optional parameter parsing functions
+  * other utility functions
 
 ## Python API
 

@@ -1,11 +1,11 @@
-//! Internal error types definition and external error type conversions
+//! Internal error types definition and external error type conversions.
 
 use image::error::ImageError;
 use std::error::Error;
 use std::fmt::{Display, Formatter, Result};
 use std::io;
 
-/// Error types used across this crate
+/// Error types used across this crate.
 #[derive(Debug)]
 pub enum PConvertError {
     ArgumentError(String),

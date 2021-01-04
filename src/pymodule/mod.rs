@@ -1,4 +1,4 @@
-//! Python extension, exported functions and type conversions
+//! Python extension, exported functions and type conversions.
 
 pub mod conversions;
 pub mod utils;
@@ -30,21 +30,13 @@ fn pconvert_rust(_py: Python, module: &PyModule) -> PyResult<()> {
     }
 
     module.add("COMPILATION_DATE", constants::COMPILATION_DATE)?;
-
     module.add("COMPILATION_TIME", constants::COMPILATION_TIME)?;
-
     module.add("VERSION", constants::VERSION)?;
-
     module.add("ALGORITHMS", constants::ALGORITHMS.to_vec())?;
-
     module.add("COMPILER", constants::COMPILER)?;
-
     module.add("COMPILER_VERSION", constants::COMPILER_VERSION)?;
-
     module.add("LIBPNG_VERSION", constants::LIBPNG_VERSION)?;
-
     module.add("FEATURES", constants::FEATURES.to_vec())?;
-
     module.add("PLATFORM_CPU_BITS", constants::PLATFORM_CPU_BITS)?;
 
     let filters: Vec<String> = constants::FILTER_TYPES
@@ -72,6 +64,7 @@ fn pconvert_rust(_py: Python, module: &PyModule) -> PyResult<()> {
         options: Option<Options>,
     ) -> PyResult<()> {
         // blends two images using either the single-threaded or the multiple-threaded version
+        // taking into consideration the requested number of thread in options
         py.allow_threads(|| -> PyResult<()> {
             let num_threads = get_num_threads(&options);
             if num_threads <= 0 {
@@ -124,6 +117,7 @@ fn pconvert_rust(_py: Python, module: &PyModule) -> PyResult<()> {
             };
 
         // blends multiple images using either the single-threaded or the multiple-threaded version
+        // taking into consideration the requested number of thread in options
         py.allow_threads(|| -> PyResult<()> {
             let num_threads = get_num_threads(&options);
             if num_threads <= 0 {
@@ -186,7 +180,7 @@ fn blend_images_single_thread(
     let mut bot = read_png_from_file(bot_path, demultiply)?;
     let top = read_png_from_file(top_path, demultiply)?;
 
-    blend_images(&top, &mut bot, &algorithm_fn, &None);
+    blend_images(&mut bot, &top, &algorithm_fn, &None);
 
     let compression_type = get_compression_type(&options);
     let filter_type = get_filter_type(&options);
@@ -218,20 +212,19 @@ unsafe fn blend_images_multi_thread(
     // expands thread pool to the desired number of threads/parallelism (if necessary and possible)
     thread_pool.expand_to(num_threads as usize);
 
-    let top_result_channel = thread_pool
-        .execute(move || ResultMessage::ImageResult(read_png_from_file(top_path, demultiply)));
     let bot_result_channel = thread_pool
         .execute(move || ResultMessage::ImageResult(read_png_from_file(bot_path, demultiply)));
-
-    let top = match top_result_channel.recv().unwrap() {
-        ResultMessage::ImageResult(result) => result,
-    }?;
+    let top_result_channel = thread_pool
+        .execute(move || ResultMessage::ImageResult(read_png_from_file(top_path, demultiply)));
 
     let mut bot = match bot_result_channel.recv().unwrap() {
         ResultMessage::ImageResult(result) => result,
     }?;
+    let top = match top_result_channel.recv().unwrap() {
+        ResultMessage::ImageResult(result) => result,
+    }?;
 
-    blend_images(&top, &mut bot, &algorithm_fn, &None);
+    blend_images(&mut bot, &top, &algorithm_fn, &None);
 
     let compression_type = get_compression_type(&options);
     let filter_type = get_filter_type(&options);
@@ -278,8 +271,8 @@ fn blend_multiple_single_thread(
         let algorithm_fn = get_blending_algorithm(&algorithm);
         let current_layer = read_png_from_file(path, demultiply)?;
         blend_images(
-            &current_layer,
             &mut composition,
+            &current_layer,
             &algorithm_fn,
             algorithm_params,
         );
@@ -356,8 +349,8 @@ unsafe fn blend_multiple_multi_thread(
         }
 
         blend_images(
-            &current_layer,
             &mut composition,
+            &current_layer,
             &algorithm_fn,
             algorithm_params,
         );

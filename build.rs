@@ -1,6 +1,7 @@
 /// Build script (https://doc.rust-lang.org/cargo/reference/build-scripts.html)
 /// This script is executed as the first step in the compilation process.
-/// Here we export metadata constants to a `constants.rs` file which is then imported and used by the remaining crate.
+/// Here we export metadata constants to a `constants/generated.rs` file which is then
+/// imported and used by the remaining crate.
 ///
 /// # Examples
 ///
@@ -29,11 +30,18 @@ use std::path::Path;
 use std::process::Command;
 use std::str;
 
-const BUILD_OUT_FILE: &str = "constants.rs";
+const BUILD_OUT_FILE: &str = "constants/generated.rs";
 const SOURCE_DIR: &str = "./src";
-const TOML: &str = include_str!("Cargo.toml");
+const CARGO_TOML: &'static str = include_str!("Cargo.toml");
 
 fn main() {
+    // in case we're running under docs.rs then we must return the control
+    // flow immediately as it's not possible to generated files under the
+    // expected read only file system present in docs.rs build environment
+    if std::env::var("DOCS_RS").is_ok() {
+        return;
+    }
+
     let dest_path = Path::new(SOURCE_DIR).join(Path::new(BUILD_OUT_FILE));
     let mut file = OpenOptions::new()
         .truncate(true)
@@ -42,7 +50,7 @@ fn main() {
         .open(dest_path)
         .expect(&format!("Can't open '{}'", BUILD_OUT_FILE));
 
-    let module_doc_string = "//! Global constants, such as compiler version used, algorithms, compression and filters supported and others";
+    let module_doc_string = "//! Global constants, such as compiler version used, algorithms, compression and filters supported and others\n";
     writeln!(file, "{}", module_doc_string).unwrap();
 
     let now_utc = Utc::now();
@@ -97,11 +105,15 @@ fn main() {
         .as_str();
     write_str_constant_to_file(&mut file, "COMPILER_VERSION", &compiler_version);
 
-    let re = Regex::new("image.*version = \"(.*)\",").unwrap();
-    let libpng_version = format!(
-        "image-{}",
-        re.captures(TOML).unwrap().get(1).unwrap().as_str()
-    );
+    let re = Regex::new("image(?:.|\n)*version = \"(.*)\"[,\n]").unwrap();
+    let libpng_capture = re.captures(CARGO_TOML);
+    let libpng_capture_s = if re.captures(CARGO_TOML).is_some() {
+        libpng_capture.unwrap().get(1).unwrap().as_str()
+    } else {
+        "undefined"
+    };
+    let libpng_version = format!("image-{}", libpng_capture_s);
+
     write_str_constant_to_file(&mut file, "LIBPNG_VERSION", &libpng_version);
 
     let mut features = vec!["cpu"];
@@ -141,7 +153,6 @@ fn main() {
     write_enum_variants_to_file(&mut file, "COMPRESSION_TYPES", libpng_compression_types);
 
     write_constant_to_file(&mut file, "DEFAULT_THREAD_POOL_SIZE", num_cpus::get());
-
     write_constant_to_file(&mut file, "MAX_THREAD_POOL_SIZE", num_cpus::get() * 10);
 }
 

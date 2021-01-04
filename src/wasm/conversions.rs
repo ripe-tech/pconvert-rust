@@ -1,4 +1,4 @@
-//! From and to conversions for rust and javascript types
+//! From and to conversions for rust and javascript types.
 
 use crate::blending::params::Value;
 use crate::errors::PConvertError;
@@ -7,7 +7,7 @@ use serde_json::Value as JSONValue;
 use std::collections::HashMap;
 use wasm_bindgen::prelude::*;
 
-/// Blending algorithm and extra parameters for WASM module
+/// Blending algorithm and extra parameters for WASM module.
 #[derive(Serialize, Deserialize)]
 pub struct JSONParams {
     pub algorithm: String,

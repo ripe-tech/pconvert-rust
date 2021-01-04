@@ -2,7 +2,7 @@
 
 The [Rust](https://www.rust-lang.org) version of the famous [P(NG)Convert](https://github.com/hivesolutions/pconvert) from Hive Solutions.
 
-This Rust crate can be used as a **command line application**, as a **crate** in another rust project, as a **Web Assembly module** (able to be used within JavaScript that targets web browsers or NodeJS) or as a **python package**.
+This Rust crate can be used as a **command line application**, as a **crate** in another rust project, as a **Web Assembly module** (able to be used within JavaScript that targets web browsers or NodeJS) or as a **Python package**.
 
 ## Command Line Application
 
@@ -62,6 +62,25 @@ $ pconvert-rust benchmark <dir> [--parallel]
 $ pconvert-rust version
 ```
 
+### Example
+
+```rust
+// blends the provided image as a new image to be used
+// under the current instance
+let top = pconvert_rust::utils::read_png_from_file("top.png".to_string(), false).unwrap();
+let mut bottom = pconvert_rust::utils::read_png_from_file("bottom.png".to_string(), false).unwrap();
+
+// gathers the mask top blending algorithm function and
+// uses it to blend both images
+let blending_fn = pconvert_rust::blending::get_blending_algorithm(
+    &pconvert_rust::blending::BlendAlgorithm::DestinationOver,
+);
+pconvert_rust::blending::blend_images(&mut bottom, &top, &blending_fn, &None);
+
+// "outputs" the blended image contents to the `out.png` file
+pconvert_rust::utils::write_png_to_file_d("out.png".to_string(), &bottom).unwrap();
+```
+
 ## WebAssembly (WASM) Module
 
 ### Compiling & Executing
@@ -84,10 +103,10 @@ JavaScript API exposed:
 
 ```javascript
 // blends two File objects and returns a File object
-blendImages(top, bot, target_file_name, algorithm, is_inline, options)
+blendImages(bot, top, target_file_name, algorithm, is_inline, options)
 
 // blends two ImageData objects and returns an ImageData object
-blendImagesData(top, bot, algorithm, is_inline, options)
+blendImagesData(bot, top, algorithm, is_inline, options)
 
 // blends multiple File objects and returns a File object
 blendMultiple(image_files, target_file_name, algorithm, algorithms, is_inline, options)
@@ -99,7 +118,7 @@ blendMultipleData(images, algorithm, algorithms, is_inline, options)
 getModuleConstants()
 
 // benchmarks and prints to console various times for different combinations of blending algorithms, compression algorithms and filters for `blendImages`
-blendImagesBenchmarkAll(top, bot, is_inline)
+blendImagesBenchmarkAll(bot, top, is_inline)
 
 // benchmarks and prints to console various times for different combinations of blending algorithms, compression algorithms and filters for `blendMultiple`
 blendMultipleBenchmarkAll(image_files, is_inline)
@@ -177,8 +196,9 @@ P(NG)Convert Rust is currently licensed under the [Apache License, Version 2.0](
 
 ## Build Automation
 
-[![Build Status](https://travis-ci.org/ripe-tech/pconvert-rust.svg?branch=master)](https://travis-ci.org/ripe-tech/pconvert-rust)
+[![Build Status](https://travis-ci.com/ripe-tech/pconvert-rust.svg?branch=master)](https://travis-ci.com/ripe-tech/pconvert-rust)
 [![Build Status GitHub](https://github.com/ripe-tech/pconvert-rust/workflows/Main%20Workflow/badge.svg)](https://github.com/ripe-tech/pconvert-rust/actions)
+[![crates Status](https://img.shields.io/crates/v/pconvert-rust)](https://crates.io/crates/pconvert-rust)
 [![PyPi Status](https://img.shields.io/pypi/v/pconvert-rust.svg)](https://pypi.python.org/pypi/pconvert-rust)
 [![npm Status](https://img.shields.io/npm/v/pconvert-rust.svg)](https://www.npmjs.com/package/pconvert-rust)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://www.apache.org/licenses/)

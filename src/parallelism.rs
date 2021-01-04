@@ -1,4 +1,4 @@
-//! Thread pool, thread pool status and workers implementation
+//! Thread pool, thread pool status and workers implementation.
 
 use crate::constants;
 use crate::errors::PConvertError;
@@ -8,7 +8,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{mpsc, Arc, Mutex};
 use std::thread::{spawn, JoinHandle};
 
-/// Thread pool used in multi-threaded pconvert calls
+/// Thread pool used in multi-threaded pconvert calls.
 pub struct ThreadPool {
     workers: Vec<Worker>,
     work_channel_sender: mpsc::Sender<WorkMessage>,
@@ -17,7 +17,7 @@ pub struct ThreadPool {
 }
 
 impl ThreadPool {
-    /// Creates a thread pool with `size` worker threads
+    /// Creates a thread pool with `size` worker threads.
     pub fn new(size: usize) -> Result<ThreadPool, PConvertError> {
         if size == 0 {
             return Err(PConvertError::ArgumentError(
@@ -39,14 +39,14 @@ impl ThreadPool {
         })
     }
 
-    /// Begin execution of worker threads
+    /// Begin execution of worker threads.
     pub fn start(&mut self) {
         for _ in 0..self.workers.capacity() {
             self.spawn_worker();
         }
     }
 
-    /// Stops worker threads and joins them with the calling thread
+    /// Stops worker threads and joins them with the calling thread.
     fn stop(&mut self) {
         // sends a Terminate message to all Workers
         for _ in &self.workers {
@@ -182,7 +182,7 @@ enum WorkMessage {
     Terminate,
 }
 
-/// Result message types for `self.execute()`
+/// Result message types for `self.execute()`.
 pub enum ResultMessage {
     ImageResult(Result<ImageBuffer<Rgba<u8>, Vec<u8>>, PConvertError>),
 }

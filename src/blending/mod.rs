@@ -1,4 +1,4 @@
-//! Blending algorithms and associated utilitary functions and enums
+//! Blending algorithms and associated utility functions and enums.
 
 pub mod algorithms;
 pub mod params;
@@ -15,7 +15,7 @@ use std::fmt::{Display, Formatter};
 use std::result;
 use std::str::FromStr;
 
-/// Enumeration of supported blending modes
+/// Enumeration of supported blending modes.
 #[derive(Clone, Debug)]
 pub enum BlendAlgorithm {
     Alpha,
@@ -67,14 +67,19 @@ impl Display for BlendAlgorithm {
     }
 }
 
-/// Blends two images buffers with the given blending function and optional parameters
+/// Blends two images buffers with the given blending function and
+/// optional parameters.
 ///
 /// # Arguments
 ///
-/// * `top` - An image buffer corresponding to the top layer
-/// * `bot` - An image buffer corresponding to the bottom layer
-/// * `blending_algorithm` - A function that blends two pixels according to optional blending parameters
-/// * `algorithm_params` - A optional map of key-value pairs of blending properties and values
+/// * `bot` - An image buffer corresponding to the bottom layer, in typical
+/// composition language this should be considered the `source`.
+/// * `top` - An image buffer corresponding to the top layer, in typical
+/// composition language this should be considered the `destination`.
+/// * `blending_algorithm` - A function that blends two pixels according
+/// to optional blending parameters.
+/// * `algorithm_params` - A optional map of key-value pairs of blending
+/// properties and values.
 ///
 /// # Examples
 ///
@@ -86,11 +91,11 @@ impl Display for BlendAlgorithm {
 /// let top = read_png_from_file("top.png".to_string(), false).unwrap();
 /// let algorithm_fn = get_blending_algorithm(&BlendAlgorithm::Alpha);
 ///
-/// blend_images(&top, &mut bot, &algorithm_fn, &None);
+/// blend_images(&mut bot, &top, &algorithm_fn, &None);
 /// ```
 pub fn blend_images(
-    top: &ImageBuffer<Rgba<u8>, Vec<u8>>,
     bot: &mut ImageBuffer<Rgba<u8>, Vec<u8>>,
+    top: &ImageBuffer<Rgba<u8>, Vec<u8>>,
     blending_algorithm: &impl Fn((&mut Rgba<u8>, &Rgba<u8>), &Option<BlendAlgorithmParams>) -> (),
     algorithm_params: &Option<BlendAlgorithmParams>,
 ) {
@@ -99,33 +104,35 @@ pub fn blend_images(
     }
 }
 
-/// Demultiplies an image buffer
+/// Demultiplies an image buffer, by applying the demultiply operation over the
+/// complete set of pixels in the provided image buffer.
 ///
 /// # Arguments
 ///
-/// * `img` - The image buffer to demultiply
+/// * `img` - The image buffer to demultiply.
 pub fn demultiply_image(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
     for pixel in img.pixels_mut() {
         demultiply_pixel(pixel);
     }
 }
 
-/// Multiplies an image buffer
+/// Multiplies an image buffer, running the opposite operation over the
+/// complete set of pixels in the image buffer.
 ///
 /// # Arguments
 ///
-/// * `img` - The image buffer to multiply
+/// * `img` - The image buffer to multiply.
 pub fn multiply_image(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
     for pixel in img.pixels_mut() {
         multiply_pixel(pixel);
     }
 }
 
-/// Matches a `BlendAlgorithm` enum variant with a blend function
+/// Matches a `BlendAlgorithm` enum variant with a blend function.
 ///
 /// # Arguments
 ///
-/// * `algorithm` - The BlendAlgorithm enum variant
+/// * `algorithm` - The BlendAlgorithm enum variant.
 pub fn get_blending_algorithm(
     algorithm: &BlendAlgorithm,
 ) -> impl Fn((&mut Rgba<u8>, &Rgba<u8>), &Option<BlendAlgorithmParams>) -> () {
@@ -143,11 +150,12 @@ pub fn get_blending_algorithm(
     }
 }
 
-/// Returns whether or not a `BlendAlgorithm` enum variant corresponds to a multiplied blending algorithm
+/// Returns whether or not a `BlendAlgorithm` enum variant corresponds to a
+/// multiplied blending algorithm.
 ///
 /// # Arguments
 ///
-/// * `algorithm` - The BlendAlgorithm enum variant
+/// * `algorithm` - The BlendAlgorithm enum variant.
 pub fn is_algorithm_multiplied(algorithm: &BlendAlgorithm) -> bool {
     match algorithm {
         BlendAlgorithm::Alpha => false,

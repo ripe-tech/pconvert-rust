@@ -1,4 +1,4 @@
-//! Utilitary functions for argument parsing from python input to inner-crate rust types
+//! Utility functions for argument parsing from python input to inner-crate rust types.
 
 use crate::blending::params::{BlendAlgorithmParams, Options, Value};
 use crate::blending::BlendAlgorithm;
@@ -10,7 +10,7 @@ use pyo3::types::{PySequence, PyString};
 use std::str::FromStr;
 
 /// Attempts to parse a `&String` to a `BlendAlgorithm`.
-/// Returns the enum variant if it suceeds. Otherwise it returns a `PyErr`.
+/// Returns the enum variant if it succeeds. Otherwise it returns a `PyErr`.
 pub fn build_algorithm(algorithm: &String) -> Result<BlendAlgorithm, PyErr> {
     match BlendAlgorithm::from_str(algorithm) {
         Ok(algorithm) => Ok(algorithm),

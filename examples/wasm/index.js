@@ -1,5 +1,6 @@
-const js = import("./node_modules/pconvert-rust/pconvert_rust.js");
-const placeholderJSON = import("./example_algorithms.json");
+import * as placeholderJSON from "./example_algorithms.json";
+
+const js = import("./node_modules/pconvert-rust/pconvert_rust_bundler");
 
 const apiFunctionSelect = document.querySelector("div#api select");
 const blendButton = document.querySelector("button#blend");
@@ -29,21 +30,21 @@ const API_FUNCTIONS = {
 };
 
 async function blend() {
-    const pconvert = await js.then(js => js);
+    const pconvert = await js;
     const apiFunction = apiFunctionSelect.options[apiFunctionSelect.selectedIndex].value;
 
     let composition;
     switch (apiFunction) {
         case API_FUNCTIONS.blendImagesData: {
-            const top = getImageData(await loadImage(inputFiles.files[0]));
-            const bot = getImageData(await loadImage(inputFiles.files[1]));
+            const bot = getImageData(await loadImage(inputFiles.files[0]));
+            const top = getImageData(await loadImage(inputFiles.files[1]));
             const algorithm = selectAlgorithm.value;
             const compression = selectCompression.value;
             const filter = selectFilter.value;
 
             composition = pconvert.blendImagesData(
-                top,
                 bot,
+                top,
                 algorithm === "" ? undefined : algorithm,
                 undefined,
                 {
@@ -55,15 +56,15 @@ async function blend() {
         }
 
         case API_FUNCTIONS.blendImages: {
-            const top = inputFiles.files[0];
-            const bot = inputFiles.files[1];
+            const bot = inputFiles.files[0];
+            const top = inputFiles.files[1];
             const algorithm = selectAlgorithm.value;
             const compression = selectCompression.value;
             const filter = selectFilter.value;
 
             const file = await pconvert.blendImages(
-                top,
                 bot,
+                top,
                 "result",
                 algorithm === "" ? undefined : algorithm,
                 undefined,
@@ -158,15 +159,15 @@ async function blend() {
 }
 
 async function benchmark() {
-    const pconvert = await js.then(js => js);
+    const pconvert = await js;
 
     const apiFunction = apiFunctionSelect.options[apiFunctionSelect.selectedIndex].value;
     switch (apiFunction) {
         case API_FUNCTIONS.blendImagesData:
         case API_FUNCTIONS.blendImages: {
-            const top = inputFiles.files[0];
-            const bot = inputFiles.files[1];
-            await pconvert.blendImagesBenchmarkAll(top, bot);
+            const bot = inputFiles.files[0];
+            const top = inputFiles.files[1];
+            await pconvert.blendImagesBenchmarkAll(bot, top);
             break;
         }
 
@@ -182,19 +183,18 @@ async function benchmark() {
 }
 
 async function setPConvertMetadata() {
-    const pconvert = await js.then(js => js);
+    const pconvert = await js;
     const constants = pconvert.getModuleConstants();
     metadata.innerHTML = JSON.stringify(constants, undefined, 2);
 }
 
 async function setAlgorithmsPlaceholder() {
-    const json = await placeholderJSON.then(json => json);
-    const placeholder = JSON.stringify(json.default, undefined, 2);
+    const placeholder = JSON.stringify(placeholderJSON, undefined, 2);
     textareaAlgorithms.setAttribute("placeholder", placeholder);
 }
 
 async function setAlgorithmSelectOptions() {
-    const pconvert = await js.then(js => js);
+    const pconvert = await js;
     const options = pconvert.getModuleConstants().ALGORITHMS;
 
     for (const option of options) {
@@ -206,7 +206,7 @@ async function setAlgorithmSelectOptions() {
 }
 
 async function setCompressionSelectOptions() {
-    const pconvert = await js.then(js => js);
+    const pconvert = await js;
     const options = pconvert.getModuleConstants().COMPRESSION_TYPES;
 
     for (const option of options) {
@@ -218,7 +218,7 @@ async function setCompressionSelectOptions() {
 }
 
 async function setFilterSelectOptions() {
-    const pconvert = await js.then(js => js);
+    const pconvert = await js;
     const options = pconvert.getModuleConstants().FILTER_TYPES;
 
     for (const option of options) {

@@ -1,4 +1,4 @@
-//! From and to conversions for rust and python types
+//! From and to conversions for rust and python types.
 
 use crate::blending::params::Value;
 use crate::errors::PConvertError;

@@ -1,7 +1,6 @@
-//! PNG decode/encode and load functions,
-//! console log macros,
+//! PNG decode/encode and load functions, console log macros,
 //! argument parsing from javascript input to inner-crate rust types
-//! and other utility functions
+//! and other utility functions.
 
 use crate::blending::params::{BlendAlgorithmParams, Value};
 use crate::blending::BlendAlgorithm;
@@ -45,7 +44,7 @@ macro_rules! console_log {
     ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
 }
 
-/// Receives a `File` and returns the decoded PNG byte buffer
+/// Receives a `File` and returns the decoded PNG byte buffer.
 pub async fn load_png(
     file: File,
     demultiply: bool,
@@ -56,7 +55,8 @@ pub async fn load_png(
     Ok(png)
 }
 
-/// Receives png buffer data and encodes it as a `File` with specified `CompressionType` and `FilterType`
+/// Receives png buffer data and encodes it as a `File` with specified
+/// `CompressionType` and `FilterType`.
 pub fn encode_file(
     image_buffer: ImageBuffer<Rgba<u8>, Vec<u8>>,
     compression: CompressionType,
@@ -72,7 +72,8 @@ pub fn encode_file(
     }
 }
 
-/// Receives png buffer data and encodes it as an `ImageData` object with specified `CompressionType` and `FilterType`
+/// Receives png buffer data and encodes it as an `ImageData` object with
+/// specified `CompressionType` and `FilterType`.
 pub fn encode_image_data(
     image_buffer: ImageBuffer<Rgba<u8>, Vec<u8>>,
     compression: CompressionType,
@@ -132,7 +133,8 @@ pub fn build_params(
     Ok(result)
 }
 
-/// Retrieves the `image::codecs::png::CompressionType` value from the `HashMap<String, JSONValue>` map if it exists.
+/// Retrieves the `image::codecs::png::CompressionType` value from the
+/// `HashMap<String, JSONValue>` map if it exists.
 /// Otherwise it returns the default value: `CompressionType::Fast`.
 pub fn get_compression_type(options: &Option<HashMap<String, JSONValue>>) -> CompressionType {
     options.as_ref().map_or(CompressionType::Fast, |options| {
@@ -145,7 +147,8 @@ pub fn get_compression_type(options: &Option<HashMap<String, JSONValue>>) -> Com
     })
 }
 
-/// Retrieves the `image::codecs::png::FilterType` value from the `HashMap<String, JSONValue>` map if it exists.
+/// Retrieves the `image::codecs::png::FilterType` value from the
+/// `HashMap<String, JSONValue>` map if it exists.
 /// Otherwise it returns the default value: `FilterType::NoFilter`.
 pub fn get_filter_type(options: &Option<HashMap<String, JSONValue>>) -> FilterType {
     options.as_ref().map_or(FilterType::NoFilter, |options| {
@@ -158,7 +161,8 @@ pub fn get_filter_type(options: &Option<HashMap<String, JSONValue>>) -> FilterTy
     })
 }
 
-/// Logs the header/column names of the benchmarks table to the browser console (with `console.log`)
+/// Logs the header/column names of the benchmarks table to the browser
+/// console (with `console.log`).
 pub fn log_benchmark_header() {
     console_log!(
         "{:<20}{:<20}{:<20}{:<20}",
@@ -169,7 +173,8 @@ pub fn log_benchmark_header() {
     );
 }
 
-/// Logs one line (algorithm, compression, filter, blend time, read time, write time) of the benchmarks table to the browser console (with `console.log`)
+/// Logs one line (algorithm, compression, filter, blend time, read time, write time)
+/// of the benchmarks table to the browser console (with `console.log`).
 pub fn log_benchmark(
     algorithm: String,
     compression: CompressionType,
@@ -193,12 +198,12 @@ pub fn log_benchmark(
     );
 }
 
-/// Wrapper function for nodejs `fs.readFileSync`
+/// Wrapper function for nodejs `fs.readFileSync`.
 pub fn node_read_file_sync(fs: &NodeFs, path: &str) -> Vec<u8> {
     fs.readFileSync(path)
 }
 
-/// Rust Future from nodejs `fs.readFile` Promise (awaitable in node)
+/// Rust Future from nodejs `fs.readFile` Promise (awaitable in node).
 pub fn node_read_file_async(fs: &NodeFs, path: &str) -> wasm_bindgen_futures::JsFuture {
     let promise = js_sys::Promise::new(&mut |resolve, reject| {
         let callback = js_sys::Function::new_with_args(
@@ -212,7 +217,7 @@ pub fn node_read_file_async(fs: &NodeFs, path: &str) -> wasm_bindgen_futures::Js
     wasm_bindgen_futures::JsFuture::from(promise)
 }
 
-/// Wrapper function for nodejs `fs.writeFileSync`
+/// Wrapper function for nodejs `fs.writeFileSync`.
 pub fn node_write_file_sync(fs: &NodeFs, path: &str, data: &[u8]) {
     fs.writeFileSync(path, data);
 }
