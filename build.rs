@@ -39,7 +39,7 @@ fn main() {
     // in case we're running under docs.rs then we must return the control
     // flow immediately as it's not possible to generated files under the
     // expected read only file system present in docs.rs build environment
-    if let Ok(_) = std::env::var("DOCS_RS") {
+    if std::env::var("DOCS_RS").is_ok() {
         return;
     }
 
