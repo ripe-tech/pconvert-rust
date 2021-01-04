@@ -21,7 +21,7 @@ pub fn print_usage() {
 pub fn pcompose(args: &mut env::Args) -> Result<(), PConvertError> {
     let dir = match args.next() {
         Some(name) => {
-            if name.chars().last().unwrap() == '/' {
+            if name.ends_with('/') {
                 name
             } else {
                 format!("{}/", name)
@@ -93,7 +93,7 @@ pub fn pconvert(args: &mut env::Args) -> Result<(), PConvertError> {
 pub fn pbenchmark(args: &mut env::Args) -> Result<(), PConvertError> {
     let dir = match args.next() {
         Some(name) => {
-            if name.chars().last().unwrap() == '/' {
+            if name.ends_with('/') {
                 name
             } else {
                 format!("{}/", name)
@@ -115,7 +115,7 @@ pub fn pbenchmark(args: &mut env::Args) -> Result<(), PConvertError> {
         "{:<20}{:<20}{:<20}{:<20}",
         "Algorithm", "Compression", "Filter", "Times"
     );
-    println!("{}", str::from_utf8(&vec![b'-'; 100]).unwrap());
+    println!("{}", str::from_utf8(&[b'-'; 100]).unwrap());
 
     // tries and outputs to stdout times for different combinations of
     // blending algorithms, compression and filter types

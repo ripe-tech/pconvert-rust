@@ -35,3 +35,5 @@ pub mod pymodule;
 
 #[cfg(feature = "wasm-extension")]
 pub mod wasm;
+
+pub mod test;
