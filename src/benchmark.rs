@@ -74,6 +74,12 @@ impl Benchmark {
     }
 }
 
+impl Default for Benchmark {
+    fn default() -> Self {
+        Benchmark::new()
+    }
+}
+
 impl Display for Benchmark {
     fn fmt(&self, fmt: &mut Formatter) -> Result {
         fmt.write_str(&format!(

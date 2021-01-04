@@ -115,7 +115,7 @@ pub fn pbenchmark(args: &mut env::Args) -> Result<(), PConvertError> {
         "{:<20}{:<20}{:<20}{:<20}",
         "Algorithm", "Compression", "Filter", "Times"
     );
-    println!("{}", str::from_utf8(&vec![b'-'; 100]).unwrap());
+    println!("{}", str::from_utf8(&[b'-'; 100]).unwrap());
 
     // tries and outputs to stdout times for different combinations of
     // blending algorithms, compression and filter types
