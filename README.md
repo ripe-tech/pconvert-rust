@@ -179,7 +179,9 @@ pythons setup.py test
 For WASM API tests:
 
 ```bash
-cargo test --features wasm-extension
+wasm-pack build --release --target=nodejs -- --features wasm-extension
+npm install
+npm run test
 ```
 
 ## Documentation
