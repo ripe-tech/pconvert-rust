@@ -34,10 +34,10 @@ jobs:
       - run: |
           wasm-pack build --release --target=bundler --out-name pconvert_rust_bundler  -- --features wasm-extension
           wasm-pack build --release --target=nodejs -- --features wasm-extension
-          sed -i 's/"pconvert_rust_bg.wasm"/"pconvert_rust_bg.wasm","pconvert_rust_bundler_bg.wasm"/g' pkg/package.json
-          sed -i 's/"pconvert_rust.js"/"pconvert_rust.js","pconvert_rust_bundler.js"/g' pkg/package.json
-          sed -i 's/"pconvert_rust_bg.js"/"pconvert_rust_bg.js","pconvert_rust_bundler_bg.js"/g' pkg/package.json
-          sed -i 's/"pconvert_rust.d.ts"/"pconvert_rust.d.ts","pconvert_rust_bundler.d.ts"/g' pkg/package.json
+          sed -i 's/"    pconvert_rust_bg.wasm"/"    pconvert_rust_bg.wasm","pconvert_rust_bundler_bg.wasm"/g' pkg/package.json
+          sed -i 's/"    pconvert_rust.js"/"    pconvert_rust.js","pconvert_rust_bundler.js"/g' pkg/package.json
+          sed -i 's/"    pconvert_rust_bg.js"/"    pconvert_rust_bg.js","pconvert_rust_bundler_bg.js"/g' pkg/package.json
+          sed -i 's/"    pconvert_rust.d.ts"/"    pconvert_rust.d.ts","pconvert_rust_bundler.d.ts"/g' pkg/package.json
       - run: |
           echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
           cd pkg && npm publish
