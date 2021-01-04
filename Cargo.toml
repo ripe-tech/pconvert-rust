@@ -1,7 +1,7 @@
 [package]
 name = "pconvert-rust"
 description = "Rust version of P(NG)Convert, a simple PNG conversion tool."
-version = "0.4.6"
+version = "0.4.7"
 authors = ["Platforme <development@platforme.com>"]
 license = "Apache-2.0"
 repository = "https://github.com/ripe-tech/pconvert-rust"
