@@ -67,7 +67,7 @@ impl ThreadPool {
     ///
     /// # Arguments
     ///
-    /// * `func` - The task to execute.  
+    /// * `func` - The task to execute.
     ///
     /// # Return
     ///
