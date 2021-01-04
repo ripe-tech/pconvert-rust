@@ -9,9 +9,6 @@ use image::{ColorType, ImageBuffer, Rgba};
 use std::fs::File;
 use std::io::{BufWriter, Read, Write};
 
-#[cfg(not(feature = "wasm-extension"))]
-use mtpng;
-
 /// Decodes and returns a PNG.
 ///
 /// # Arguments

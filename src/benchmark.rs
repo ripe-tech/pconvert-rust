@@ -33,9 +33,15 @@ impl Benchmark {
     /// Executes the function to benchmark and adds the time spent
     /// to a certain counter with the given `target_fn`.
     ///
-    /// ```rust
+    /// ```no_run
+    /// use pconvert_rust::benchmark::Benchmark;
+    /// use pconvert_rust::utils::read_png_from_file;
+    ///
+    /// let mut benchmark = Benchmark::new();
+    /// let demultiply = false;
+    /// let path = "path/to/file.png".to_owned();
     /// let top = benchmark.execute(Benchmark::add_read_png_time, || {
-    ///    read_png_from_file(format!("{}back.png", dir), demultiply)
+    ///    read_png_from_file(path, demultiply)
     /// }).unwrap();
     /// ```
     pub fn execute<F, T, H>(&mut self, update_fn: H, target_fn: F) -> T
