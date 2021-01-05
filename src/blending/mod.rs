@@ -96,7 +96,7 @@ impl Display for BlendAlgorithm {
 pub fn blend_images(
     bot: &mut ImageBuffer<Rgba<u8>, Vec<u8>>,
     top: &ImageBuffer<Rgba<u8>, Vec<u8>>,
-    blending_algorithm: &impl Fn((&mut Rgba<u8>, &Rgba<u8>), &Option<BlendAlgorithmParams>) -> (),
+    blending_algorithm: &impl Fn((&mut Rgba<u8>, &Rgba<u8>), &Option<BlendAlgorithmParams>),
     algorithm_params: &Option<BlendAlgorithmParams>,
 ) {
     for pixel_pair in bot.pixels_mut().zip(top.pixels()) {
@@ -135,7 +135,7 @@ pub fn multiply_image(img: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
 /// * `algorithm` - The BlendAlgorithm enum variant.
 pub fn get_blending_algorithm(
     algorithm: &BlendAlgorithm,
-) -> impl Fn((&mut Rgba<u8>, &Rgba<u8>), &Option<BlendAlgorithmParams>) -> () {
+) -> impl Fn((&mut Rgba<u8>, &Rgba<u8>), &Option<BlendAlgorithmParams>) {
     match algorithm {
         BlendAlgorithm::Alpha => blend_alpha,
         BlendAlgorithm::Multiplicative => blend_multiplicative,
