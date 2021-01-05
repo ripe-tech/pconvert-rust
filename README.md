@@ -173,7 +173,7 @@ cargo test
 For python API tests:
 
 ```bash
-pythons setup.py test
+python setup.py test
 ```
 
 For WASM API tests:
