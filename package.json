@@ -24,8 +24,10 @@
     "pretty": "npm run prettier && npm run lint-fix",
     "test": "mocha pconvert_rust/test/ --recursive"
   },
+  "dependencies": {
+    "pconvert-rust": "^0.4.7"
+  },
   "devDependencies": {
-    "pconvert-rust": "^0.2.0",
     "eslint": "^6.8.0",
     "eslint-config-hive": "^0.2.2",
     "mocha": "^6.2.2",
