@@ -4,6 +4,7 @@
 
 Cargo.lock
 package-lock.json
+yarn.lock
 
 generated.rs
 
