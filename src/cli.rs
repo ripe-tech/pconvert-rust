@@ -4,7 +4,7 @@ use pconvert_rust::benchmark::Benchmark;
 use pconvert_rust::blending::BlendAlgorithm;
 use pconvert_rust::constants;
 use pconvert_rust::errors::PConvertError;
-use pconvert_rust::tests::{apply_blue_filter, compose, compose_parallel, Background};
+use pconvert_rust::test::{apply_blue_filter, compose, compose_parallel, Background};
 use pconvert_rust::utils::read_png_from_file;
 use std::env;
 use std::str;

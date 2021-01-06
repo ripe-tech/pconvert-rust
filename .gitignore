@@ -3,6 +3,8 @@
 .DS_Store
 
 Cargo.lock
+package-lock.json
+
 generated.rs
 
 /assets/**/result*
@@ -18,4 +20,3 @@ generated.rs
 /pconvert_rust.egg-info
 
 node_modules/
-package-lock.json

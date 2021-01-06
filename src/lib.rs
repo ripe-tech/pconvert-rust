@@ -30,8 +30,6 @@ pub mod errors;
 pub mod parallelism;
 pub mod utils;
 
-pub mod tests;
-
 #[cfg(feature = "python-extension")]
 pub mod pymodule;
 
