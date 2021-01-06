@@ -61,11 +61,11 @@ pub fn read_png_from_file(
 pub fn encode_png(
     writable_buff: impl Write,
     png: &ImageBuffer<Rgba<u8>, Vec<u8>>,
-    compression: CompressionType,
-    filter: FilterType,
+    compression: &CompressionType,
+    filter: &FilterType,
 ) -> Result<(), PConvertError> {
     let buff = BufWriter::new(writable_buff);
-    let encoder = PngEncoder::new_with_quality(buff, compression, filter);
+    let encoder = PngEncoder::new_with_quality(buff, *compression, *filter);
     Ok(encoder.encode(&png, png.width(), png.height(), ColorType::Rgba8)?)
 }
 
@@ -81,8 +81,8 @@ pub fn encode_png(
 pub fn write_png_to_file(
     file_out: String,
     png: &ImageBuffer<Rgba<u8>, Vec<u8>>,
-    compression: CompressionType,
-    filter: FilterType,
+    compression: &CompressionType,
+    filter: &FilterType,
 ) -> Result<(), PConvertError> {
     let file = File::create(&file_out)?;
     encode_png(file, png, compression, filter)
@@ -102,7 +102,7 @@ pub fn write_png_to_file_d(
     png: &ImageBuffer<Rgba<u8>, Vec<u8>>,
 ) -> Result<(), PConvertError> {
     let file = File::create(&file_out)?;
-    encode_png(file, png, CompressionType::Fast, FilterType::NoFilter)
+    encode_png(file, png, &CompressionType::Fast, &FilterType::NoFilter)
 }
 
 /// [NOT SUPPORTED IN WASM] Multi-threaded write version of a

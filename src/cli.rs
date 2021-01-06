@@ -40,14 +40,14 @@ pub fn pcompose(args: &mut env::Args) -> Result<(), PConvertError> {
     ];
 
     // composes with different combinations of blending algorithms and backgrounds
-    for background in backgrounds {
+    for background in &backgrounds {
         for algorithm in constants::ALGORITHMS.iter() {
             compose(
                 &dir,
-                BlendAlgorithm::from_str(algorithm).unwrap(),
-                background.clone(),
-                CompressionType::Fast,
-                FilterType::NoFilter,
+                &BlendAlgorithm::from_str(algorithm).unwrap(),
+                background,
+                &CompressionType::Fast,
+                &FilterType::NoFilter,
                 &mut benchmark,
             )?;
         }
@@ -132,10 +132,10 @@ pub fn pbenchmark(args: &mut env::Args) -> Result<(), PConvertError> {
                 } else {
                     compose(
                         &dir,
-                        BlendAlgorithm::from_str(&algorithm).unwrap(),
-                        Background::Alpha,
-                        *compression,
-                        *filter,
+                        &BlendAlgorithm::from_str(&algorithm).unwrap(),
+                        &Background::Alpha,
+                        compression,
+                        filter,
                         &mut benchmark,
                     )?;
                 }

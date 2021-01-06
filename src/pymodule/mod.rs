@@ -184,7 +184,7 @@ fn blend_images_single_thread(
 
     let compression_type = get_compression_type(&options);
     let filter_type = get_filter_type(&options);
-    write_png_to_file(target_path, &bot, compression_type, filter_type)?;
+    write_png_to_file(target_path, &bot, &compression_type, &filter_type)?;
 
     Ok(())
 }
@@ -280,7 +280,7 @@ fn blend_multiple_single_thread(
 
     let compression_type = get_compression_type(&options);
     let filter_type = get_filter_type(&options);
-    write_png_to_file(out_path, &composition, compression_type, filter_type)?;
+    write_png_to_file(out_path, &composition, &compression_type, &filter_type)?;
 
     Ok(())
 }

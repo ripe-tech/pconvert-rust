@@ -76,14 +76,14 @@ fn test_compose() {
     ];
 
     // composes with different combinations of blending algorithms and backgrounds
-    for background in backgrounds {
+    for background in &backgrounds {
         for algorithm in constants::ALGORITHMS.iter() {
             compose(
                 &TEST_DIR,
-                BlendAlgorithm::from_str(algorithm).unwrap(),
-                background.clone(),
-                CompressionType::Fast,
-                FilterType::NoFilter,
+                &BlendAlgorithm::from_str(algorithm).unwrap(),
+                background,
+                &CompressionType::Fast,
+                &FilterType::NoFilter,
                 &mut benchmark,
             )
             .expect(&format!(
@@ -140,10 +140,10 @@ fn test_convert() {
 
 pub fn compose(
     dir: &str,
-    algorithm: BlendAlgorithm,
-    background: Background,
-    compression: CompressionType,
-    filter: FilterType,
+    algorithm: &BlendAlgorithm,
+    background: &Background,
+    compression: &CompressionType,
+    filter: &FilterType,
     benchmark: &mut Benchmark,
 ) -> Result<String, PConvertError> {
     let demultiply = is_algorithm_multiplied(&algorithm);
