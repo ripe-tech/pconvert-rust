@@ -53,7 +53,7 @@ fn test_benchmark() {
     Benchmark::add_write_png_time(&mut benchmark1, 150);
 
     assert!(benchmark1.total() == 100 + 200 + 150);
-    
+
     let mut benchmark2 = Benchmark::new();
     Benchmark::add_blend_time(&mut benchmark2, 50);
     Benchmark::add_read_png_time(&mut benchmark2, 100);
@@ -86,10 +86,7 @@ fn test_compose() {
                 &FilterType::NoFilter,
                 &mut benchmark,
             )
-            .expect(&format!(
-                "failed composing with algorithm={} background={} compression=Fast filter=NoFilter",
-                algorithm, background
-            ));
+            .unwrap_or_else(|_| panic!("failed composing with algorithm={} background={} compression=Fast filter=NoFilter", algorithm, background));
         }
     }
 }
@@ -115,10 +112,7 @@ fn test_compose_parallel() {
                 FilterType::NoFilter,
                 &mut benchmark,
             )
-            .expect(&format!(
-                "failed composing with algorithm={} background={} compression=Fast filter=NoFilter",
-                algorithm, background
-            ));
+            .unwrap_or_else(|_| panic!("failed composing with algorithm={} background={} compression=Fast filter=NoFilter", algorithm, background));
         }
     }
 }
@@ -126,8 +120,8 @@ fn test_compose_parallel() {
 #[test]
 fn test_convert() {
     let file_in = format!("{}{}", TEST_DIR, TEST_FILE);
-    let mut img =
-        read_png_from_file(file_in.clone(), false).expect(&format!("failure reading {}", file_in));
+    let mut img = read_png_from_file(file_in.clone(), false)
+        .unwrap_or_else(|_| panic!("failure reading {}", file_in));
 
     for pixel in img.pixels_mut() {
         apply_blue_filter(pixel);
@@ -135,7 +129,7 @@ fn test_convert() {
 
     let out = format!("{}{}", TEST_DIR, TEST_FILE_OUT);
     img.save_with_format(out.clone(), ImageFormat::Png)
-        .expect(&format!("failure writing {}", out));
+        .unwrap_or_else(|_| panic!("failure writing {}", out));
 }
 
 pub fn compose(
@@ -148,37 +142,44 @@ pub fn compose(
 ) -> Result<String, PConvertError> {
     let demultiply = is_algorithm_multiplied(&algorithm);
 
-    let mut bot = benchmark.execute(Benchmark::add_read_png_time, || {
-        read_png_from_file(format!("{}sole.png", dir), demultiply)
-    })?;
-
     let algorithm_fn = get_blending_algorithm(&algorithm);
 
     // reads one PNG at the time and blends it with the current result
+    // these values are hardcoded by the multiple layer files
+    let background_file = format!("background_{}.png", background);
+    let png_file_names = vec![
+        "sole.png",
+        "back.png",
+        "front.png",
+        "shoelace.png",
+        &background_file,
+    ];
+
+    let png_paths = png_file_names
+        .iter()
+        .map(|name| format!("{}{}", dir, name))
+        .collect::<Vec<String>>();
 
     let top = benchmark.execute(Benchmark::add_read_png_time, || {
-        read_png_from_file(format!("{}back.png", dir), demultiply)
+        read_png_from_file(format!("{}sole.png", dir), demultiply)
     })?;
 
-    benchmark.execute(Benchmark::add_blend_time, || {
-        blend_images(&mut bot, &top, &algorithm_fn, &None)
-    });
+    let mut bot =
+        png_paths[..png_file_names.len() - 1]
+            .iter()
+            .fold(top, |mut composition, path| {
+                let layer = benchmark
+                    .execute(Benchmark::add_read_png_time, || {
+                        read_png_from_file(path.clone(), demultiply)
+                    })
+                    .unwrap();
 
-    let top = benchmark.execute(Benchmark::add_read_png_time, || {
-        read_png_from_file(format!("{}front.png", dir), demultiply)
-    })?;
+                benchmark.execute(Benchmark::add_blend_time, || {
+                    blend_images(&mut composition, &layer, &algorithm_fn, &None)
+                });
 
-    benchmark.execute(Benchmark::add_blend_time, || {
-        blend_images(&mut bot, &top, &algorithm_fn, &None)
-    });
-
-    let top = benchmark.execute(Benchmark::add_read_png_time, || {
-        read_png_from_file(format!("{}shoelace.png", dir), demultiply)
-    })?;
-
-    benchmark.execute(Benchmark::add_blend_time, || {
-        blend_images(&mut bot, &top, &algorithm_fn, &None)
-    });
+                composition
+            });
 
     if demultiply {
         benchmark.execute(Benchmark::add_blend_time, || multiply_image(&mut bot));
@@ -197,7 +198,7 @@ pub fn compose(
         "result_{}_{}_{:#?}_{:#?}.png",
         algorithm, background, compression, filter
     );
-    let file_out = format!("{}{}", dir, file_name.clone());
+    let file_out = format!("{}{}", dir, file_name);
     benchmark.execute(Benchmark::add_write_png_time, || {
         write_png_to_file(file_out, &composition, compression, filter)
     })?;
@@ -283,7 +284,7 @@ pub fn compose_parallel(
         "result_{}_{}_{:#?}_{:#?}.png",
         algorithm, background, compression, filter
     );
-    let file_out = format!("{}{}", dir, file_name.clone());
+    let file_out = format!("{}{}", dir, file_name);
     benchmark.execute(Benchmark::add_write_png_time, || {
         write_png_parallel(file_out, &composition, compression, filter)
     })?;
