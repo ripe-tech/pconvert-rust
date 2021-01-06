@@ -1,3 +1,3 @@
 module.exports = {
-  extends: ["hive", "hive/prettier"]
+    extends: ["hive", "hive/prettier"]
 };
