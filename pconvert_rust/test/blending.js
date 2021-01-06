@@ -8,7 +8,7 @@ const TEST_ASSETS = path.resolve("assets/test");
 describe("NodeJS WASM", async function() {
     it("should have known module constants", () => {
         const constants = pconvert.getModuleConstants();
-        const keys = [
+        const mandatoryKeys = [
             "ALGORITHMS",
             "COMPILATION_DATE",
             "COMPILATION_TIME",
@@ -21,8 +21,7 @@ describe("NodeJS WASM", async function() {
             "PLATFORM_CPU_BITS",
             "VERSION"
         ];
-        keys.forEach(k => assert(k in constants));
-        Object.keys(constants).forEach(k => assert(keys.includes(k)));
+        assert.deepStrictEqual(mandatoryKeys, Object.keys(constants));
     });
 
     it("should blend multiple files from local file system", () => {
@@ -52,6 +51,6 @@ describe("NodeJS WASM", async function() {
         const algorithm = "alpha";
         const algorithms = null;
         await pconvert.blendMultipleFsAsync(paths, out, algorithm, algorithms, true);
-        assert(fs.existsSync(out));
+        assert(fs.existsSync(out), `Expected final composition to be at ${out}`);
     });
 });
