@@ -286,7 +286,7 @@ pub fn compose_parallel(
     );
     let file_out = format!("{}{}", dir, file_name);
     benchmark.execute(Benchmark::add_write_png_time, || {
-        write_png_parallel(file_out, &composition, compression, filter)
+        write_png_parallel(file_out, &composition, &compression, &filter)
     })?;
 
     Ok(file_name)

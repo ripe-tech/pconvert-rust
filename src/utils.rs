@@ -118,8 +118,8 @@ pub fn write_png_to_file_d(
 pub fn write_png_parallel(
     file_out: String,
     png: &ImageBuffer<Rgba<u8>, Vec<u8>>,
-    compression: CompressionType,
-    filter: FilterType,
+    compression: &CompressionType,
+    filter: &FilterType,
 ) -> Result<(), PConvertError> {
     let writer = File::create(file_out)?;
 
@@ -128,8 +128,8 @@ pub fn write_png_parallel(
     header.set_color(mtpng::ColorType::TruecolorAlpha, 8)?;
 
     let mut options = mtpng::encoder::Options::new();
-    options.set_compression_level(mtpng_compression_from(compression))?;
-    options.set_filter_mode(mtpng::Mode::Fixed(mtpng_filter_from(filter)))?;
+    options.set_compression_level(mtpng_compression_from(*compression))?;
+    options.set_filter_mode(mtpng::Mode::Fixed(mtpng_filter_from(*filter)))?;
 
     let mut encoder = mtpng::encoder::Encoder::new(writer, &options);
     encoder.write_header(&header)?;
@@ -152,8 +152,8 @@ pub fn write_png_parallel(
 pub fn write_png_parallel(
     file_out: String,
     png: &ImageBuffer<Rgba<u8>, Vec<u8>>,
-    compression: CompressionType,
-    filter: FilterType,
+    compression: &CompressionType,
+    filter: &FilterType,
 ) -> Result<(), PConvertError> {
     write_png_to_file(file_out, png, compression, filter)
 }
