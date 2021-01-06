@@ -14,7 +14,7 @@ use pyo3::PyErr;
 impl From<PConvertError> for PyErr {
     fn from(err: PConvertError) -> PyErr {
         match err {
-            PConvertError::ArgumentError(err) => PyAttributeError::new_err(err.to_string()),
+            PConvertError::ArgumentError(err) => PyAttributeError::new_err(err),
             PConvertError::ImageLibError(err) => PyException::new_err(err.to_string()),
             PConvertError::UnsupportedImageTypeError => {
                 PyNotImplementedError::new_err(err.to_string())

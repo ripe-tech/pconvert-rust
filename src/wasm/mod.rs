@@ -166,9 +166,7 @@ pub fn blend_multiple_data_js(
             img_data.height(),
             img_data.data().to_vec(),
         )
-        .ok_or(PConvertError::ArgumentError(
-            "Could not parse \"bot\"".to_string(),
-        ))?;
+        .ok_or_else(|| PConvertError::ArgumentError("Could not parse \"bot\"".to_string()))?;
 
         image_buffers.push(img_buffer);
     }
@@ -273,7 +271,7 @@ pub fn blend_multiple_fs(
     let composition = node_read_file_sync(&node_fs, &first_path);
     let mut composition = decode_png(&composition[..], first_demultiply)?;
 
-    let mut zip_iter = img_paths_iter.zip(algorithms_to_apply.iter());
+    let zip_iter = img_paths_iter.zip(algorithms_to_apply.iter());
     for pair in zip_iter {
         let path = pair.0.as_string().expect("path must be a string");
         let (algorithm, algorithm_params) = pair.1;
@@ -439,7 +437,7 @@ fn blend_multiple_buffers(
     if first_demultiply {
         demultiply_image(&mut composition);
     }
-    let mut zip_iter = image_buffers_iter.zip(algorithms_to_apply.iter());
+    let zip_iter = image_buffers_iter.zip(algorithms_to_apply.iter());
     for pair in zip_iter {
         let mut current_layer = pair.0.to_owned();
         let (algorithm, algorithm_params) = pair.1;

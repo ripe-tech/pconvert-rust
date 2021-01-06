@@ -169,7 +169,7 @@ fn blend_images_single_thread(
     is_inline: Option<bool>,
     options: Option<Options>,
 ) -> PyResult<()> {
-    let algorithm = algorithm.unwrap_or(String::from("multiplicative"));
+    let algorithm = algorithm.unwrap_or_else(|| String::from("multiplicative"));
     let algorithm = build_algorithm(&algorithm)?;
 
     let _is_inline = is_inline.unwrap_or(false);
@@ -198,7 +198,7 @@ unsafe fn blend_images_multi_thread(
     options: Option<Options>,
     num_threads: i32,
 ) -> PyResult<()> {
-    let algorithm = algorithm.unwrap_or(String::from("multiplicative"));
+    let algorithm = algorithm.unwrap_or_else(|| String::from("multiplicative"));
     let algorithm = build_algorithm(&algorithm)?;
     let _is_inline = is_inline.unwrap_or(false);
     let demultiply = is_algorithm_multiplied(&algorithm);
@@ -263,8 +263,8 @@ fn blend_multiple_single_thread(
     let first_path = img_paths_iter.next().unwrap().to_string();
     let first_demultiply = is_algorithm_multiplied(&algorithms[0].0);
     let mut composition = read_png_from_file(first_path, first_demultiply)?;
-    let mut zip_iter = img_paths_iter.zip(algorithms.iter());
-    while let Some(pair) = zip_iter.next() {
+    let zip_iter = img_paths_iter.zip(algorithms.iter());
+    for pair in zip_iter {
         let path = pair.0.to_string();
         let (algorithm, algorithm_params) = pair.1;
         let demultiply = is_algorithm_multiplied(&algorithm);
