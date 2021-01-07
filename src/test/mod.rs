@@ -132,6 +132,10 @@ fn test_convert() {
         .unwrap_or_else(|_| panic!("failure writing {}", out));
 }
 
+/// Testing utility that composes an image made up of the specified
+/// background image, using the specified algorithm, compression and filter types.
+/// Looks for the layers and outputs the final composition to the given `dir` and
+/// takes track of times spent in each phase in the benchmark struct
 pub fn compose(
     dir: &str,
     algorithm: &BlendAlgorithm,
@@ -206,6 +210,9 @@ pub fn compose(
     Ok(file_name)
 }
 
+/// Multi-threaded version of the `compose` testing utility
+/// Reads each PNG in a different thread and makes use of the
+/// `mtpng` library to write the final composition
 pub fn compose_parallel(
     dir: &str,
     algorithm: BlendAlgorithm,
@@ -250,7 +257,7 @@ pub fn compose_parallel(
         }
     })?;
 
-    for i in 1..=result_channels.len() - 2 {
+    for i in 1..=3 {
         let top = benchmark.execute(Benchmark::add_read_png_time, || {
             if let Ok(ResultMessage::ImageResult(result)) = result_channels[i].recv() {
                 result

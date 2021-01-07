@@ -22,7 +22,8 @@
         "lint-fix": "eslint \"pconvert_rust/test/**/*.js\" --fix",
         "prettier": "prettier \"./**/*.{js,json}\" --write",
         "pretty": "npm run prettier && npm run lint-fix",
-        "test": "mocha pconvert_rust/test/ --recursive"
+        "build": "wasm-pack build --release --target=nodejs -- --features wasm-extension",
+        "test": "npm run build && mocha pconvert_rust/test/ --recursive"
     },
     "dependencies": {
         "pconvert-rust": "^0.4.9"
