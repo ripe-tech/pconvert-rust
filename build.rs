@@ -23,7 +23,6 @@
 /// ```
 use chrono::Utc;
 use image::codecs::png::{CompressionType, FilterType};
-use num_cpus;
 use regex::Regex;
 use std::fs::{File, OpenOptions};
 use std::io::Write;
@@ -33,7 +32,7 @@ use std::str;
 
 const BUILD_OUT_FILE: &str = "constants/generated.rs";
 const SOURCE_DIR: &str = "./src";
-const CARGO_TOML: &'static str = include_str!("Cargo.toml");
+const CARGO_TOML: &str = include_str!("Cargo.toml");
 
 fn main() {
     // in case we're running under docs.rs then we must return the control
@@ -49,7 +48,7 @@ fn main() {
         .write(true)
         .create(true)
         .open(dest_path)
-        .expect(&format!("Can't open '{}'", BUILD_OUT_FILE));
+        .unwrap_or_else(|_| panic!("Can't open '{}'", BUILD_OUT_FILE));
 
     let module_doc_string = "//! Global constants, such as compiler version used, algorithms, compression and filters supported and others\n";
     writeln!(file, "{}", module_doc_string).unwrap();
@@ -96,7 +95,7 @@ fn main() {
         .output()
         .ok()
         .and_then(|output| String::from_utf8(output.stdout).ok())
-        .unwrap_or("UNKNOWN".to_string());
+        .unwrap_or_else(|| "UNKNOWN".to_string());
     let re = Regex::new("rustc ([\\d.\\d.\\d]*)").unwrap();
     let compiler_version = re
         .captures(&compiler_version)
@@ -168,17 +167,12 @@ where
         std::any::type_name::<T>(),
         val
     )
-    .expect(&format!(
-        "Failed to write '{}' to 'build_constants.rs'",
-        key
-    ));
+    .unwrap_or_else(|_| panic!("Failed to write '{}' to 'build_constants.rs'", key));
 }
 
 fn write_str_constant_to_file(file: &mut File, key: &str, val: &str) {
-    writeln!(file, "pub const {}: &str = \"{}\";", key, val).expect(&format!(
-        "Failed to write '{}' to 'build_constants.rs'",
-        key
-    ));
+    writeln!(file, "pub const {}: &str = \"{}\";", key, val)
+        .unwrap_or_else(|_| panic!("Failed to write '{}' to 'build_constants.rs'", key));
 }
 
 fn write_vec_constant_to_file<T>(file: &mut File, key: &str, vec: Vec<T>)
@@ -198,10 +192,7 @@ where
         vec.len(),
         list_str
     )
-    .expect(&format!(
-        "Failed to write '{}' to 'build_constants.rs'",
-        key
-    ));
+    .unwrap_or_else(|_| panic!("Failed to write '{}' to 'build_constants.rs'", key));
 }
 
 fn write_enum_variants_to_file<T>(file: &mut File, key: &str, vec: Vec<T>)
@@ -221,8 +212,5 @@ where
         vec.len(),
         list_str
     )
-    .expect(&format!(
-        "Failed to write '{}' to 'build_constants.rs'",
-        key
-    ));
+    .unwrap_or_else(|_| panic!("Failed to write '{}' to 'build_constants.rs'", key));
 }
