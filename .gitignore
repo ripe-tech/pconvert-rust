@@ -16,3 +16,6 @@ generated.rs
 /build
 /target
 /pconvert_rust.egg-info
+
+package-lock.json
+/node_modules
