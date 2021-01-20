@@ -107,7 +107,7 @@ async fn blend_multiple_benchmark_js(
     image_files: JsValue,
     target_file_name: String,
     algorithm: Option<String>,
-    algorithms: Option<Box<[JsValue]>>,
+    algorithms: Option<Vec<JsValue>>,
     is_inline: Option<bool>,
     compression: CompressionType,
     filter: FilterType,

@@ -115,7 +115,7 @@ pub async fn blend_multiple_js(
     image_files: JsValue,
     target_file_name: String,
     algorithm: Option<String>,
-    algorithms: Option<Box<[JsValue]>>,
+    algorithms: Option<Vec<JsValue>>,
     is_inline: Option<bool>,
     options: JsValue,
 ) -> Result<File, JsValue> {
@@ -148,7 +148,7 @@ pub async fn blend_multiple_js(
 pub fn blend_multiple_data_js(
     images: &JsValue,
     algorithm: Option<String>,
-    algorithms: Option<Box<[JsValue]>>,
+    algorithms: Option<Vec<JsValue>>,
     is_inline: Option<bool>,
     options: JsValue,
 ) -> Result<ImageData, JsValue> {
@@ -215,10 +215,10 @@ pub fn get_module_constants_js() -> JsValue {
 /// `options` given. Algorithm defaults to `BlendAlgorithm::Multiplicative`.
 #[wasm_bindgen(js_name = blendMultipleFs)]
 pub fn blend_multiple_fs(
-    image_paths: Box<[JsValue]>,
+    image_paths: Vec<JsValue>,
     out_path: String,
     algorithm: Option<String>,
-    algorithms: Option<Box<[JsValue]>>,
+    algorithms: Option<Vec<JsValue>>,
     is_inline: Option<bool>,
     options: JsValue,
 ) -> Result<(), JsValue> {
@@ -238,7 +238,7 @@ pub fn blend_multiple_fs(
 
     let algorithms_to_apply: Vec<(BlendAlgorithm, Option<BlendAlgorithmParams>)> =
         if let Some(algorithms) = algorithms {
-            build_params(algorithms)?
+            build_params(&algorithms)?
         } else if let Some(algorithm) = algorithm {
             let algorithm = build_algorithm(&algorithm)?;
             vec![(algorithm, None); num_images - 1]
@@ -308,10 +308,10 @@ pub fn blend_multiple_fs(
 /// `options` given. Algorithm defaults to `BlendAlgorithm::Multiplicative`.
 #[wasm_bindgen(js_name = blendMultipleFsAsync)]
 pub async fn blend_multiple_fs_async(
-    image_paths: Box<[JsValue]>,
+    image_paths: Vec<JsValue>,
     out_path: String,
     algorithm: Option<String>,
-    algorithms: Option<Box<[JsValue]>>,
+    algorithms: Option<Vec<JsValue>>,
     is_inline: Option<bool>,
     options: JsValue,
 ) -> Result<(), JsValue> {
@@ -331,7 +331,7 @@ pub async fn blend_multiple_fs_async(
 
     let algorithms_to_apply: Vec<(BlendAlgorithm, Option<BlendAlgorithmParams>)> =
         if let Some(algorithms) = algorithms {
-            build_params(algorithms)?
+            build_params(&algorithms)?
         } else if let Some(algorithm) = algorithm {
             let algorithm = build_algorithm(&algorithm)?;
             vec![(algorithm, None); num_images - 1]
@@ -402,7 +402,7 @@ pub async fn blend_multiple_fs_async(
 fn blend_multiple_buffers(
     image_buffers: Vec<ImageBuffer<Rgba<u8>, Vec<u8>>>,
     algorithm: Option<String>,
-    algorithms: Option<Box<[JsValue]>>,
+    algorithms: Option<Vec<JsValue>>,
     is_inline: Option<bool>,
 ) -> Result<ImageBuffer<Rgba<u8>, Vec<u8>>, PConvertError> {
     let num_images = image_buffers.len();
@@ -423,7 +423,7 @@ fn blend_multiple_buffers(
 
     let algorithms_to_apply: Vec<(BlendAlgorithm, Option<BlendAlgorithmParams>)> =
         if let Some(algorithms) = algorithms {
-            build_params(algorithms)?
+            build_params(&algorithms)?
         } else if let Some(algorithm) = algorithm {
             let algorithm = build_algorithm(&algorithm)?;
             vec![(algorithm, None); num_images - 1]

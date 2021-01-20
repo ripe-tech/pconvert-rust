@@ -105,19 +105,18 @@ pub fn build_algorithm(algorithm: &str) -> Result<BlendAlgorithm, PConvertError>
 /// Attempts to build a vector of blending operations and extra parameters.
 /// One pair per blending operation. Returns a `PConvertError` if it fails parsing.
 pub fn build_params(
-    algorithms: Box<[JsValue]>,
+    algorithms: &[JsValue],
 ) -> Result<Vec<(BlendAlgorithm, Option<BlendAlgorithmParams>)>, PConvertError> {
     let mut result = Vec::new();
 
-    for i in 0..algorithms.len() {
-        let element = &algorithms[i];
-        if element.is_string() {
+    for algorithm in algorithms {
+        if algorithm.is_string() {
             let algorithm =
-                build_algorithm(&element.as_string().unwrap_or_else(|| "multiplicative".to_string()))?;
+                build_algorithm(&algorithm.as_string().unwrap_or_else(|| "multiplicative".to_string()))?;
 
             result.push((algorithm, None));
-        } else if element.is_object() {
-            let params: JSONParams = element.into_serde::<JSONParams>().unwrap();
+        } else if algorithm.is_object() {
+            let params: JSONParams = algorithm.into_serde::<JSONParams>().unwrap();
             let algorithm = build_algorithm(&params.algorithm)?;
 
             let mut blending_params = BlendAlgorithmParams::new();
