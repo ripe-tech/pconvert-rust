@@ -92,7 +92,7 @@ pub fn encode_image_data(
 
 /// Attempts to parse a `&String` to a `BlendAlgorithm`.
 /// Returns the enum variant if it suceeds. Otherwise it returns a `PConvertError`.
-pub fn build_algorithm(algorithm: &String) -> Result<BlendAlgorithm, PConvertError> {
+pub fn build_algorithm(algorithm: &str) -> Result<BlendAlgorithm, PConvertError> {
     match BlendAlgorithm::from_str(&algorithm) {
         Ok(algorithm) => Ok(algorithm),
         Err(algorithm) => Err(PConvertError::ArgumentError(format!(
@@ -113,7 +113,7 @@ pub fn build_params(
         let element = &algorithms[i];
         if element.is_string() {
             let algorithm =
-                build_algorithm(&element.as_string().unwrap_or("multiplicative".to_string()))?;
+                build_algorithm(&element.as_string().unwrap_or_else(|| "multiplicative".to_string()))?;
 
             result.push((algorithm, None));
         } else if element.is_object() {

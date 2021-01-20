@@ -71,12 +71,10 @@ pub fn blend_images_data_js(
     };
 
     let (width, height) = (bot.width(), bot.height());
-    let mut bot = ImageBuffer::from_vec(width, height, bot.data().to_vec()).ok_or(
-        PConvertError::ArgumentError("Could not parse \"bot\"".to_string()),
-    )?;
-    let mut top = ImageBuffer::from_vec(width, height, top.data().to_vec()).ok_or(
-        PConvertError::ArgumentError("Could not parse \"top\"".to_string()),
-    )?;
+    let mut bot = ImageBuffer::from_vec(width, height, bot.data().to_vec())
+        .ok_or_else(|| PConvertError::ArgumentError("Could not parse \"bot\"".to_string()))?;
+    let mut top = ImageBuffer::from_vec(width, height, top.data().to_vec())
+        .ok_or_else(|| PConvertError::ArgumentError("Could not parse \"top\"".to_string()))?;
 
     blend_image_buffers(&mut bot, &mut top, algorithm, is_inline)?;
 
@@ -95,7 +93,7 @@ pub fn blend_image_buffers(
     algorithm: Option<String>,
     is_inline: Option<bool>,
 ) -> Result<(), PConvertError> {
-    let algorithm = algorithm.unwrap_or(String::from("multiplicative"));
+    let algorithm = algorithm.unwrap_or_else(|| String::from("multiplicative"));
     let algorithm = build_algorithm(&algorithm)?;
     let algorithm_fn = get_blending_algorithm(&algorithm);
     let demultiply = is_algorithm_multiplied(&algorithm);
@@ -168,9 +166,7 @@ pub fn blend_multiple_data_js(
             img_data.height(),
             img_data.data().to_vec(),
         )
-        .ok_or(PConvertError::ArgumentError(
-            "Could not parse \"bot\"".to_string(),
-        ))?;
+        .ok_or_else(|| PConvertError::ArgumentError("Could not parse \"bot\"".to_string()))?;
 
         image_buffers.push(img_buffer);
     }
@@ -275,8 +271,8 @@ pub fn blend_multiple_fs(
     let composition = node_read_file_sync(&node_fs, &first_path);
     let mut composition = decode_png(&composition[..], first_demultiply)?;
 
-    let mut zip_iter = img_paths_iter.zip(algorithms_to_apply.iter());
-    while let Some(pair) = zip_iter.next() {
+    let zip_iter = img_paths_iter.zip(algorithms_to_apply.iter());
+    for pair in zip_iter {
         let path = pair.0.as_string().expect("path must be a string");
         let (algorithm, algorithm_params) = pair.1;
         let demultiply = is_algorithm_multiplied(&algorithm);
@@ -441,8 +437,8 @@ fn blend_multiple_buffers(
     if first_demultiply {
         demultiply_image(&mut composition);
     }
-    let mut zip_iter = image_buffers_iter.zip(algorithms_to_apply.iter());
-    while let Some(pair) = zip_iter.next() {
+    let zip_iter = image_buffers_iter.zip(algorithms_to_apply.iter());
+    for pair in zip_iter {
         let mut current_layer = pair.0.to_owned();
         let (algorithm, algorithm_params) = pair.1;
         let demultiply = is_algorithm_multiplied(&algorithm);
