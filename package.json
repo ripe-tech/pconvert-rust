@@ -18,23 +18,21 @@
         "pconvert_rust/test/**/*.js"
     ],
     "scripts": {
+        "build": "wasm-pack build --release --target=nodejs -- --features wasm-extension",
         "lint": "eslint \"pconvert_rust/test/**/*.js\"",
         "lint-fix": "eslint \"pconvert_rust/test/**/*.js\" --fix",
         "prettier": "prettier \"./**/*.{js,json}\" --write",
         "pretty": "npm run prettier && npm run lint-fix",
-        "build": "wasm-pack build --release --target=nodejs -- --features wasm-extension",
         "test": "npm run build && mocha pconvert_rust/test/ --recursive",
         "upgrade": "npx sort-package-json && ncu -u"
     },
-    "dependencies": {
-        "pconvert-rust": "^0.4.9"
-    },
     "devDependencies": {
-        "eslint": "^6.8.0",
-        "eslint-config-hive": "^0.2.2",
-        "mocha": "^6.2.2",
-        "prettier": "^1.19.1",
-        "prettier-config-hive": "^0.1.1"
+        "eslint": "^7.18.0",
+        "eslint-config-hive": "^0.5.3",
+        "mocha": "^8.2.1",
+        "npm-check-updates": "^10.2.5",
+        "prettier": "^2.2.1",
+        "prettier-config-hive": "^0.1.7"
     },
     "engines": {
         "node": ">=11"
