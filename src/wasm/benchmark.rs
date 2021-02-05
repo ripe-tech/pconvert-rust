@@ -92,7 +92,7 @@ async fn blend_images_benchmark_js(
     let write_time = end - start_write;
 
     log_benchmark(
-        algorithm.unwrap_or_else(|| "multiplicative".to_string()),
+        algorithm.unwrap_or("multiplicative".to_string()),
         compression,
         filter,
         blend_time,
