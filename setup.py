@@ -27,7 +27,7 @@ except ImportError:
 
 setuptools.setup(
     name = "pconvert-rust",
-    version = "0.4.9",
+    version = "0.4.10",
     author = "Platforme International",
     author_email = "development@platforme.com",
     description = "PNG Convert Rust",
