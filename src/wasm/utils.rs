@@ -85,7 +85,7 @@ pub fn encode_image_data(
     encode_png(&mut encoded_data, &image_buffer, compression, filter)?;
 
     let bytes = &mut image_buffer.to_vec();
-    let clamped_bytes: Clamped<&mut [u8]> = Clamped(bytes);
+    let clamped_bytes: Clamped<&[u8]> = Clamped(bytes);
 
     ImageData::new_with_u8_clamped_array_and_sh(clamped_bytes, width, height)
 }
