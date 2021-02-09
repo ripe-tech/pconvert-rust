@@ -25,6 +25,7 @@
 
 pub mod benchmark;
 pub mod blending;
+pub mod compose;
 pub mod constants;
 pub mod errors;
 pub mod parallelism;
@@ -36,4 +37,5 @@ pub mod pymodule;
 #[cfg(feature = "wasm-extension")]
 pub mod wasm;
 
+#[cfg(test)]
 pub mod test;
