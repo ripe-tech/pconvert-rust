@@ -11,7 +11,7 @@ use std::str::FromStr;
 
 /// Attempts to parse a `&String` to a `BlendAlgorithm`.
 /// Returns the enum variant if it succeeds. Otherwise it returns a `PyErr`.
-pub fn build_algorithm(algorithm: &String) -> Result<BlendAlgorithm, PyErr> {
+pub fn build_algorithm(algorithm: &str) -> Result<BlendAlgorithm, PyErr> {
     match BlendAlgorithm::from_str(algorithm) {
         Ok(algorithm) => Ok(algorithm),
         Err(algorithm) => Err(PyErr::from(PConvertError::ArgumentError(format!(
