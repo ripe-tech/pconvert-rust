@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const assert = require("assert");
+
 const pconvert = require("../../pkg/pconvert_rust.js");
 
 const TEST_ASSETS = path.resolve("assets/test");
