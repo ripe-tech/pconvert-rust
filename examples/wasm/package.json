@@ -14,12 +14,12 @@
         "pconvert-rust": "^0.4.9"
     },
     "devDependencies": {
-        "eslint": "^7.17.0",
+        "eslint": "^7.18.0",
         "eslint-config-hive": "^0.5.3",
         "npm-check-updates": "^10.2.5",
         "prettier": "^2.2.1",
         "prettier-config-hive": "^0.1.7",
-        "sort-package-json": "^1.48.0",
+        "sort-package-json": "^1.48.1",
         "webpack": "^4.44.2",
         "webpack-cli": "^3.3.12",
         "webpack-dev-server": "^3.11.1"

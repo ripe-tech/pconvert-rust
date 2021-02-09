@@ -1,0 +1,41 @@
+{
+    "name": "pconvert-rust",
+    "version": "0.4.9",
+    "description": "Rust version of P(NG)Convert, a simple PNG conversion tool.",
+    "keywords": [
+        "pconvert",
+        "rust",
+        "fast"
+    ],
+    "homepage": "https://github.com/ripe-tech/pconvert-rust",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/ripe-tech/pconvert-rust.git"
+    },
+    "license": "Apache-2.0",
+    "author": "Platforme",
+    "files": [
+        "pconvert_rust/test/**/*.js"
+    ],
+    "scripts": {
+        "build": "wasm-pack build --release --target=nodejs -- --features wasm-extension",
+        "lint": "eslint \"pconvert_rust/test/**/*.js\"",
+        "lint-fix": "eslint \"pconvert_rust/test/**/*.js\" --fix",
+        "prettier": "prettier \"./**/*.{js,json}\" --write",
+        "pretty": "npm run prettier && npm run lint-fix",
+        "test": "npm run build && mocha pconvert_rust/test/ --recursive",
+        "upgrade": "npx sort-package-json && ncu -u"
+    },
+    "devDependencies": {
+        "eslint": "^7.18.0",
+        "eslint-config-hive": "^0.5.3",
+        "mocha": "^8.2.1",
+        "npm-check-updates": "^10.2.5",
+        "prettier": "^2.2.1",
+        "prettier-config-hive": "^0.1.7"
+    },
+    "engines": {
+        "node": ">=11"
+    },
+    "engineStrict": true
+}

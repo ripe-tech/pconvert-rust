@@ -107,7 +107,7 @@ async fn blend_multiple_benchmark_js(
     image_files: JsValue,
     target_file_name: String,
     algorithm: Option<String>,
-    algorithms: Option<Box<[JsValue]>>,
+    algorithms: Option<Vec<JsValue>>,
     is_inline: Option<bool>,
     compression: CompressionType,
     filter: FilterType,
@@ -139,7 +139,7 @@ async fn blend_multiple_benchmark_js(
     let write_time = end - start_write;
 
     log_benchmark(
-        algorithm.unwrap_or("multiplicative".to_string()),
+        algorithm.unwrap_or_else(|| "multiplicative".to_string()),
         compression,
         filter,
         blend_time,

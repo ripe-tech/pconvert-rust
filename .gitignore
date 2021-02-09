@@ -2,7 +2,10 @@
 
 .DS_Store
 
+yarn.lock
 Cargo.lock
+package-lock.json
+
 generated.rs
 
 /assets/**/result*
@@ -15,4 +18,5 @@ generated.rs
 /dist
 /build
 /target
+/node_modules
 /pconvert_rust.egg-info
