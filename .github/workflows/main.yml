@@ -10,9 +10,9 @@ jobs:
     container: rust:${{ matrix.rust-version }}
     steps:
       - uses: actions/checkout@v1
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v1
         with:
-          python-version: "3.7"
+          python-version: "3.8"
       - run: cargo build
       - run: cargo test
       - run: PYO3_PYTHON="${pythonLocation}/bin/python3" cargo build --features python-extension
