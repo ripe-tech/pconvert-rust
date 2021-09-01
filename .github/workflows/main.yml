@@ -21,5 +21,5 @@ jobs:
       - run: cargo run benchmark assets/demo/
       - run: cargo run benchmark assets/demo/ --parallel
       - run: cargo doc --lib --all-features
-      - run: LD_LIBRARY_PATH="${pythonLocation}" ${pythonLocation}/bin/python3 -m pip install --upgrade .
-      - run: LD_LIBRARY_PATH="${pythonLocation}" ${pythonLocation}/bin/python3 setup.py test
+      - run: LD_LIBRARY_PATH="${pythonLocation}/lib" ${pythonLocation}/bin/python3 -m pip install --upgrade .
+      - run: LD_LIBRARY_PATH="${pythonLocation}/lib" ${pythonLocation}/bin/python3 setup.py test
