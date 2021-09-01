@@ -8,9 +8,9 @@ jobs:
     name: Deploy crates.io
     strategy:
       matrix:
-        rust-version: ["1.46"]
+        rust-version: ["1.51"]
     runs-on: ubuntu-latest
-    container: rust:${{ matrix.rust-version }}
+    container: rust:${{ matrix.rust-version }}-bullseye
     steps:
       - uses: actions/checkout@v1
       - run: cargo build
@@ -21,9 +21,9 @@ jobs:
     name: Deploy NPM
     strategy:
       matrix:
-        rust-version: ["1.44"]
+        rust-version: ["1.51"]
     runs-on: ubuntu-latest
-    container: rust:${{ matrix.rust-version }}
+    container: rust:${{ matrix.rust-version }}-bullseye
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-node@v1
@@ -47,20 +47,16 @@ jobs:
     name: Deploy PyPI
     strategy:
       matrix:
-        rust-version: ["1.44"]
+        rust-version: ["1.51"]
     runs-on: ubuntu-latest
-    container: rust:${{ matrix.rust-version }}
+    container: rust:${{ matrix.rust-version }}-bullseye
     steps:
       - uses: actions/checkout@v1
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v2
         with:
           python-version: "3.8"
-      - run: |
-          export LD_LIBRARY_PATH="${pythonLocation}/lib"
-          PYO3_PYTHON="${pythonLocation}/bin/python3" cargo build --features python-extension
-      - run: |
-          export LD_LIBRARY_PATH="${pythonLocation}/lib"
-          PYTHON3="${pythonLocation}/bin/python3" PIP3="${pythonLocation}/bin/python3 -m pip" ./deploy.sh
+      - run: PYO3_PYTHON="${pythonLocation}/bin/python3" cargo build --features python-extension
+      - run: PYTHON3="${pythonLocation}/bin/python3" PIP3="${pythonLocation}/bin/python3 -m pip" ./deploy.sh
         env:
           PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
           PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
