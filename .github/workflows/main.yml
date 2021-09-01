@@ -7,7 +7,7 @@ jobs:
       matrix:
         rust-version: ["1.46", "1.47", "1.48", "1.49", latest]
     runs-on: ubuntu-latest
-    container: rust:${{ matrix.rust-version }}-bullseye
+    container: rust:${{ matrix.rust-version }}-alpine
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-python@v2
