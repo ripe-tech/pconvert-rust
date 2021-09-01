@@ -54,7 +54,7 @@ jobs:
       - uses: actions/checkout@v1
       - uses: actions/setup-python@v2
         with:
-          python-version: "3.x"
+          python-version: "3.8"
       - run: PYO3_PYTHON="${pythonLocation}/bin/python3" cargo build --features python-extension
       - run: PYTHON3="${pythonLocation}/bin/python3" PIP3="${pythonLocation}/bin/python3 -m pip" ./deploy.sh
         env:
