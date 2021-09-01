@@ -1,6 +1,6 @@
 {
     "name": "pconvert-rust",
-    "version": "0.4.10",
+    "version": "0.4.11",
     "description": "Rust version of P(NG)Convert, a simple PNG conversion tool.",
     "keywords": [
         "pconvert",
