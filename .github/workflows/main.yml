@@ -21,7 +21,7 @@ jobs:
     name: Build Python
     strategy:
       matrix:
-        rust-version: ["1.51", "1.52", "1.53", "1.54", latest]
+        rust-version: ["1.51", "1.52", "1.53", "1.54"]
     runs-on: ubuntu-latest
     container: rust:${{ matrix.rust-version }}-bullseye
     steps:
