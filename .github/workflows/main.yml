@@ -7,13 +7,12 @@ jobs:
       matrix:
         rust-version: ["1.46", "1.47", "1.48", "1.49", latest]
     runs-on: ubuntu-latest
-    container: rust:${{ matrix.rust-version }}-alpine
+    container: rust:${{ matrix.rust-version }}
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-python@v2
         with:
-          python-version: "3.8"
-      - run: apk update && apk add glib glib-dev
+          python-version: "3.7"
       - run: cargo build
       - run: cargo test
       - run: PYO3_PYTHON="${pythonLocation}/bin/python3" cargo build --features python-extension
