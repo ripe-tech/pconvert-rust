@@ -5,27 +5,31 @@ jobs:
     name: Build
     strategy:
       matrix:
-        rust-version: ["1.46", "1.47", "1.48", "1.49", latest]
+        rust-version: ["1.44", "1.45", "1.46", "1.47", "1.48", "1.49", "1.50", "1.51", "1.52", "1.53", "1.54", latest]
     runs-on: ubuntu-latest
     container: rust:${{ matrix.rust-version }}
     steps:
       - uses: actions/checkout@v1
-      - uses: actions/setup-python@v1
-        with:
-          python-version: "3.8"
       - run: cargo build
       - run: cargo test
-      - run: |
-          export LD_LIBRARY_PATH="${pythonLocation}/lib"
-          PYO3_PYTHON="${pythonLocation}/bin/python3" cargo build --features python-extension
       - run: cargo build --features wasm-extension
       - run: cargo run version
       - run: cargo run benchmark assets/demo/
       - run: cargo run benchmark assets/demo/ --parallel
       - run: cargo doc --lib --all-features
-      - run: |
-          export LD_LIBRARY_PATH="${pythonLocation}/lib"
-          ${pythonLocation}/bin/python3 -m pip install --upgrade .
-      - run: |
-          export LD_LIBRARY_PATH="${pythonLocation}/lib"
-          ${pythonLocation}/bin/python3 setup.py test
+  build-python:
+    name: Build Python
+    strategy:
+      matrix:
+        rust-version: ["1.51", "1.52", "1.53", "1.54", latest]
+    runs-on: ubuntu-latest
+    container: rust:${{ matrix.rust-version }}-bullseye
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"
+      - run: PYO3_PYTHON="${pythonLocation}/bin/python3" cargo build --features python-extension
+      - run: cargo run version
+      - run: ${pythonLocation}/bin/python3 -m pip install --upgrade .
+      - run: ${pythonLocation}/bin/python3 setup.py test
