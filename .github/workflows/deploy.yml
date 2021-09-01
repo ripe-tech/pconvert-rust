@@ -8,7 +8,7 @@ jobs:
     name: Deploy crates.io
     strategy:
       matrix:
-        rust-version: ["1.44"]
+        rust-version: ["1.45"]
     runs-on: ubuntu-latest
     container: rust:${{ matrix.rust-version }}
     steps:
