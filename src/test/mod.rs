@@ -4,7 +4,7 @@ use crate::{
     compose::{apply_blue_filter, compose, compose_parallel, Background},
 };
 use crate::{constants, utils::read_png_from_file};
-use image::png::{CompressionType, FilterType};
+use image::codecs::png::{CompressionType, FilterType};
 use image::ImageFormat;
 use std::str::FromStr;
 
