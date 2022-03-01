@@ -155,7 +155,7 @@ fn pconvert_rust(_py: Python, module: &PyModule) -> PyResult<()> {
                     Ok(status_dict)
                 }
                 None => Err(PyException::new_err(
-                    "Acessing global thread pool".to_string(),
+                    "Accessing global thread pool".to_string(),
                 )),
             }
         }
