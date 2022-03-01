@@ -111,8 +111,11 @@ pub fn build_params(
 
     for algorithm in algorithms {
         if algorithm.is_string() {
-            let algorithm =
-                build_algorithm(&algorithm.as_string().unwrap_or_else(|| "multiplicative".to_string()))?;
+            let algorithm = build_algorithm(
+                &algorithm
+                    .as_string()
+                    .unwrap_or_else(|| "multiplicative".to_string()),
+            )?;
 
             result.push((algorithm, None));
         } else if algorithm.is_object() {

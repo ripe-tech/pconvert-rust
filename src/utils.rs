@@ -4,8 +4,8 @@
 use crate::blending::demultiply_image;
 use crate::errors::PConvertError;
 use image::codecs::png::{CompressionType, FilterType, PngDecoder, PngEncoder};
-use image::ImageEncoder;
 use image::ImageDecoder;
+use image::ImageEncoder;
 use image::{ColorType, ImageBuffer, Rgba};
 use std::fs::File;
 use std::io::{BufWriter, Read, Write};
