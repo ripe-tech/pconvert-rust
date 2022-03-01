@@ -107,6 +107,9 @@ pub fn pbenchmark(args: &mut env::Args) -> Result<(), PConvertError> {
         _ => false,
     };
 
+    // prints the header information of the table with all
+    // of the columns set to the same size, then prints a
+    // simple line separator
     println!(
         "{:<20}{:<20}{:<20}{:<20}",
         "Algorithm", "Compression", "Filter", "Times"
