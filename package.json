@@ -30,8 +30,8 @@
         "eslint": "^7.18.0",
         "eslint-config-hive": "^0.5.3",
         "mocha": "^8.2.1",
-        "npm-check-updates": "^10.2.5",
-        "prettier": "^2.2.1",
+        "npm-check-updates": "^12.5.0",
+        "prettier": "^2.5.1",
         "prettier-config-hive": "^0.1.7"
     },
     "engines": {
