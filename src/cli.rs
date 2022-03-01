@@ -168,5 +168,5 @@ pub fn pversion() {
         constants::LIBPNG_VERSION,
         constants::FEATURES
     );
-    println!("Copyright (c) 2008-2021 Platforme International Limited. All rights reserved.");
+    println!("Copyright (c) 2008-2022 Platforme International Limited. All rights reserved.");
 }
