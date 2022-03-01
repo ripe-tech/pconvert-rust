@@ -161,7 +161,7 @@ pub fn compose_parallel(
             if let Ok(ResultMessage::ImageResult(result)) = result_channels[i].recv() {
                 result
             } else {
-                panic!(format!("failure reading '{}'", png_file_names[i]))
+                panic!("failure reading '{}'", png_file_names[i])
             }
         })?;
         benchmark.execute(Benchmark::add_blend_time, || {
@@ -177,7 +177,7 @@ pub fn compose_parallel(
         if let Ok(ResultMessage::ImageResult(result)) = result_channels[4].recv() {
             result
         } else {
-            panic!(format!("failure reading '{}'", background_file))
+            panic!("failure reading '{}'", background_file)
         }
     })?;
     benchmark.execute(Benchmark::add_blend_time, || {
