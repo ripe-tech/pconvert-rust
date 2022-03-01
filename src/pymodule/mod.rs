@@ -53,7 +53,8 @@ fn pconvert_rust(_py: Python, module: &PyModule) -> PyResult<()> {
         .collect();
     module.add("COMPRESSION_TYPES", compressions)?;
 
-    #[pyfn(module, "blend_images")]
+    #[pyfunction]
+    #[pyo3(name = "blend_images")]
     fn blend_images_py(
         py: Python,
         bot_path: String,
@@ -92,7 +93,8 @@ fn pconvert_rust(_py: Python, module: &PyModule) -> PyResult<()> {
         })
     }
 
-    #[pyfn(module, "blend_multiple")]
+    #[pyfunction]
+    #[pyo3(name = "blend_multiple")]
     fn blend_multiple_py(
         py: Python,
         img_paths: &PySequence,
@@ -143,7 +145,8 @@ fn pconvert_rust(_py: Python, module: &PyModule) -> PyResult<()> {
         })
     }
 
-    #[pyfn(module, "get_thread_pool_status")]
+    #[pyfunction]
+    #[pyo3(name = "get_thread_pool_status")]
     fn get_thread_pool_status(py: Python) -> PyResult<&PyDict> {
         unsafe {
             match &mut THREAD_POOL {
