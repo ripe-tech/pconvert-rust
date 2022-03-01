@@ -21,7 +21,7 @@ wasm-extension = ["js-sys", "serde", "serde_json", "wasm-bindgen", "wasm-bindgen
 
 [dependencies]
 # mandatory dependencies
-image = { version = "0.24.1", default-features = false, features = ["png"] }
+image = { version = "0.24", default-features = false, features = ["png"] }
 
 # `--features wasm-extension` dependencies
 js-sys = { version = "0.3", optional = true }
@@ -32,7 +32,7 @@ wasm-bindgen-futures = { version = "0.4", optional = true }
 web-sys = { version = "0.3", features =  ["File", "ImageData"], optional = true }
 
 # `--features python-extension` dependencies
-pyo3 = { version = "0.12", features = ["extension-module"], optional = true }
+pyo3 = { version = "0.16", features = ["extension-module"], optional = true }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 mtpng = { version = "0.3" }
