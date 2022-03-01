@@ -161,6 +161,10 @@ fn pconvert_rust(_py: Python, module: &PyModule) -> PyResult<()> {
         }
     }
 
+    module.add_function(wrap_pyfunction!(blend_images_py, module)?)?;
+    module.add_function(wrap_pyfunction!(blend_multiple_py, module)?)?;
+    module.add_function(wrap_pyfunction!(get_thread_pool_status, module)?)?;
+
     Ok(())
 }
 
