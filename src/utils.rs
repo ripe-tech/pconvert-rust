@@ -4,6 +4,7 @@
 use crate::blending::demultiply_image;
 use crate::errors::PConvertError;
 use image::codecs::png::{CompressionType, FilterType, PngDecoder, PngEncoder};
+use image::ImageEncoder;
 use image::ImageDecoder;
 use image::{ColorType, ImageBuffer, Rgba};
 use std::fs::File;
@@ -66,7 +67,7 @@ pub fn encode_png(
 ) -> Result<(), PConvertError> {
     let buff = BufWriter::new(writable_buff);
     let encoder = PngEncoder::new_with_quality(buff, compression, filter);
-    Ok(encoder.encode(&png, png.width(), png.height(), ColorType::Rgba8)?)
+    Ok(encoder.write_image(&png, png.width(), png.height(), ColorType::Rgba8)?)
 }
 
 /// Writes a PNG to the local file system using the provided compression
