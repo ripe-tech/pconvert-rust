@@ -103,25 +103,25 @@ JavaScript API exposed:
 
 ```javascript
 // blends two File objects and returns a File object
-blendImages(bot, top, target_file_name, algorithm, is_inline, options)
+blendImages(bot, top, targetFileName, algorithm, isInline, options)
 
 // blends two ImageData objects and returns an ImageData object
-blendImagesData(bot, top, algorithm, is_inline, options)
+blendImagesData(bot, top, algorithm, isInline, options)
 
 // blends multiple File objects and returns a File object
-blendMultiple(image_files, target_file_name, algorithm, algorithms, is_inline, options)
+blendMultiple(imageFiles, targetFileName, algorithm, algorithms, isInline, options)
 
 // blends multiple ImageData objects  and returns an ImageData object
-blendMultipleData(images, algorithm, algorithms, is_inline, options)
+blendMultipleData(images, algorithm, algorithms, isInline, options)
+
+// benchmarks and prints to console various times for different combinations of blending algorithms, compression algorithms and filters for `blendImages`
+blendImagesBenchmarkAll(bot, top, isInline)
+
+// benchmarks and prints to console various times for different combinations of blending algorithms, compression algorithms and filters for `blendMultiple`
+blendMultipleBenchmarkAll(imageFiles, isInline)
 
 // returns a JSON of module constants (e.g. ALGORITHMS, FILTER_TYPES, COMPILER_VERSION, ...)
 getModuleConstants()
-
-// benchmarks and prints to console various times for different combinations of blending algorithms, compression algorithms and filters for `blendImages`
-blendImagesBenchmarkAll(bot, top, is_inline)
-
-// benchmarks and prints to console various times for different combinations of blending algorithms, compression algorithms and filters for `blendMultiple`
-blendMultipleBenchmarkAll(image_files, is_inline)
 ```
 
 ## Python package
