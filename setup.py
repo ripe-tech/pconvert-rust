@@ -18,7 +18,7 @@ try:
     import setuptools_rust
 except ImportError:
     import subprocess
-    errno = subprocess.call([sys.executable, "-m", "pip", "install", "setuptools-rust"])
+    errno = subprocess.call([sys.executable, "-m", "pip", "install", "setuptools-rust<1.3.0"])
     if errno:
         print("Please install setuptools-rust package")
         raise SystemExit(errno)
