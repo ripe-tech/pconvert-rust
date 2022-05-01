@@ -46,7 +46,7 @@ setuptools.setup(
         )
     ],
     install_requires = [],
-    setup_requires = ["setuptools-rust>=0.10.1", "wheel"],
+    setup_requires = ["setuptools-rust<1.3.0", "wheel"],
     include_package_data = True,
     zip_safe = False,
     classifiers = [
