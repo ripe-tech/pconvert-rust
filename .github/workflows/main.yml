@@ -8,7 +8,7 @@ jobs:
     name: Build
     strategy:
       matrix:
-        rust-version: ["1.54", "1.55", "1.56", "1.57", "1.58", "1.59", "1.60", "1.61", latest]
+        rust-version: ["1.56.1", "1.57", "1.58", "1.59", "1.60", "1.61", "1.62", "1.63", latest]
     runs-on: ubuntu-latest
     container: rust:${{ matrix.rust-version }}
     steps:
@@ -23,7 +23,7 @@ jobs:
     name: Build Complete
     strategy:
       matrix:
-        rust-version: ["1.54", "1.55", "1.56", "1.57", "1.58", "1.59", "1.60", "1.61", latest]
+        rust-version: ["1.56.1", "1.57", "1.58", "1.59", "1.60", "1.61", "1.62", "1.63", latest]
     runs-on: ubuntu-latest
     container: rust:${{ matrix.rust-version }}
     steps:
@@ -39,7 +39,7 @@ jobs:
     name: Build Python
     strategy:
       matrix:
-        rust-version: ["1.54", "1.55", "1.56", "1.57", "1.58", "1.59", "1.60", "1.61"]
+        rust-version: ["1.56.1", "1.57", "1.58", "1.59", "1.60", "1.61", "1.62", "1.63"]
     runs-on: ubuntu-latest
     container: rust:${{ matrix.rust-version }}-bullseye
     steps:
