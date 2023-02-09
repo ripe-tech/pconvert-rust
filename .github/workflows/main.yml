@@ -46,7 +46,7 @@ jobs:
       - uses: actions/checkout@v1
       - uses: actions/setup-python@v2
         with:
-          python-version: "3.8"
+          python-version: "3.9"
       - run: PYO3_PYTHON="${pythonLocation}/bin/python3" cargo build --features python-extension
       - run: cargo run version
       - run: ${pythonLocation}/bin/python3 -m pip install --upgrade .
