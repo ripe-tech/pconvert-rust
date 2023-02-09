@@ -44,7 +44,7 @@ jobs:
     container: rust:${{ matrix.rust-version }}-bullseye
     steps:
       - uses: actions/checkout@v1
-      - uses: actions/setup-python@v2
+      - uses: actions/setup-python@v4
         with:
           python-version: "3.8"
       - run: PYO3_PYTHON="${pythonLocation}/bin/python3" cargo build --features python-extension
