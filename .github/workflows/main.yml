@@ -45,5 +45,5 @@ jobs:
       - run: apt update && apt-get install -y -q python3.9 python3-pip
       - run: cargo build --features python-extension
       - run: cargo run version
-      - run: python3 -m pip3 install --upgrade .
+      - run: python3 -m pip install --upgrade .
       - run: python3 setup.py test
