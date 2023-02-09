@@ -52,15 +52,10 @@ jobs:
     container: rust:${{ matrix.rust-version }}-bullseye
     steps:
       - uses: actions/checkout@v1
-      - uses: actions/setup-python@v2
-        with:
-          python-version: "3.9"
-      - run: PYO3_PYTHON="${pythonLocation}/bin/python3" echo $PYO3_PYTHON
-      - run: python --version
-      - run: cargo version
-      - run: rustc --version
-      - run: PYO3_PYTHON="${pythonLocation}/bin/python3" cargo build --features python-extension
-      - run: PYTHON3="${pythonLocation}/bin/python3" PIP3="${pythonLocation}/bin/python3 -m pip" ./deploy.sh
+      - run: apt update && apt-get install -y -q python3.9 python3-pip
+      - run: cargo run version
+      - run: cargo build --features python-extension
+      - run: PYTHON3=$(which python3) PIP3="$(which python3) -m pip" ./deploy.sh
         env:
           PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
           PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}

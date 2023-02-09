@@ -13,10 +13,9 @@ jobs:
     container: rust:${{ matrix.rust-version }}
     steps:
       - uses: actions/checkout@v1
-      - run: cargo build
+      - run: cargo run version
       - run: cargo test
       - run: cargo build
-      - run: cargo run version
       - run: cargo run benchmark assets/demo/
       - run: cargo run benchmark assets/demo/ --parallel
   build-complete:
@@ -28,10 +27,9 @@ jobs:
     container: rust:${{ matrix.rust-version }}
     steps:
       - uses: actions/checkout@v1
-      - run: cargo build
+      - run: cargo run version
       - run: cargo test
       - run: cargo build --features wasm-extension
-      - run: cargo run version
       - run: cargo run benchmark assets/demo/
       - run: cargo run benchmark assets/demo/ --parallel
       - run: cargo doc --lib --all-features
@@ -39,18 +37,13 @@ jobs:
     name: Build Python
     strategy:
       matrix:
-        rust-version: ["1.61", latest]
+        rust-version: ["1.61"]
     runs-on: ubuntu-latest
     container: rust:${{ matrix.rust-version }}
     steps:
       - uses: actions/checkout@v1
-      - uses: actions/setup-python@v2
-        with:
-          python-version: "3.9"
-      - run: python --version
-      - run: cargo version
-      - run: rustc --version
-      - run: PYO3_PYTHON="${pythonLocation}/bin/python3" cargo build --features python-extension
+      - run: apt update && apt-get install -y -q python3.9 python3-pip
       - run: cargo run version
-      - run: ${pythonLocation}/bin/python3 -m pip install --upgrade .
-      - run: ${pythonLocation}/bin/python3 setup.py test
+      - run: cargo build --features python-extension
+      - run: python3 -m pip install --upgrade .
+      - run: python3 setup.py test
