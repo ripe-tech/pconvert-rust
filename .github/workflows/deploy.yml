@@ -55,6 +55,10 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: "3.9"
+      - run: PYO3_PYTHON="${pythonLocation}/bin/python3" echo $PYO3_PYTHON
+      - run: python --version
+      - run: cargo version
+      - run: rustc --version
       - run: PYO3_PYTHON="${pythonLocation}/bin/python3" cargo build --features python-extension
       - run: PYTHON3="${pythonLocation}/bin/python3" PIP3="${pythonLocation}/bin/python3 -m pip" ./deploy.sh
         env:
