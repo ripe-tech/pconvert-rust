@@ -14,8 +14,8 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - run: cargo run version
-      - run: cargo build
       - run: cargo test
+      - run: cargo build
       - run: cargo run benchmark assets/demo/
       - run: cargo run benchmark assets/demo/ --parallel
   build-complete:
@@ -43,7 +43,8 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - run: apt update && apt-get install -y -q python3.9 python3-pip
-      - run: cargo build --features python-extension
+      - run: PYTHON3="${whereis python3}" echo $PYTHON3
       - run: cargo run version
+      - run: cargo build --features python-extension
       - run: python3 -m pip install --upgrade .
       - run: python3 setup.py test
