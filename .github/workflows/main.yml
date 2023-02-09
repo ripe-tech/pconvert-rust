@@ -13,10 +13,9 @@ jobs:
     container: rust:${{ matrix.rust-version }}
     steps:
       - uses: actions/checkout@v1
+      - run: cargo run version
       - run: cargo build
       - run: cargo test
-      - run: cargo build
-      - run: cargo run version
       - run: cargo run benchmark assets/demo/
       - run: cargo run benchmark assets/demo/ --parallel
   build-complete:
@@ -28,10 +27,9 @@ jobs:
     container: rust:${{ matrix.rust-version }}
     steps:
       - uses: actions/checkout@v1
-      - run: cargo build
+      - run: cargo run version
       - run: cargo test
       - run: cargo build --features wasm-extension
-      - run: cargo run version
       - run: cargo run benchmark assets/demo/
       - run: cargo run benchmark assets/demo/ --parallel
       - run: cargo doc --lib --all-features
@@ -47,5 +45,5 @@ jobs:
       - run: apt update && apt-get install python3.9
       - run: cargo build --features python-extension
       - run: cargo run version
-      - run: python3 -m pip install --upgrade .
+      - run: python3 -m pip3 install --upgrade .
       - run: python3 setup.py test
