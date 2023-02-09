@@ -8,7 +8,7 @@ jobs:
     name: Deploy crates.io
     strategy:
       matrix:
-        rust-version: ["1.56.1"]
+        rust-version: [latest]
     runs-on: ubuntu-latest
     container: rust:${{ matrix.rust-version }}-bullseye
     steps:
@@ -21,7 +21,7 @@ jobs:
     name: Deploy NPM
     strategy:
       matrix:
-        rust-version: ["1.56.1"]
+        rust-version: [latest]
     runs-on: ubuntu-latest
     container: rust:${{ matrix.rust-version }}-bullseye
     steps:
@@ -47,7 +47,7 @@ jobs:
     name: Deploy PyPI
     strategy:
       matrix:
-        rust-version: ["1.56.1"]
+        rust-version: [latest]
     runs-on: ubuntu-latest
     container: rust:${{ matrix.rust-version }}-bullseye
     steps:
