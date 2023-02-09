@@ -44,13 +44,9 @@ jobs:
     container: rust:${{ matrix.rust-version }}-bullseye
     steps:
       - uses: actions/checkout@v1
-      - name: Setup Python 3.8
-        run: |
-          apt update
-          apt-get install -y software-properties-common 
-          add-apt-repository -y ppa:deadsnakes/ppa
-          apt-get install -y python3.8
-          ln -s `which python3.8` /usr/local/bin/python
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
       - run: PYO3_PYTHON="${pythonLocation}/bin/python3" cargo build --features python-extension
       - run: cargo run version
       - run: ${pythonLocation}/bin/python3 -m pip install --upgrade .
