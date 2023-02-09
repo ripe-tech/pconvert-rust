@@ -43,8 +43,6 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - run: apt update && apt-get install -y -q python3.9 python3-pip
-      - run: export PYTHON3=$(whereis python3)
-      - run: echo $PYTHON3
       - run: cargo run version
       - run: cargo build --features python-extension
       - run: python3 -m pip install --upgrade .
