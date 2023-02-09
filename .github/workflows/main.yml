@@ -39,7 +39,7 @@ jobs:
     name: Build Python
     strategy:
       matrix:
-        rust-version: ["1.61", latest]
+        rust-version: ["1.61"]
     runs-on: ubuntu-latest
     container: rust:${{ matrix.rust-version }}-bullseye
     steps:
