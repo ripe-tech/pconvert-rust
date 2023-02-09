@@ -45,7 +45,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - run: apt update && apt-get install python3.9
-      - run: PYO3_PYTHON="${pythonLocation}/bin/python3" cargo build --features python-extension
+      - run: cargo build --features python-extension
       - run: cargo run version
-      - run: ${pythonLocation}/bin/python3 -m pip install --upgrade .
-      - run: ${pythonLocation}/bin/python3 setup.py test
+      - run: python3 -m pip install --upgrade .
+      - run: python3 setup.py test
