@@ -42,7 +42,7 @@ jobs:
     container: rust:${{ matrix.rust-version }}-bullseye
     steps:
       - uses: actions/checkout@v1
-      - run: apt update && apt-get install python3.9
+      - run: apt update && apt-get install python3.9 python3-pip
       - run: cargo build --features python-extension
       - run: cargo run version
       - run: python3 -m pip3 install --upgrade .
