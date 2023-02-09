@@ -39,9 +39,9 @@ jobs:
     name: Build Python
     strategy:
       matrix:
-        rust-version: ["1.61"]
+        rust-version: [latest]
     runs-on: ubuntu-latest
-    container: rust:${{ matrix.rust-version }}-bullseye
+    container: rust:${{ matrix.rust-version }}
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-python@v2
