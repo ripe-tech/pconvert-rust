@@ -67,7 +67,7 @@ pub fn encode_png(
 ) -> Result<(), PConvertError> {
     let buff = BufWriter::new(writable_buff);
     let encoder = PngEncoder::new_with_quality(buff, compression, filter);
-    Ok(encoder.write_image(&png, png.width(), png.height(), ColorType::Rgba8)?)
+    Ok(encoder.write_image(png, png.width(), png.height(), ColorType::Rgba8)?)
 }
 
 /// Writes a PNG to the local file system using the provided compression
@@ -134,7 +134,7 @@ pub fn write_png_parallel(
 
     let mut encoder = mtpng::encoder::Encoder::new(writer, &options);
     encoder.write_header(&header)?;
-    encoder.write_image_rows(&png)?;
+    encoder.write_image_rows(png)?;
     encoder.finish()?;
 
     Ok(())
@@ -167,8 +167,6 @@ pub fn image_compression_from(compression: String) -> CompressionType {
         "best" => CompressionType::Best,
         "default" => CompressionType::Default,
         "fast" => CompressionType::Fast,
-        "huffman" => CompressionType::Huffman,
-        "rle" => CompressionType::Rle,
         _ => CompressionType::Fast,
     }
 }
