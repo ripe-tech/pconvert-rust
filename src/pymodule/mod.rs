@@ -109,13 +109,10 @@ fn pconvert_rust(_py: Python, module: &PyModule) -> PyResult<()> {
         let num_images = img_paths.len();
 
         let algorithms_to_apply: Vec<(BlendAlgorithm, Option<BlendAlgorithmParams>)> =
-            if let Some(algorithms) = algorithms {
-                build_params(algorithms)?
-            } else if let Some(algorithm) = algorithm {
-                let algorithm = build_algorithm(&algorithm)?;
-                vec![(algorithm, None); num_images - 1]
-            } else {
-                vec![(BlendAlgorithm::Multiplicative, None); num_images - 1]
+            match (algorithms, algorithm) {
+                (Some(algorithms), _) if algorithms.len().unwrap() > 0 => build_params(algorithms)?,
+                (_, Some(algorithm)) => vec![(build_algorithm(&algorithm)?, None); num_images - 1],
+                _ => vec![(BlendAlgorithm::Multiplicative, None); num_images - 1],
             };
 
         // blends multiple images using either the single-threaded or the multiple-threaded version
@@ -268,7 +265,11 @@ fn blend_multiple_single_thread(
     // current composition with the next layer
     let mut img_paths_iter = img_paths.iter();
     let first_path = img_paths_iter.next().unwrap().to_string();
-    let first_demultiply = is_algorithm_multiplied(&algorithms[0].0);
+    let first_demultiply = if algorithms.len() > 0 {
+        is_algorithm_multiplied(&algorithms[0].0)
+    } else {
+        false
+    };
     let mut composition = read_png_from_file(first_path, first_demultiply)?;
     let zip_iter = img_paths_iter.zip(algorithms.iter());
     for pair in zip_iter {
@@ -333,7 +334,12 @@ unsafe fn blend_multiple_multi_thread(
         png_channels.push(result_channel);
     }
 
-    let first_demultiply = is_algorithm_multiplied(&algorithms[0].0);
+    let first_demultiply = if algorithms.len() > 0 {
+        is_algorithm_multiplied(&algorithms[0].0)
+    } else {
+        false
+    };
+
     let mut composition = match png_channels[0].recv().unwrap() {
         ResultMessage::ImageResult(result) => result,
     }?;
