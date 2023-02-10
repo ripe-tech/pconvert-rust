@@ -8,30 +8,28 @@ jobs:
     name: Build
     strategy:
       matrix:
-        rust-version: ["1.56.1", "1.57", "1.58", "1.59", "1.60", "1.61", "1.62", "1.63", latest]
+        rust-version: ["1.61", latest]
     runs-on: ubuntu-latest
     container: rust:${{ matrix.rust-version }}
     steps:
       - uses: actions/checkout@v1
-      - run: cargo build
+      - run: cargo run version
       - run: cargo test
       - run: cargo build
-      - run: cargo run version
       - run: cargo run benchmark assets/demo/
       - run: cargo run benchmark assets/demo/ --parallel
   build-complete:
     name: Build Complete
     strategy:
       matrix:
-        rust-version: ["1.56.1", "1.57", "1.58", "1.59", "1.60", "1.61", "1.62", "1.63", latest]
+        rust-version: ["1.61", latest]
     runs-on: ubuntu-latest
     container: rust:${{ matrix.rust-version }}
     steps:
       - uses: actions/checkout@v1
-      - run: cargo build
+      - run: cargo run version
       - run: cargo test
       - run: cargo build --features wasm-extension
-      - run: cargo run version
       - run: cargo run benchmark assets/demo/
       - run: cargo run benchmark assets/demo/ --parallel
       - run: cargo doc --lib --all-features
@@ -39,15 +37,13 @@ jobs:
     name: Build Python
     strategy:
       matrix:
-        rust-version: ["1.56.1", "1.57", "1.58", "1.59", "1.60", "1.61", "1.62", "1.63"]
+        rust-version: ["1.61"]
     runs-on: ubuntu-latest
     container: rust:${{ matrix.rust-version }}-bullseye
     steps:
       - uses: actions/checkout@v1
-      - uses: actions/setup-python@v2
-        with:
-          python-version: "3.8"
-      - run: PYO3_PYTHON="${pythonLocation}/bin/python3" cargo build --features python-extension
+      - run: apt update && apt-get install -y -q python3.9 python3-pip
       - run: cargo run version
-      - run: ${pythonLocation}/bin/python3 -m pip install --upgrade .
-      - run: ${pythonLocation}/bin/python3 setup.py test
+      - run: cargo build --features python-extension
+      - run: python3 -m pip install --upgrade .
+      - run: python3 setup.py test
