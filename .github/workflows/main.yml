@@ -39,7 +39,7 @@ jobs:
       matrix:
         rust-version: ["1.61"]
     runs-on: ubuntu-latest
-    container: rust:${{ matrix.rust-version }}
+    container: rust:${{ matrix.rust-version }}-bullseye
     steps:
       - uses: actions/checkout@v1
       - run: apt update && apt-get install -y -q python3.9 python3-pip
