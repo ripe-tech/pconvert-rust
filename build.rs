@@ -53,7 +53,7 @@ fn main() {
     let module_doc_string = "//! Global constants, such as compiler version used, algorithms, compression and filters supported and others\n";
     writeln!(file, "{}", module_doc_string).unwrap();
 
-    let generated_annotation = "@generated\n";
+    let generated_annotation = "// @generated\n";
     writeln!(file, "{}", generated_annotation).unwrap();
 
     let now_utc = Utc::now();
