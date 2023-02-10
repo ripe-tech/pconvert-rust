@@ -15,6 +15,7 @@ jobs:
           components: clippy
           profile: minimal
           override: true
+      - run: cargo build
       - uses: actions-rs/clippy-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -30,4 +31,5 @@ jobs:
           components: rustfmt
           profile: minimal
           override: true
+      - run: cargo build
       - run: cargo fmt --all -- --check
