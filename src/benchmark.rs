@@ -54,7 +54,7 @@ impl Benchmark {
         // to the update function (read, write or blend time)
         let start = Instant::now();
         let result = target_fn();
-        update_fn(self, start.elapsed().as_millis() as u128);
+        update_fn(self, start.elapsed().as_millis());
         result
     }
 
