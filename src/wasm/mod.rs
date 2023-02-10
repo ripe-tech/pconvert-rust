@@ -267,7 +267,11 @@ pub fn blend_multiple_fs(
 
     let node_fs = node_require("fs");
 
-    let first_demultiply = is_algorithm_multiplied(&algorithms_to_apply[0].0);
+    let first_demultiply = if algorithms_to_apply.len() > 0 {
+        is_algorithm_multiplied(&algorithms_to_apply[0].0)
+    } else {
+        false
+    };
     let composition = node_read_file_sync(&node_fs, &first_path);
     let mut composition = decode_png(&composition[..], first_demultiply)?;
 
@@ -359,7 +363,11 @@ pub async fn blend_multiple_fs_async(
         png_futures.push(Some(png_future));
     }
 
-    let first_demultiply = is_algorithm_multiplied(&algorithms_to_apply[0].0);
+    let first_demultiply = if algorithms_to_apply.len() > 0 {
+        is_algorithm_multiplied(&algorithms_to_apply[0].0)
+    } else {
+        false
+    };
     let composition = png_futures[0].take().unwrap().await?;
     let composition = js_sys::Uint8Array::from(composition).to_vec();
     let mut composition = decode_png(&composition[..], first_demultiply)?;
@@ -432,7 +440,11 @@ fn blend_multiple_buffers(
         };
 
     let mut image_buffers_iter = image_buffers.iter();
-    let first_demultiply = is_algorithm_multiplied(&algorithms_to_apply[0].0);
+    let first_demultiply = if algorithms_to_apply.len() > 0 {
+        is_algorithm_multiplied(&algorithms_to_apply[0].0)
+    } else {
+        false
+    };
     let mut composition = image_buffers_iter.next().unwrap().to_owned();
     if first_demultiply {
         demultiply_image(&mut composition);
