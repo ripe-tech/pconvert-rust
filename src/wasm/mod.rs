@@ -104,7 +104,7 @@ pub fn blend_image_buffers(
         demultiply_image(top);
     }
 
-    blend_images(bot, &top, &algorithm_fn, &None);
+    blend_images(bot, top, &algorithm_fn, &None);
     Ok(())
 }
 
@@ -267,7 +267,7 @@ pub fn blend_multiple_fs(
 
     let node_fs = node_require("fs");
 
-    let first_demultiply = if algorithms_to_apply.len() > 0 {
+    let first_demultiply = if !algorithms_to_apply.is_empty() {
         is_algorithm_multiplied(&algorithms_to_apply[0].0)
     } else {
         false
@@ -279,8 +279,8 @@ pub fn blend_multiple_fs(
     for pair in zip_iter {
         let path = pair.0.as_string().expect("path must be a string");
         let (algorithm, algorithm_params) = pair.1;
-        let demultiply = is_algorithm_multiplied(&algorithm);
-        let algorithm_fn = get_blending_algorithm(&algorithm);
+        let demultiply = is_algorithm_multiplied(algorithm);
+        let algorithm_fn = get_blending_algorithm(algorithm);
         let current_layer = node_read_file_sync(&node_fs, &path);
         let current_layer = decode_png(&current_layer[..], demultiply)?;
         blend_images(
@@ -363,7 +363,7 @@ pub async fn blend_multiple_fs_async(
         png_futures.push(Some(png_future));
     }
 
-    let first_demultiply = if algorithms_to_apply.len() > 0 {
+    let first_demultiply = if !algorithms_to_apply.is_empty() {
         is_algorithm_multiplied(&algorithms_to_apply[0].0)
     } else {
         false
@@ -377,8 +377,8 @@ pub async fn blend_multiple_fs_async(
     // retrieves the images from the result channels
     for i in 1..png_futures.len() {
         let (algorithm, algorithm_params) = &algorithms_to_apply[i - 1];
-        let demultiply = is_algorithm_multiplied(&algorithm);
-        let algorithm_fn = get_blending_algorithm(&algorithm);
+        let demultiply = is_algorithm_multiplied(algorithm);
+        let algorithm_fn = get_blending_algorithm(algorithm);
         let current_layer = png_futures[i].take().unwrap().await?;
         let current_layer = js_sys::Uint8Array::from(current_layer).to_vec();
         let current_layer = decode_png(&current_layer[..], demultiply)?;
@@ -440,7 +440,7 @@ fn blend_multiple_buffers(
         };
 
     let mut image_buffers_iter = image_buffers.iter();
-    let first_demultiply = if algorithms_to_apply.len() > 0 {
+    let first_demultiply = if !algorithms_to_apply.is_empty() {
         is_algorithm_multiplied(&algorithms_to_apply[0].0)
     } else {
         false
@@ -453,8 +453,8 @@ fn blend_multiple_buffers(
     for pair in zip_iter {
         let mut current_layer = pair.0.to_owned();
         let (algorithm, algorithm_params) = pair.1;
-        let demultiply = is_algorithm_multiplied(&algorithm);
-        let algorithm_fn = get_blending_algorithm(&algorithm);
+        let demultiply = is_algorithm_multiplied(algorithm);
+        let algorithm_fn = get_blending_algorithm(algorithm);
 
         if demultiply {
             demultiply_image(&mut current_layer);
