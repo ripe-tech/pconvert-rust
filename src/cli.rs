@@ -143,12 +143,11 @@ pub fn pbenchmark(args: &mut env::Args) -> Result<(), PConvertError> {
                     )?;
                 }
 
+                let compression = format!("{:#?}", compression);
+                let filter = format!("{:#?}", filter);
                 println!(
                     "{:<20}{:<20}{:<20}{:<20}",
-                    algorithm,
-                    format_args!("{:#?}", compression),
-                    format_args!("{:#?}", filter),
-                    &benchmark
+                    algorithm, compression, filter, &benchmark
                 );
                 total_benchmark = total_benchmark + benchmark;
             }
