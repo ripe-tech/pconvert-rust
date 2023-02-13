@@ -16,8 +16,7 @@ use crate::utils::{decode_png, encode_png};
 use image::{ImageBuffer, Rgba, RgbaImage};
 use js_sys::try_iter;
 use serde_json::json;
-use serde_json::Value as JSONValue;
-use std::collections::HashMap;
+use serde_wasm_bindgen;
 use utils::{
     build_algorithm, build_params, encode_file, encode_image_data, get_compression_type,
     get_filter_type, load_png, node_read_file_async, node_read_file_sync, node_require,
@@ -38,7 +37,7 @@ pub async fn blend_images_js(
     options: JsValue,
 ) -> Result<File, JsValue> {
     let options = match options.is_object() {
-        true => options.into_serde::<HashMap<String, JSONValue>>().ok(),
+        true => serde_wasm_bindgen::from_value(options).ok(),
         false => None,
     };
 
@@ -66,7 +65,7 @@ pub fn blend_images_data_js(
     options: JsValue,
 ) -> Result<ImageData, JsValue> {
     let options = match options.is_object() {
-        true => options.into_serde::<HashMap<String, JSONValue>>().ok(),
+        true => serde_wasm_bindgen::from_value(options).ok(),
         false => None,
     };
 
@@ -120,7 +119,7 @@ pub async fn blend_multiple_js(
     options: JsValue,
 ) -> Result<File, JsValue> {
     let options = match options.is_object() {
-        true => options.into_serde::<HashMap<String, JSONValue>>().ok(),
+        true => serde_wasm_bindgen::from_value(options).ok(),
         false => None,
     };
 
@@ -153,7 +152,7 @@ pub fn blend_multiple_data_js(
     options: JsValue,
 ) -> Result<ImageData, JsValue> {
     let options = match options.is_object() {
-        true => options.into_serde::<HashMap<String, JSONValue>>().ok(),
+        true => serde_wasm_bindgen::from_value(options).ok(),
         false => None,
     };
 
@@ -194,7 +193,7 @@ pub fn get_module_constants_js() -> JsValue {
         .map(|x| format!("{:?}", x))
         .collect();
 
-    JsValue::from_serde(&json!({
+    serde_wasm_bindgen::to_value(&json!({
         "COMPILATION_DATE": constants::COMPILATION_DATE,
         "COMPILATION_TIME": constants::COMPILATION_TIME,
         "VERSION": constants::VERSION,
@@ -232,7 +231,7 @@ pub fn blend_multiple_fs(
     }
 
     let options = match options.is_object() {
-        true => options.into_serde::<HashMap<String, JSONValue>>().ok(),
+        true => serde_wasm_bindgen::from_value(options).ok(),
         false => None,
     };
 
@@ -329,7 +328,7 @@ pub async fn blend_multiple_fs_async(
     }
 
     let options = match options.is_object() {
-        true => options.into_serde::<HashMap<String, JSONValue>>().ok(),
+        true => serde_wasm_bindgen::from_value(options).ok(),
         false => None,
     };
 

@@ -119,7 +119,7 @@ pub fn build_params(
 
             result.push((algorithm, None));
         } else if algorithm.is_object() {
-            let params: JSONParams = algorithm.into_serde::<JSONParams>().unwrap();
+            let params: JSONParams = serde_wasm_bindgen::from_value(algorithm.clone()).unwrap();
             let algorithm = build_algorithm(&params.algorithm)?;
 
             let mut blending_params = BlendAlgorithmParams::new();
