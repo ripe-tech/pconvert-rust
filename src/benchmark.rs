@@ -7,10 +7,11 @@ use std::ops::Sub;
 use std::time::Instant;
 
 /// Holds the times for read, write and blend operations.
+#[derive(Clone)]
 pub struct Benchmark {
-    blend_time: u128,
-    read_png_time: u128,
-    write_png_time: u128,
+    blend_time: f64,
+    read_png_time: f64,
+    write_png_time: f64,
 }
 
 impl Benchmark {
@@ -18,15 +19,15 @@ impl Benchmark {
     /// counters set to zero.
     pub fn new() -> Self {
         Benchmark {
-            blend_time: 0,
-            read_png_time: 0,
-            write_png_time: 0,
+            blend_time: 0.0,
+            read_png_time: 0.0,
+            write_png_time: 0.0,
         }
     }
 
     /// Returns the total time (in milliseconds), i.e., the sum of read,
     /// write and blend times.
-    pub fn total(&self) -> u128 {
+    pub fn total(&self) -> f64 {
         self.blend_time + self.read_png_time + self.write_png_time
     }
 
@@ -47,29 +48,30 @@ impl Benchmark {
     pub fn execute<F, T, H>(&mut self, update_fn: H, target_fn: F) -> T
     where
         F: FnOnce() -> T,
-        H: FnOnce(&mut Self, u128),
+        H: FnOnce(&mut Self, f64),
     {
         // saves beginning Instant, executes the target function,
         // measures time spent and updates the benchmark struct according
         // to the update function (read, write or blend time)
         let start = Instant::now();
         let result = target_fn();
-        update_fn(self, start.elapsed().as_millis());
+        let duration = start.elapsed().as_micros() as f64;
+        update_fn(self, duration / 1000.0);
         result
     }
 
     /// Adds time spent blending to the blend time counter.
-    pub fn add_blend_time(benchmark: &mut Benchmark, blend_time: u128) {
+    pub fn add_blend_time(benchmark: &mut Benchmark, blend_time: f64) {
         benchmark.blend_time += blend_time;
     }
 
     /// Adds time spent reading to the read time counter.
-    pub fn add_read_png_time(benchmark: &mut Benchmark, read_png_time: u128) {
+    pub fn add_read_png_time(benchmark: &mut Benchmark, read_png_time: f64) {
         benchmark.read_png_time += read_png_time;
     }
 
     /// Adds time spent writing to the write time counter.
-    pub fn add_write_png_time(benchmark: &mut Benchmark, write_png_time: u128) {
+    pub fn add_write_png_time(benchmark: &mut Benchmark, write_png_time: f64) {
         benchmark.write_png_time += write_png_time;
     }
 }
@@ -83,7 +85,7 @@ impl Default for Benchmark {
 impl Display for Benchmark {
     fn fmt(&self, fmt: &mut Formatter) -> Result {
         fmt.write_str(&format!(
-            "{}ms (blend {}ms, read {}ms, write {}ms)",
+            "{:.2}ms (blend {:.2}ms, read {:.2}ms, write {:.2}ms)",
             self.total(),
             self.blend_time,
             self.read_png_time,

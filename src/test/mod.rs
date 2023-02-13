@@ -15,21 +15,21 @@ const TEST_FILE_OUT: &str = "result_tux.png";
 #[test]
 fn test_benchmark() {
     let mut benchmark1 = Benchmark::new();
-    Benchmark::add_blend_time(&mut benchmark1, 100);
-    Benchmark::add_read_png_time(&mut benchmark1, 200);
-    Benchmark::add_write_png_time(&mut benchmark1, 150);
+    Benchmark::add_blend_time(&mut benchmark1, 100.0);
+    Benchmark::add_read_png_time(&mut benchmark1, 200.0);
+    Benchmark::add_write_png_time(&mut benchmark1, 150.0);
 
-    assert!(benchmark1.total() == 100 + 200 + 150);
+    assert!(benchmark1.total() == 100.0 + 200.0 + 150.0);
 
     let mut benchmark2 = Benchmark::new();
-    Benchmark::add_blend_time(&mut benchmark2, 50);
-    Benchmark::add_read_png_time(&mut benchmark2, 100);
-    Benchmark::add_write_png_time(&mut benchmark2, 75);
+    Benchmark::add_blend_time(&mut benchmark2, 50.03);
+    Benchmark::add_read_png_time(&mut benchmark2, 100.67);
+    Benchmark::add_write_png_time(&mut benchmark2, 75.0);
 
-    assert!(benchmark2.total() == 50 + 100 + 75);
+    assert!(benchmark2.total() == 50.03 + 100.67 + 75.0);
 
-    let sum_benchmark = benchmark1 + benchmark2;
-    assert!(sum_benchmark.total() == 100 + 200 + 150 + 50 + 100 + 75);
+    let sum_benchmark = benchmark1.clone() + benchmark2.clone();
+    assert!(sum_benchmark.total() == benchmark1.total() + benchmark2.total());
 }
 
 #[test]
