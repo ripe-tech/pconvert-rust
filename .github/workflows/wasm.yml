@@ -6,6 +6,7 @@ on:
 jobs:
   build:
     name: Build
+    needs: lint
     strategy:
       matrix:
         rust-version: ["1.61", latest]

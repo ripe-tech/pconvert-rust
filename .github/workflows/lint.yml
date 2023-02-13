@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: "0 0 * * 0"
 jobs:
-  clippy:
+  lint:
     name: Clippy
     runs-on: ubuntu-latest
     steps:
@@ -12,10 +12,11 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          components: clippy
+          components: clippy, rustfmt
           profile: minimal
           override: true
       - run: cargo build
+      - run: cargo fmt --all -- --check
       - uses: actions-rs/clippy-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -28,16 +29,3 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: --features wasm-extension -- -D clippy::all -D warnings
-  rustfmt:
-    name: Format
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          components: rustfmt
-          profile: minimal
-          override: true
-      - run: cargo build
-      - run: cargo fmt --all -- --check

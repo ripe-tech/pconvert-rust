@@ -6,6 +6,7 @@ on:
 jobs:
   build-crates:
     name: Deploy crates.io
+    needs: lint
     strategy:
       matrix:
         rust-version: ["1.61"]
@@ -19,6 +20,7 @@ jobs:
           cargo publish --no-verify
   build-npm:
     name: Deploy NPM
+    needs: lint
     strategy:
       matrix:
         rust-version: ["1.61"]
@@ -45,6 +47,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
   build-pypi:
     name: Deploy PyPI
+    needs: lint
     strategy:
       matrix:
         rust-version: ["1.61"]
