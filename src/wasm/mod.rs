@@ -15,8 +15,9 @@ use crate::errors::PConvertError;
 use crate::utils::{decode_png, encode_png};
 use image::{ImageBuffer, Rgba, RgbaImage};
 use js_sys::try_iter;
+use serde::Serialize;
 use serde_json::json;
-use serde_wasm_bindgen;
+use serde_wasm_bindgen::Serializer;
 use utils::{
     build_algorithm, build_params, encode_file, encode_image_data, get_compression_type,
     get_filter_type, load_png, node_read_file_async, node_read_file_sync, node_require,
@@ -193,7 +194,7 @@ pub fn get_module_constants_js() -> JsValue {
         .map(|x| format!("{:?}", x))
         .collect();
 
-    serde_wasm_bindgen::to_value(&json!({
+    json!({
         "COMPILATION_DATE": constants::COMPILATION_DATE,
         "COMPILATION_TIME": constants::COMPILATION_TIME,
         "VERSION": constants::VERSION,
@@ -205,7 +206,8 @@ pub fn get_module_constants_js() -> JsValue {
         "PLATFORM_CPU_BITS": constants::PLATFORM_CPU_BITS,
         "FILTER_TYPES": filters,
         "COMPRESSION_TYPES": compressions
-    }))
+    })
+    .serialize(&Serializer::json_compatible())
     .unwrap()
 }
 
