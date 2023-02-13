@@ -16,7 +16,7 @@ pub enum PConvertError {
 
 impl Display for PConvertError {
     fn fmt(&self, formatter: &mut Formatter) -> Result {
-        match &*self {
+        match self {
             PConvertError::UnsupportedImageTypeError => write!(
                 formatter,
                 "UnsupportedImageTypeError: images should be PNGs encoded as RGBA8"

@@ -53,6 +53,9 @@ fn main() {
     let module_doc_string = "//! Global constants, such as compiler version used, algorithms, compression and filters supported and others\n";
     writeln!(file, "{}", module_doc_string).unwrap();
 
+    let generated_annotation = "// @generated\n";
+    writeln!(file, "{}", generated_annotation).unwrap();
+
     let now_utc = Utc::now();
     write_str_constant_to_file(
         &mut file,
@@ -103,7 +106,7 @@ fn main() {
         .get(1)
         .unwrap()
         .as_str();
-    write_str_constant_to_file(&mut file, "COMPILER_VERSION", &compiler_version);
+    write_str_constant_to_file(&mut file, "COMPILER_VERSION", compiler_version);
 
     let re = Regex::new("image(?:.|\n)*version = \"(.*)\"[,\n]").unwrap();
     let libpng_capture = re.captures(CARGO_TOML);
@@ -147,8 +150,6 @@ fn main() {
         CompressionType::Default,
         CompressionType::Best,
         CompressionType::Fast,
-        CompressionType::Huffman,
-        CompressionType::Rle,
     ];
     write_enum_variants_to_file(&mut file, "COMPRESSION_TYPES", libpng_compression_types);
 

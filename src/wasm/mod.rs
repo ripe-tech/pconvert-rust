@@ -15,9 +15,9 @@ use crate::errors::PConvertError;
 use crate::utils::{decode_png, encode_png};
 use image::{ImageBuffer, Rgba, RgbaImage};
 use js_sys::try_iter;
+use serde::Serialize;
 use serde_json::json;
-use serde_json::Value as JSONValue;
-use std::collections::HashMap;
+use serde_wasm_bindgen::Serializer;
 use utils::{
     build_algorithm, build_params, encode_file, encode_image_data, get_compression_type,
     get_filter_type, load_png, node_read_file_async, node_read_file_sync, node_require,
@@ -38,7 +38,7 @@ pub async fn blend_images_js(
     options: JsValue,
 ) -> Result<File, JsValue> {
     let options = match options.is_object() {
-        true => options.into_serde::<HashMap<String, JSONValue>>().ok(),
+        true => serde_wasm_bindgen::from_value(options).ok(),
         false => None,
     };
 
@@ -66,7 +66,7 @@ pub fn blend_images_data_js(
     options: JsValue,
 ) -> Result<ImageData, JsValue> {
     let options = match options.is_object() {
-        true => options.into_serde::<HashMap<String, JSONValue>>().ok(),
+        true => serde_wasm_bindgen::from_value(options).ok(),
         false => None,
     };
 
@@ -104,7 +104,7 @@ pub fn blend_image_buffers(
         demultiply_image(top);
     }
 
-    blend_images(bot, &top, &algorithm_fn, &None);
+    blend_images(bot, top, &algorithm_fn, &None);
     Ok(())
 }
 
@@ -120,7 +120,7 @@ pub async fn blend_multiple_js(
     options: JsValue,
 ) -> Result<File, JsValue> {
     let options = match options.is_object() {
-        true => options.into_serde::<HashMap<String, JSONValue>>().ok(),
+        true => serde_wasm_bindgen::from_value(options).ok(),
         false => None,
     };
 
@@ -153,7 +153,7 @@ pub fn blend_multiple_data_js(
     options: JsValue,
 ) -> Result<ImageData, JsValue> {
     let options = match options.is_object() {
-        true => options.into_serde::<HashMap<String, JSONValue>>().ok(),
+        true => serde_wasm_bindgen::from_value(options).ok(),
         false => None,
     };
 
@@ -194,7 +194,7 @@ pub fn get_module_constants_js() -> JsValue {
         .map(|x| format!("{:?}", x))
         .collect();
 
-    JsValue::from_serde(&json!({
+    json!({
         "COMPILATION_DATE": constants::COMPILATION_DATE,
         "COMPILATION_TIME": constants::COMPILATION_TIME,
         "VERSION": constants::VERSION,
@@ -206,7 +206,8 @@ pub fn get_module_constants_js() -> JsValue {
         "PLATFORM_CPU_BITS": constants::PLATFORM_CPU_BITS,
         "FILTER_TYPES": filters,
         "COMPRESSION_TYPES": compressions
-    }))
+    })
+    .serialize(&Serializer::json_compatible())
     .unwrap()
 }
 
@@ -232,7 +233,7 @@ pub fn blend_multiple_fs(
     }
 
     let options = match options.is_object() {
-        true => options.into_serde::<HashMap<String, JSONValue>>().ok(),
+        true => serde_wasm_bindgen::from_value(options).ok(),
         false => None,
     };
 
@@ -267,7 +268,7 @@ pub fn blend_multiple_fs(
 
     let node_fs = node_require("fs");
 
-    let first_demultiply = if algorithms_to_apply.len() > 0 {
+    let first_demultiply = if !algorithms_to_apply.is_empty() {
         is_algorithm_multiplied(&algorithms_to_apply[0].0)
     } else {
         false
@@ -279,8 +280,8 @@ pub fn blend_multiple_fs(
     for pair in zip_iter {
         let path = pair.0.as_string().expect("path must be a string");
         let (algorithm, algorithm_params) = pair.1;
-        let demultiply = is_algorithm_multiplied(&algorithm);
-        let algorithm_fn = get_blending_algorithm(&algorithm);
+        let demultiply = is_algorithm_multiplied(algorithm);
+        let algorithm_fn = get_blending_algorithm(algorithm);
         let current_layer = node_read_file_sync(&node_fs, &path);
         let current_layer = decode_png(&current_layer[..], demultiply)?;
         blend_images(
@@ -329,7 +330,7 @@ pub async fn blend_multiple_fs_async(
     }
 
     let options = match options.is_object() {
-        true => options.into_serde::<HashMap<String, JSONValue>>().ok(),
+        true => serde_wasm_bindgen::from_value(options).ok(),
         false => None,
     };
 
@@ -363,7 +364,7 @@ pub async fn blend_multiple_fs_async(
         png_futures.push(Some(png_future));
     }
 
-    let first_demultiply = if algorithms_to_apply.len() > 0 {
+    let first_demultiply = if !algorithms_to_apply.is_empty() {
         is_algorithm_multiplied(&algorithms_to_apply[0].0)
     } else {
         false
@@ -377,8 +378,8 @@ pub async fn blend_multiple_fs_async(
     // retrieves the images from the result channels
     for i in 1..png_futures.len() {
         let (algorithm, algorithm_params) = &algorithms_to_apply[i - 1];
-        let demultiply = is_algorithm_multiplied(&algorithm);
-        let algorithm_fn = get_blending_algorithm(&algorithm);
+        let demultiply = is_algorithm_multiplied(algorithm);
+        let algorithm_fn = get_blending_algorithm(algorithm);
         let current_layer = png_futures[i].take().unwrap().await?;
         let current_layer = js_sys::Uint8Array::from(current_layer).to_vec();
         let current_layer = decode_png(&current_layer[..], demultiply)?;
@@ -440,7 +441,7 @@ fn blend_multiple_buffers(
         };
 
     let mut image_buffers_iter = image_buffers.iter();
-    let first_demultiply = if algorithms_to_apply.len() > 0 {
+    let first_demultiply = if !algorithms_to_apply.is_empty() {
         is_algorithm_multiplied(&algorithms_to_apply[0].0)
     } else {
         false
@@ -453,8 +454,8 @@ fn blend_multiple_buffers(
     for pair in zip_iter {
         let mut current_layer = pair.0.to_owned();
         let (algorithm, algorithm_params) = pair.1;
-        let demultiply = is_algorithm_multiplied(&algorithm);
-        let algorithm_fn = get_blending_algorithm(&algorithm);
+        let demultiply = is_algorithm_multiplied(algorithm);
+        let algorithm_fn = get_blending_algorithm(algorithm);
 
         if demultiply {
             demultiply_image(&mut current_layer);

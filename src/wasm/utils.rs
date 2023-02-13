@@ -93,7 +93,7 @@ pub fn encode_image_data(
 /// Attempts to parse a `&String` to a `BlendAlgorithm`.
 /// Returns the enum variant if it suceeds. Otherwise it returns a `PConvertError`.
 pub fn build_algorithm(algorithm: &str) -> Result<BlendAlgorithm, PConvertError> {
-    match BlendAlgorithm::from_str(&algorithm) {
+    match BlendAlgorithm::from_str(algorithm) {
         Ok(algorithm) => Ok(algorithm),
         Err(algorithm) => Err(PConvertError::ArgumentError(format!(
             "Invalid algorithm '{}'",
@@ -119,7 +119,7 @@ pub fn build_params(
 
             result.push((algorithm, None));
         } else if algorithm.is_object() {
-            let params: JSONParams = algorithm.into_serde::<JSONParams>().unwrap();
+            let params: JSONParams = serde_wasm_bindgen::from_value(algorithm.clone()).unwrap();
             let algorithm = build_algorithm(&params.algorithm)?;
 
             let mut blending_params = BlendAlgorithmParams::new();

@@ -5,6 +5,7 @@ pub mod mock;
 #[cfg(feature = "readonly")]
 pub use self::mock::*;
 
+#[rustfmt::skip]
 #[cfg(not(feature = "readonly"))]
 pub mod generated;
 #[cfg(not(feature = "readonly"))]
