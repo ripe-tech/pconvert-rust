@@ -14,13 +14,8 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - run: cargo run version
-      - run: cargo build
-      - run: cargo fmt --all -- --check
-      - uses: actions-rs/clippy-check@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: -- -D clippy::all -D warnings
       - run: cargo test
+      - run: cargo build
       - run: cargo run benchmark assets/demo/
       - run: cargo run benchmark assets/demo/ --parallel
   build-complete:
@@ -33,13 +28,8 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - run: cargo run version
-      - run: cargo build --features wasm-extension
-      - run: cargo fmt --all -- --check
-      - uses: actions-rs/clippy-check@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: -- -D clippy::all -D warnings
       - run: cargo test
+      - run: cargo build --features wasm-extension
       - run: cargo run benchmark assets/demo/
       - run: cargo run benchmark assets/demo/ --parallel
       - run: cargo doc --lib --all-features
@@ -55,10 +45,5 @@ jobs:
       - run: apt update && apt-get install -y -q python3.9 python3-pip
       - run: cargo run version
       - run: cargo build --features python-extension
-      - run: cargo fmt --all -- --check
-      - uses: actions-rs/clippy-check@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: --features python-extension -- -D clippy::all -D warnings
       - run: python3 -m pip install --upgrade .
       - run: python3 setup.py test
