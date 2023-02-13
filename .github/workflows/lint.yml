@@ -16,7 +16,6 @@ jobs:
           profile: minimal
           override: true
       - run: cargo build
-      - run: rm src/constants/generated.rs
       - uses: actions-rs/clippy-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -33,5 +32,4 @@ jobs:
           profile: minimal
           override: true
       - run: cargo build
-      - run: rm src/constants/generated.rs
       - run: cargo fmt --all -- --check
