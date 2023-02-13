@@ -1,0 +1,30 @@
+name: Lint Workflow
+on:
+  push:
+  schedule:
+    - cron: "0 0 * * 0"
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: clippy, rustfmt
+          profile: minimal
+          override: true
+      - run: cargo build
+      - run: cargo fmt --all -- --check
+      - uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: -- -D clippy::all -D warnings
+      - uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --features python-extension -- -D clippy::all -D warnings
+      - uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --features wasm-extension -- -D clippy::all -D warnings

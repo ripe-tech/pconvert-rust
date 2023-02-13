@@ -126,7 +126,7 @@ pub fn pbenchmark(args: &mut env::Args) -> Result<(), PConvertError> {
                 if run_parallel {
                     compose_parallel(
                         &dir,
-                        BlendAlgorithm::from_str(&algorithm).unwrap(),
+                        BlendAlgorithm::from_str(algorithm).unwrap(),
                         &Background::Alpha,
                         *compression,
                         *filter,
@@ -135,7 +135,7 @@ pub fn pbenchmark(args: &mut env::Args) -> Result<(), PConvertError> {
                 } else {
                     compose(
                         &dir,
-                        BlendAlgorithm::from_str(&algorithm).unwrap(),
+                        BlendAlgorithm::from_str(algorithm).unwrap(),
                         &Background::Alpha,
                         *compression,
                         *filter,
@@ -143,12 +143,11 @@ pub fn pbenchmark(args: &mut env::Args) -> Result<(), PConvertError> {
                     )?;
                 }
 
+                let compression = format!("{:#?}", compression);
+                let filter = format!("{:#?}", filter);
                 println!(
                     "{:<20}{:<20}{:<20}{:<20}",
-                    algorithm,
-                    format!("{:#?}", compression),
-                    format!("{:#?}", filter),
-                    &benchmark
+                    algorithm, compression, filter, &benchmark
                 );
                 total_benchmark = total_benchmark + benchmark;
             }

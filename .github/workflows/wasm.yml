@@ -18,6 +18,6 @@ jobs:
           node-version: "12"
       - run: node --version
       - run: cargo install wasm-pack
+      - run: wasm-pack build --release --target=nodejs -- --features wasm-extension
       - run: npm install
       - run: npm test
-      - run: wasm-pack build --release --target=nodejs -- --features wasm-extension
