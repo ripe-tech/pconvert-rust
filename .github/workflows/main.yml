@@ -6,7 +6,6 @@ on:
 jobs:
   build:
     name: Build
-    needs: lint
     strategy:
       matrix:
         rust-version: ["1.61", latest]
@@ -21,7 +20,6 @@ jobs:
       - run: cargo run benchmark assets/demo/ --parallel
   build-complete:
     name: Build Complete
-    needs: lint
     strategy:
       matrix:
         rust-version: ["1.61", latest]
@@ -37,7 +35,6 @@ jobs:
       - run: cargo doc --lib --all-features
   build-python:
     name: Build Python
-    needs: lint
     strategy:
       matrix:
         rust-version: ["1.61"]
