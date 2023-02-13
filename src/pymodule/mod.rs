@@ -1,4 +1,5 @@
 //! Python extension, exported functions and type conversions.
+#![allow(clippy::borrow_deref_ref)]
 
 pub mod conversions;
 pub mod utils;
