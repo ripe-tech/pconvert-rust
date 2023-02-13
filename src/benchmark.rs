@@ -7,6 +7,7 @@ use std::ops::Sub;
 use std::time::Instant;
 
 /// Holds the times for read, write and blend operations.
+#[derive(Clone)]
 pub struct Benchmark {
     blend_time: f64,
     read_png_time: f64,
