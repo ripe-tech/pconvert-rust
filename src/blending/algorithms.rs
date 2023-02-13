@@ -4,7 +4,7 @@ use crate::blending::params::{BlendAlgorithmParams, Value};
 use crate::utils::{max, min};
 use image::Rgba;
 
-#[inline]
+#[inline(always)]
 pub fn blend_alpha(
     (bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>),
     _params: &Option<BlendAlgorithmParams>,
@@ -43,7 +43,7 @@ pub fn blend_alpha(
     bot_pixel[3] = a as u8;
 }
 
-#[inline]
+#[inline(always)]
 pub fn blend_multiplicative(
     (bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>),
     _params: &Option<BlendAlgorithmParams>,
@@ -68,7 +68,7 @@ pub fn blend_multiplicative(
     bot_pixel[3] = a as u8;
 }
 
-#[inline]
+#[inline(always)]
 pub fn blend_source_over(
     (bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>),
     _params: &Option<BlendAlgorithmParams>,
@@ -107,7 +107,7 @@ pub fn blend_source_over(
     bot_pixel[3] = a as u8;
 }
 
-#[inline]
+#[inline(always)]
 pub fn blend_destination_over(
     (bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>),
     _params: &Option<BlendAlgorithmParams>,
@@ -146,7 +146,7 @@ pub fn blend_destination_over(
     bot_pixel[3] = a as u8;
 }
 
-#[inline]
+#[inline(always)]
 pub fn blend_mask_top(
     (bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>),
     params: &Option<BlendAlgorithmParams>,
@@ -182,7 +182,7 @@ pub fn blend_mask_top(
     bot_pixel[3] = a as u8;
 }
 
-#[inline]
+#[inline(always)]
 pub fn blend_first_top(
     (bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>),
     _params: &Option<BlendAlgorithmParams>,
@@ -206,7 +206,7 @@ pub fn blend_first_top(
     bot_pixel[3] = a;
 }
 
-#[inline]
+#[inline(always)]
 pub fn blend_first_bottom(
     (bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>),
     _params: &Option<BlendAlgorithmParams>,
@@ -230,7 +230,7 @@ pub fn blend_first_bottom(
     bot_pixel[3] = a;
 }
 
-#[inline]
+#[inline(always)]
 pub fn blend_disjoint_over(
     (bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>),
     _params: &Option<BlendAlgorithmParams>,
@@ -268,7 +268,7 @@ pub fn blend_disjoint_over(
     bot_pixel[3] = a as u8;
 }
 
-#[inline]
+#[inline(always)]
 pub fn blend_disjoint_under(
     (bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>),
     _params: &Option<BlendAlgorithmParams>,
@@ -306,7 +306,7 @@ pub fn blend_disjoint_under(
     bot_pixel[3] = a as u8;
 }
 
-#[inline]
+#[inline(always)]
 pub fn blend_disjoint_debug(
     (bot_pixel, top_pixel): (&mut Rgba<u8>, &Rgba<u8>),
     _params: &Option<BlendAlgorithmParams>,
