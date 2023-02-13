@@ -265,7 +265,7 @@ fn blend_multiple_single_thread(
     // current composition with the next layer
     let mut img_paths_iter = img_paths.iter();
     let first_path = img_paths_iter.next().unwrap().to_string();
-    let first_demultiply = if algorithms.len() > 0 {
+    let first_demultiply = if !algorithms.is_empty() {
         is_algorithm_multiplied(&algorithms[0].0)
     } else {
         false
@@ -275,8 +275,8 @@ fn blend_multiple_single_thread(
     for pair in zip_iter {
         let path = pair.0.to_string();
         let (algorithm, algorithm_params) = pair.1;
-        let demultiply = is_algorithm_multiplied(&algorithm);
-        let algorithm_fn = get_blending_algorithm(&algorithm);
+        let demultiply = is_algorithm_multiplied(algorithm);
+        let algorithm_fn = get_blending_algorithm(algorithm);
         let current_layer = read_png_from_file(path, demultiply)?;
         blend_images(
             &mut composition,
@@ -334,7 +334,7 @@ unsafe fn blend_multiple_multi_thread(
         png_channels.push(result_channel);
     }
 
-    let first_demultiply = if algorithms.len() > 0 {
+    let first_demultiply = if !algorithms.is_empty() {
         is_algorithm_multiplied(&algorithms[0].0)
     } else {
         false
@@ -352,8 +352,8 @@ unsafe fn blend_multiple_multi_thread(
     // retrieves the images from the result channels
     for i in 1..png_channels.len() {
         let (algorithm, algorithm_params) = &algorithms[i - 1];
-        let demultiply = is_algorithm_multiplied(&algorithm);
-        let algorithm_fn = get_blending_algorithm(&algorithm);
+        let demultiply = is_algorithm_multiplied(algorithm);
+        let algorithm_fn = get_blending_algorithm(algorithm);
         let mut current_layer = match png_channels[i].recv().unwrap() {
             ResultMessage::ImageResult(result) => result,
         }?;
