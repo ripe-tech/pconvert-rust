@@ -9,4 +9,4 @@ import pconvert_rust
 class GlobalTest(unittest.TestCase):
     def test_basic(self):
         self.assertEqual(type(pconvert_rust.VERSION), str)
-        self.assertEqual(pconvert_rust.VERSION, "0.4.11")
+        self.assertEqual(pconvert_rust.VERSION, "0.5.0")
