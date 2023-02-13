@@ -20,6 +20,14 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           args: -- -D clippy::all -D warnings
+      - uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --features python-extension -- -D clippy::all -D warnings
+      - uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --features wasm-extension -- -D clippy::all -D warnings
   rustfmt:
     name: Format
     runs-on: ubuntu-latest
