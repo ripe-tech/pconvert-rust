@@ -13,7 +13,7 @@ pconvert.blend_multiple(
     (
         os.path.abspath(f"{PATH_TO_ASSETS}sole.png"),
         os.path.abspath(f"{PATH_TO_ASSETS}back.png"),
-        os.path.abspath(f"{PATH_TO_ASSETS}front.png")
+        os.path.abspath(f"{PATH_TO_ASSETS}front.png"),
     ),
-    os.path.abspath("result.basic.png")
+    os.path.abspath("result.basic.png"),
 )

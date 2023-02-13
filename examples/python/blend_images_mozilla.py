@@ -15,12 +15,12 @@ pconvert.blend_images(
     os.path.abspath(f"{PATH_TO_ASSETS}source.png"),
     os.path.abspath(f"{PATH_TO_ASSETS}destination.png"),
     os.path.abspath("result.source_over.mozilla.png"),
-    "source_over"
+    "source_over",
 )
 
 pconvert.blend_images(
     os.path.abspath(f"{PATH_TO_ASSETS}source.png"),
     os.path.abspath(f"{PATH_TO_ASSETS}destination.png"),
     os.path.abspath("result.destination_over.mozilla.png"),
-    "destination_over"
+    "destination_over",
 )
