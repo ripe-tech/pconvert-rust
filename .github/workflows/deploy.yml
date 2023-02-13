@@ -14,6 +14,11 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - run: cargo build
+      - run: cargo fmt --all -- --check
+      - uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: -- -D clippy::all -D warnings
       - run: |
           cargo login ${{ secrets.CRATES_TOKEN }}
           cargo publish --no-verify
@@ -38,6 +43,11 @@ jobs:
           sed -i 's/    "pconvert_rust.js"/    "pconvert_rust.js","pconvert_rust_bundler.js"/g' pkg/package.json
           sed -i 's/    "pconvert_rust_bg.js"/    "pconvert_rust_bg.js","pconvert_rust_bundler_bg.js"/g' pkg/package.json
           sed -i 's/    "pconvert_rust.d.ts"/    "pconvert_rust.d.ts","pconvert_rust_bundler.d.ts"/g' pkg/package.json
+      - run: cargo fmt --all -- --check
+      - uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --features wasm-extension -- -D clippy::all -D warnings
       - run: |
           echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
           cd pkg && npm publish
@@ -55,6 +65,11 @@ jobs:
       - run: apt update && apt-get install -y -q python3.9 python3-pip
       - run: cargo run version
       - run: cargo build --features python-extension
+      - run: cargo fmt --all -- --check
+      - uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --features python-extension -- -D clippy::all -D warnings
       - run: PYTHON3=$(which python3) PIP3="$(which python3) -m pip" ./deploy.sh
         env:
           PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
