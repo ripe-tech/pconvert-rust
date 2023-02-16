@@ -96,11 +96,10 @@ impl ThreadPool {
 
         // sends task to task queue and attaches the sender end of the result channel
         // so that the Worker can send the task result
+        self.status.inc_queued_count();
         self.work_channel_sender
             .send(WorkMessage::NewTask(task, result_channel_sender))
             .unwrap_or_default();
-
-        self.status.inc_queued_count();
 
         result_channel_receiver
     }
