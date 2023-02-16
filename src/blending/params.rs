@@ -19,6 +19,7 @@ pub enum Value {
     Long(i64),
     Float(f64),
     Str(String),
+    UInt(usize),
 
     #[cfg(not(feature = "wasm-extension"))]
     Int(i32),

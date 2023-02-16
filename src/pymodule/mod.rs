@@ -69,7 +69,7 @@ fn pconvert_rust(_py: Python, module: &PyModule) -> PyResult<()> {
         // taking into consideration the requested number of thread in options
         py.allow_threads(|| -> PyResult<()> {
             let num_threads = get_num_threads(&options);
-            if num_threads <= 0 {
+            if num_threads == 0 {
                 blend_images_single_thread(
                     bot_path,
                     top_path,
@@ -120,7 +120,7 @@ fn pconvert_rust(_py: Python, module: &PyModule) -> PyResult<()> {
         // taking into consideration the requested number of thread in options
         py.allow_threads(|| -> PyResult<()> {
             let num_threads = get_num_threads(&options);
-            if num_threads <= 0 {
+            if num_threads == 0 {
                 blend_multiple_single_thread(
                     img_paths,
                     out_path,
@@ -201,7 +201,7 @@ unsafe fn blend_images_multi_thread(
     algorithm: Option<String>,
     is_inline: Option<bool>,
     options: Option<Options>,
-    num_threads: i32,
+    num_threads: usize,
 ) -> PyResult<()> {
     let algorithm = algorithm.unwrap_or_else(|| String::from("multiplicative"));
     let algorithm = build_algorithm(&algorithm)?;
@@ -215,7 +215,7 @@ unsafe fn blend_images_multi_thread(
     };
 
     // expands thread pool to the desired number of threads/parallelism (if necessary and possible)
-    thread_pool.expand_to(num_threads as usize);
+    thread_pool.expand_to(num_threads);
 
     let bot_result_channel = thread_pool
         .execute(move || ResultMessage::ImageResult(read_png_from_file(bot_path, demultiply)));
@@ -300,7 +300,7 @@ unsafe fn blend_multiple_multi_thread(
     algorithms: Vec<(BlendAlgorithm, Option<BlendAlgorithmParams>)>,
     is_inline: Option<bool>,
     options: Option<Options>,
-    num_threads: i32,
+    num_threads: usize,
 ) -> PyResult<()> {
     let num_images = img_paths.len();
 
@@ -325,7 +325,7 @@ unsafe fn blend_multiple_multi_thread(
     };
 
     // expands thread pool to the desired number of threads/parallelism (if necessary and possible)
-    thread_pool.expand_to(num_threads as usize);
+    thread_pool.expand_to(num_threads);
 
     let mut png_channels: Vec<mpsc::Receiver<ResultMessage>> = Vec::with_capacity(num_images);
     for path in img_paths.into_iter() {

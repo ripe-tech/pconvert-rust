@@ -93,12 +93,12 @@ pub fn get_filter_type(options: &Option<Options>) -> FilterType {
 
 /// Retrieves the number of threads value from the `Options` map if it exists.
 /// Otherwise it returns the default value: 0.
-pub fn get_num_threads(options: &Option<Options>) -> i32 {
+pub fn get_num_threads(options: &Option<Options>) -> usize {
     options.clone().map_or(0, |options| {
         options
             .get("num_threads")
             .map_or(0, |num_threads| match num_threads {
-                Value::Int(num_threads) => *num_threads,
+                Value::UInt(num_threads) => *num_threads,
                 _ => 0,
             })
     })
