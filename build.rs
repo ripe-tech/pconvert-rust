@@ -153,8 +153,9 @@ fn main() {
     ];
     write_enum_variants_to_file(&mut file, "COMPRESSION_TYPES", libpng_compression_types);
 
-    write_constant_to_file(&mut file, "DEFAULT_THREAD_POOL_SIZE", num_cpus::get());
-    write_constant_to_file(&mut file, "MAX_THREAD_POOL_SIZE", num_cpus::get() * 10);
+    let threads = std::thread::available_parallelism().unwrap().get();
+    write_constant_to_file(&mut file, "DEFAULT_THREAD_POOL_SIZE", threads);
+    write_constant_to_file(&mut file, "MAX_THREAD_POOL_SIZE", threads * 10);
 }
 
 fn write_constant_to_file<T>(file: &mut File, key: &str, val: T)
