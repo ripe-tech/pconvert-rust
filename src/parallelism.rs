@@ -107,11 +107,8 @@ impl ThreadPool {
     /// Expands the thread pool to `num_threads`.
     /// Creates `n` workers, where `n = num_threads - thread_pool_size`.
     pub fn expand_to(&mut self, num_threads: usize) {
-        let num_threads = min(
-            num_threads as isize,
-            constants::MAX_THREAD_POOL_SIZE as isize,
-        );
-        let to_spawn = num_threads - self.status.size() as isize;
+        let num_threads = min(num_threads, constants::MAX_THREAD_POOL_SIZE);
+        let to_spawn = num_threads as isize - self.status.size() as isize;
         for _ in 0..to_spawn {
             self.spawn_worker();
             self.status.inc_size();
