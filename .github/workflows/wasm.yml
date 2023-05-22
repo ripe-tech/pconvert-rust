@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v1
       - uses: actions/setup-node@v1
         with:
-          node-version: "12"
+          node-version: [14, 16, 18, 20]
       - run: node --version
       - run: cargo install wasm-pack
       - run: wasm-pack build --release --target=nodejs -- --features wasm-extension
